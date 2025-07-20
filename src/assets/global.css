@@ -1,0 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+/* Definição de variáveis */
+:root {
+    --red-devils: #b91c1c;
+    --red-devils-hover: #991b1b;
+    --red-devils-border: #dc2626;
+    --gray-light: #f8f9fa;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--gray-light);
+    margin: 0;
+    padding: 0;
+}
+
+.text-red-devils {
+    color: var(--red-devils) !important;
+}
+
+.bg-red-devils {
+    background-color: var(--red-devils) !important;
+}
+
+.bg-red-devils-hover:hover {
+    background-color: var(--red-devils-hover) !important;
+}
+
+.border-red-devils {
+    border-color: var(--red-devils-border) !important;
+}
+
+.btn-red-devils {
+    background-color: var(--red-devils);
+    border: 1px solid var(--red-devils-border);
+    color: #fff;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.btn-red-devils:hover {
+    background-color: var(--red-devils-hover);
+    color: #fff;
+}
+
+.red-devils-bg {
+    background-color: #651717;
+}
+
+.red-devils-card {
+    border-radius: 16px;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+}
