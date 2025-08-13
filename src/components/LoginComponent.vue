@@ -62,9 +62,15 @@ const router = useRouter()
 function handleLogin() {
     if (!email.value || !password.value) return
 
-    console.log({ email: email.value, password: password.value, rememberMe: rememberMe.value })
+    // Simulação de login (substitua com API real se quiser)
+    console.log({
+        email: email.value,
+        password: password.value,
+        rememberMe: rememberMe.value
+    })
 
-    // lógica de login real aqui
+    // Redireciona para a Home após login
+    router.push('/home') // ou: router.push('/home')
 }
 
 function goToRegister() {
