@@ -49,6 +49,7 @@
 
 
 <script setup>
+import axios from "axios"
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import logo from '../assets/logo-red-devils.png'
@@ -56,21 +57,40 @@ import logo from '../assets/logo-red-devils.png'
 const email = ref('')
 const password = ref('')
 const rememberMe = ref(false)
+const error = ref("")
+const loading = ref(false)
+
 
 const router = useRouter()
 
-function handleLogin() {
-    if (!email.value || !password.value) return
+async function handleLogin() {
+    if (!email.value || !password.value) {
+        error.value = "Preencha todos os campos"
+        return
+    }
 
-    // Simulação de login (substitua com API real se quiser)
-    console.log({
-        email: email.value,
-        password: password.value,
-        rememberMe: rememberMe.value
-    })
+    loading.value = true
+    error.value = ""
 
-    // Redireciona para a Home após login
-    router.push('/home') // ou: router.push('/home')
+    try {
+        const response = await axios.post("http://localhost:8080/api/login", {
+            email: email.value,
+            password: password.value
+        })
+
+        const { access_token, token_type, player } = response.data
+
+        localStorage.setItem("token", `${token_type} ${access_token}`)
+        localStorage.setItem("player", JSON.stringify(player))
+
+        router.push("/home")
+
+    } catch (err) {
+        error.value = "Credenciais inválidas ou erro de conexão"
+        console.error(err)
+    } finally {
+        loading.value = false
+    }
 }
 
 function goToRegister() {
