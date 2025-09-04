@@ -98,13 +98,12 @@ const showPassword = ref(false)
 const toast = useToast()
 const router = useRouter()
 
-const isEdit = ref(false) // controla cadastro/edição
+const isEdit = ref(false) 
 
 function togglePassword() {
     showPassword.value = !showPassword.value
 }
 
-// 🔹 Verifica se existe player e preenche
 onMounted(async () => {
     const savedPlayer = localStorage.getItem("player")
     const token = localStorage.getItem("token")
