@@ -55,7 +55,7 @@ const sidebarOpen = ref(false)
 const isMobile = ref(window.innerWidth <= 992)
 
 const menu = [
-    { name: 'Meu Perfil', path: '/editar', icon: 'bi bi-person-gear' },
+    { name: 'Meu Perfil', path: '/register', icon: 'bi bi-person-gear' },
     { name: 'Ranking', path: '/home', icon: 'bi bi-trophy' },
     { name: 'Jogadores', path: '/jogadores', icon: 'bi bi-people' },
     { name: 'Partidas', path: '/partidas', icon: 'bi bi-calendar-event' },
