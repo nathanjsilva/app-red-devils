@@ -33,12 +33,6 @@
 
                 <div class="text-center my-3 text-muted">ou</div>
 
-                <button type="button"
-                    class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2 google-btn">
-                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="google-icon" />
-                    Entrar com Google
-                </button>
-
                 <button type="button" class="btn btn-outline-danger w-100 mt-2" @click="goToRegister">
                     Criar conta
                 </button>
@@ -53,13 +47,14 @@ import axios from "axios"
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import logo from '../assets/logo-red-devils.png'
+import { useToast } from 'vue-toastification'
 
 const email = ref('')
 const password = ref('')
 const rememberMe = ref(false)
 const error = ref("")
 const loading = ref(false)
-
+const toast = useToast()
 
 const router = useRouter()
 
@@ -86,7 +81,7 @@ async function handleLogin() {
         router.push("/home")
 
     } catch (err) {
-        error.value = "Credenciais inválidas ou erro de conexão"
+        toast.error("Credenciais inválidas ou erro de conexão")
         console.error(err)
     } finally {
         loading.value = false

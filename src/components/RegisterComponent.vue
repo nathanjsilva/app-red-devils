@@ -34,8 +34,7 @@
                 <button type="submit" class="btn btn-red-devils w-100">Cadastrar</button>
 
                 <div class="text-center mt-3">
-                    <small>Já tem uma conta? <a href="/"
-                            class="text-red-devils text-decoration-none">Entrar</a></small>
+                    <small>Já tem uma conta? <a href="/" class="text-red-devils text-decoration-none">Entrar</a></small>
                 </div>
             </form>
         </div>
@@ -43,32 +42,59 @@
 </template>
 
 <script setup>
+import axios from "axios"
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import logo from '../assets/logo-red-devils.png'
+import { useToast } from 'vue-toastification'
 
 const name = ref('')
 const email = ref('')
 const password = ref('')
 const position = ref('')
+const loading = ref(false)
+const error = ref("")
+const toast = useToast()
 
 const router = useRouter()
 
-function handleRegister() {
-    if (!name.value || !email.value || !password.value || !position.value) return
+async function handleRegister() {
+    if (!name.value || !email.value || !password.value || !position.value) {
+        toast.error('Preencha todos os campos')
+        return
+    }
 
-    console.log({
-        name: name.value,
-        email: email.value,
-        password: password.value,
-        position: position.value
-    })
+    loading.value = true
+    error.value = ""
 
-    // Aqui virá a lógica real de cadastro futuramente
-    // Ex: await api.post('/register', { ... })
+    try {
+        const response = await axios.post("http://localhost:8080/api/players", {
+            email: email.value,
+            name: name.value,
+            password: password.value,
+            position: position.value,
 
-    // Por enquanto, redireciona pro login:
-    router.push('/')
+        })
+
+        toast.success('Jogador cadastrado com sucesso.')
+
+        router.push("/")
+
+    } catch (err) {
+        if (err.response && err.response.data && err.response.data.errors) {
+            const errors = err.response.data.errors;
+            Object.values(errors).forEach(fieldErrors => {
+                fieldErrors.forEach(message => {
+                    toast.error(message);
+                });
+            });
+        } else {
+            toast.error("Ocorreu um erro ao cadastrar jogador.");
+        }
+        console.error(err);
+    } finally {
+        loading.value = false
+    }
 }
 </script>
 

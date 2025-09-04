@@ -55,11 +55,12 @@ const sidebarOpen = ref(false)
 const isMobile = ref(window.innerWidth <= 992)
 
 const menu = [
-    { name: 'Dashboard', path: '/', icon: 'bi bi-speedometer2' },
-    { name: 'Ranking', path: '/ranking', icon: 'bi bi-trophy' },
+    { name: 'Meu Perfil', path: '/editar', icon: 'bi bi-person-gear' },
+    { name: 'Ranking', path: '/home', icon: 'bi bi-trophy' },
     { name: 'Jogadores', path: '/jogadores', icon: 'bi bi-people' },
     { name: 'Partidas', path: '/partidas', icon: 'bi bi-calendar-event' },
-    { name: 'Configurações', path: '/config', icon: 'bi bi-gear' }
+    { name: 'Votação', path: '/votacao', icon: 'bi bi-ui-checks' },
+    { name: 'Configurações', path: '/config', icon: 'bi bi-gear' },
 ]
 
 function logout() {
