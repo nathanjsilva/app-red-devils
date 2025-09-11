@@ -31,7 +31,7 @@
             </nav>
 
             <div class="sidebar-footer text-center py-3">
-                <button class="btn btn-sm btn-outline-light" @click="logout">
+                <button class="btn btn-sm btn-outline-light" @click="handleLogout">
                     <i class="bi bi-box-arrow-right me-1"></i> Sair
                 </button>
             </div>
@@ -44,17 +44,20 @@
     </div>
 </template>
 
-<script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuth } from '../composables/useAuth'
+import { useResponsive } from '../composables/useResponsive'
 import logo from '../assets/logo-red-devils.png'
+import type { MenuItem } from '../types'
 
-const route = useRoute()
 const router = useRouter()
+const { logout } = useAuth()
+const { isMobile } = useResponsive()
 const sidebarOpen = ref(false)
-const isMobile = ref(window.innerWidth <= 992)
 
-const menu = [
+const menu: MenuItem[] = [
     { name: 'Meu Perfil', path: '/register', icon: 'bi bi-person-gear' },
     { name: 'Ranking', path: '/home', icon: 'bi bi-trophy' },
     { name: 'Jogadores', path: '/jogadores', icon: 'bi bi-people' },
@@ -63,22 +66,9 @@ const menu = [
     { name: 'Configurações', path: '/config', icon: 'bi bi-gear' },
 ]
 
-function logout() {
-    router.push('/login')
+const handleLogout = async () => {
+    await logout()
 }
-
-function handleResize() {
-    isMobile.value = window.innerWidth <= 992
-    if (!isMobile.value) sidebarOpen.value = false
-}
-
-onMounted(() => {
-    window.addEventListener('resize', handleResize)
-})
-
-onBeforeUnmount(() => {
-    window.removeEventListener('resize', handleResize)
-})
 </script>
 
 <style scoped>

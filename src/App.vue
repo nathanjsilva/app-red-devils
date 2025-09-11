@@ -5,14 +5,20 @@
   </div>
 </template>
 
-<script setup>
-import { computed } from 'vue'
+<script setup lang="ts">
+import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useAuthStore } from './stores/auth'
 import Sidebar from './components/SidebarComponent.vue'
 
 const route = useRoute()
+const authStore = useAuthStore()
 
 const hideSidebar = computed(() => {
   return route.path === '/' || route.path === '/register'
+})
+
+onMounted(() => {
+  authStore.initializeAuth()
 })
 </script>
