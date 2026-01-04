@@ -4,12 +4,16 @@ import type { Player, UpdatePlayerRequest } from '../types'
 export class PlayerService {
   static async getPlayer(id: number): Promise<Player> {
     const response = await api.get<Player>(`/players/${id}`)
-    return response.data
+    // API pode retornar { data: Player } ou Player diretamente
+    const payload = (response as any).data?.data ?? (response as any).data
+    return payload as Player
   }
 
   static async updatePlayer(id: number, playerData: UpdatePlayerRequest): Promise<Player> {
     const response = await api.put<Player>(`/players/${id}`, playerData)
-    return response.data
+    // API pode retornar { data: Player } ou Player diretamente
+    const payload = (response as any).data?.data ?? (response as any).data
+    return payload as Player
   }
 
   static async getAllPlayers(): Promise<Player[]> {

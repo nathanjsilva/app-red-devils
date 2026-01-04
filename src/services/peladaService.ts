@@ -4,7 +4,9 @@ import type { Pelada, CreatePeladaRequest } from '../types'
 export class PeladaService {
   static async createPelada(peladaData: CreatePeladaRequest): Promise<Pelada> {
     const response = await api.post<Pelada>('/peladas', peladaData)
-    return response.data
+    // API pode retornar { data: Pelada } ou Pelada diretamente
+    const payload = (response as any).data?.data ?? (response as any).data
+    return payload as Pelada
   }
 
   static async getAllPeladas(): Promise<Pelada[]> {
@@ -37,7 +39,9 @@ export class PeladaService {
 
   static async updatePelada(id: number, peladaData: Partial<CreatePeladaRequest>): Promise<Pelada> {
     const response = await api.put<Pelada>(`/peladas/${id}`, peladaData)
-    return response.data
+    // API pode retornar { data: Pelada } ou Pelada diretamente
+    const payload = (response as any).data?.data ?? (response as any).data
+    return payload as Pelada
   }
 
   static async deletePelada(id: number): Promise<void> {

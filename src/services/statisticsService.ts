@@ -4,32 +4,44 @@ import type { PlayerStatistics, Ranking, PeladaStatisticsResponse } from '../typ
 export class StatisticsService {
   static async getPlayerTotalStatistics(playerId: number): Promise<PlayerStatistics> {
     const response = await api.get<PlayerStatistics>(`/statistics/player/${playerId}/total`)
-    return response.data
+    // API pode retornar { data: PlayerStatistics } ou PlayerStatistics diretamente
+    const payload = (response as any).data?.data ?? (response as any).data
+    return payload as PlayerStatistics
   }
 
   static async getWinsRanking(): Promise<Ranking> {
     const response = await api.get<Ranking>('/statistics/rankings/wins')
-    return response.data
+    // API pode retornar { data: Ranking } ou Ranking diretamente
+    const payload = (response as any).data?.data ?? (response as any).data
+    return payload as Ranking
   }
 
   static async getGoalsRanking(): Promise<Ranking> {
     const response = await api.get<Ranking>('/statistics/rankings/goals')
-    return response.data
+    // API pode retornar { data: Ranking } ou Ranking diretamente
+    const payload = (response as any).data?.data ?? (response as any).data
+    return payload as Ranking
   }
 
   static async getAssistsRanking(): Promise<Ranking> {
     const response = await api.get<Ranking>('/statistics/rankings/assists')
-    return response.data
+    // API pode retornar { data: Ranking } ou Ranking diretamente
+    const payload = (response as any).data?.data ?? (response as any).data
+    return payload as Ranking
   }
 
   static async getGoalParticipationRanking(): Promise<Ranking> {
     const response = await api.get<Ranking>('/statistics/rankings/goal-participation')
-    return response.data
+    // API pode retornar { data: Ranking } ou Ranking diretamente
+    const payload = (response as any).data?.data ?? (response as any).data
+    return payload as Ranking
   }
 
   static async getGoalkeepersRanking(): Promise<Ranking> {
     const response = await api.get<Ranking>('/statistics/rankings/goalkeepers')
-    return response.data
+    // API pode retornar { data: Ranking } ou Ranking diretamente
+    const payload = (response as any).data?.data ?? (response as any).data
+    return payload as Ranking
   }
 
   static async getPeladaStatistics(peladaId: number): Promise<PeladaStatisticsResponse> {
@@ -42,7 +54,9 @@ export class StatisticsService {
 
   static async getPlayerStatisticsForPelada(playerId: number, peladaId: number): Promise<PlayerStatistics> {
     const response = await api.get<PlayerStatistics>(`/statistics/player/${playerId}/pelada/${peladaId}`)
-    return response.data
+    // API pode retornar { data: PlayerStatistics } ou PlayerStatistics diretamente
+    const payload = (response as any).data?.data ?? (response as any).data
+    return payload as PlayerStatistics
   }
 
   /**

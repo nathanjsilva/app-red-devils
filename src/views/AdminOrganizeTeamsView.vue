@@ -29,7 +29,8 @@
             <p class="mt-3 text-muted">Carregando times...</p>
           </div>
 
-          <div class="col-12" v-else-if="teamFields.length && peladaInfo">
+          <!-- Organização manual -->
+          <div class="col-12" v-if="teamFields.length && peladaInfo">
             <div class="row g-3">
               <div v-for="field in teamFields" :key="field.team_number" class="col-md-6">
                 <div class="border rounded p-3">
@@ -62,8 +63,8 @@
             </div>
           </div>
 
-          <div class="col-12">
-            <button class="btn btn-red" :disabled="isLoading || !peladaId">
+          <div class="col-12" v-if="teamFields.length && peladaInfo">
+            <button class="btn btn-red" :disabled="isLoading || !peladaId" @click.prevent="handleOrganize">
               {{ isLoading ? 'Organizando...' : 'Organizar Times' }}
             </button>
           </div>
@@ -79,7 +80,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 import { useToast } from 'vue-toastification'
 import { PeladaService } from '../services/peladaService'
 import { TeamService } from '../services/teamService'
@@ -117,8 +118,25 @@ const formatDate = (dateString: string): string => {
 const onChangeSingleAssignment = (teamNumber: number, slotIndex: number, event: Event) => {
   const target = event.target as HTMLSelectElement
   const value = parseInt(target.value, 10)
+  
+  // Se o valor for inválido, limpar o slot
+  if (isNaN(value)) {
+    if (!teamAssignmentsMap[teamNumber]) teamAssignmentsMap[teamNumber] = []
+    teamAssignmentsMap[teamNumber][slotIndex] = undefined as any
+    return
+  }
+  
+  // Validar se o jogador já está em outro time ou slot
+  if (isPlayerAlreadyChosen(value, teamNumber, slotIndex)) {
+    toast.error('Este jogador já está em outro time ou slot. Escolha outro jogador.')
+    // Reverter para o valor anterior
+    target.value = teamAssignmentsMap[teamNumber]?.[slotIndex]?.toString() || ''
+    return
+  }
+  
+  // Atualizar o assignment
   if (!teamAssignmentsMap[teamNumber]) teamAssignmentsMap[teamNumber] = []
-  teamAssignmentsMap[teamNumber][slotIndex] = isNaN(value) ? undefined as any : value
+  teamAssignmentsMap[teamNumber][slotIndex] = value
 }
 
 const selectedPlayerIds = computed(() => {
@@ -202,72 +220,168 @@ const loadTeamContext = async () => {
     
     teamFields.value = fieldsRes.team_fields
     
-    // Verificar se a pelada tem jogadores cadastrados
-    let peladaPlayersResponse: any = null
-    try {
-      peladaPlayersResponse = await TeamService.getPeladaPlayers(peladaId.value)
-      console.log('✅ Jogadores da pelada encontrados:', peladaPlayersResponse.players?.length || 0)
-    } catch (e: any) {
-      console.warn('⚠️ Não foi possível carregar jogadores da pelada:', e)
-    }
-    
-    // Se a pelada tem jogadores cadastrados, usar esses jogadores
-    if (peladaPlayersResponse && peladaPlayersResponse.players && peladaPlayersResponse.players.length > 0) {
-      // Converter PeladaPlayersItem[] para Player[]
-      players.value = peladaPlayersResponse.players.map((p: any) => ({
-        id: p.id,
-        name: p.name || '',
-        email: '',
-        position: p.position || (p.is_goalkeeper ? 'goleiro' : 'linha'),
-        phone: p.phone || '',
-        nickname: p.nickname || '',
-        is_admin: false,
-        created_at: '',
-        updated_at: ''
-      }))
-      console.log('✅ Usando jogadores cadastrados na pelada')
-    } else {
-      // Caso contrário, usar todos os jogadores
-      const playersResponse = await PlayerService.getAllPlayers()
-      if (Array.isArray(playersResponse)) {
-        players.value = playersResponse
-      } else if (playersResponse && 'data' in playersResponse) {
-        players.value = (playersResponse as any).data
-      }
-      console.log('✅ Usando todos os jogadores disponíveis')
-    }
-    
     // Inicializar teamAssignmentsMap com arrays vazios
     for (const f of teamFields.value) {
       teamAssignmentsMap[f.team_number] = []
     }
     
-    // Tentar carregar times já organizados
+    // Carregar duas rotas em paralelo:
+    // 1. Rota de estatísticas (players-with-statistics) - FONTE PRINCIPAL com times e jogadores organizados
+    // 2. Rota de todos os jogadores (/players) - para popular os selects
     try {
-      const organizedTeams = await TeamService.getOrganizedTeams(peladaId.value)
-      if (organizedTeams && organizedTeams.teams && organizedTeams.teams.length > 0) {
-        console.log('✅ Times já organizados encontrados:', organizedTeams.teams.length)
-        
-        // Preencher teamAssignmentsMap com os jogadores já organizados
-        organizedTeams.teams.forEach(team => {
-          const teamNumber = team.team_number
-          if (teamNumber !== undefined && team.players) {
-            if (!teamAssignmentsMap[teamNumber]) {
-              teamAssignmentsMap[teamNumber] = []
-            }
-            // Preencher os slots com os IDs dos jogadores
-            team.players.forEach((player, index) => {
-              teamAssignmentsMap[teamNumber][index] = player.id
-            })
-          }
-        })
-        
-        console.log('✅ Times já organizados carregados no formulário')
+      const [teamsWithStatsResponse, allPlayersResponse] = await Promise.allSettled([
+        TeamService.getTeamsWithStatistics(peladaId.value),
+        PlayerService.getAllPlayers()
+      ])
+      
+      // Processar resposta de todos os jogadores do sistema (para popular selects)
+      if (allPlayersResponse.status === 'fulfilled') {
+        const allPlayers = allPlayersResponse.value
+        if (Array.isArray(allPlayers)) {
+          players.value = allPlayers
+        } else if (allPlayers && 'data' in allPlayers) {
+          players.value = (allPlayers as any).data
+        }
+        console.log('✅ Todos os jogadores do sistema carregados:', players.value.length)
       } else {
-        console.log('ℹ️ Nenhum time organizado encontrado para esta pelada')
+        console.warn('⚠️ Erro ao carregar todos os jogadores:', allPlayersResponse.reason)
+        toast.warning('Não foi possível carregar a lista completa de jogadores')
+      }
+      
+      // Processar resposta de players-with-statistics - FONTE PRINCIPAL
+      if (teamsWithStatsResponse.status === 'fulfilled') {
+        const teamsWithStats = teamsWithStatsResponse.value
+        
+        // Priorizar o campo 'teams' que já vem organizado
+        if (teamsWithStats && teamsWithStats.teams && Array.isArray(teamsWithStats.teams) && teamsWithStats.teams.length > 0) {
+          console.log('✅ Times organizados encontrados via players-with-statistics:', teamsWithStats.teams.length)
+          
+          let hasOrganizedTeams = false
+          
+          // Preencher teamAssignmentsMap com os jogadores de cada time
+          teamsWithStats.teams.forEach((team: any) => {
+            // Extrair número do time do nome (ex: "Time 1" -> 1, "Time 2" -> 2)
+            let teamNumber: number | undefined = undefined
+            
+            if (team.name) {
+              const match = team.name.match(/Time\s*(\d+)/i)
+              if (match && match[1]) {
+                teamNumber = parseInt(match[1], 10)
+              }
+            }
+            
+            if (teamNumber !== undefined && !isNaN(teamNumber) && team.players && Array.isArray(team.players) && team.players.length > 0) {
+              // Garantir que o array existe
+              if (!teamAssignmentsMap[teamNumber]) {
+                teamAssignmentsMap[teamNumber] = []
+              }
+              
+              // Criar array com todos os jogadores
+              const teamPlayers: number[] = []
+              team.players.forEach((player: any) => {
+                if (player && player.id && !isNaN(player.id)) {
+                  teamPlayers.push(player.id)
+                }
+              })
+              
+              // Usar splice para manter reatividade do Vue
+              teamAssignmentsMap[teamNumber].splice(0, teamAssignmentsMap[teamNumber].length, ...teamPlayers)
+              
+              hasOrganizedTeams = true
+              console.log(`✅ Time ${teamNumber} (${team.name}) preenchido automaticamente com ${teamPlayers.length} jogador(es):`, teamPlayers)
+            }
+          })
+          
+          if (hasOrganizedTeams) {
+            const teamCount = teamsWithStats.teams.length
+            
+            // Aguardar próximo tick para garantir que Vue atualize a UI
+            await nextTick()
+            
+            toast.success(`${teamCount} time(s) já organizado(s) foi(ram) carregado(s). Você pode editar a organização.`)
+            console.log('✅ Times já organizados carregados no formulário')
+          }
+        } else if (teamsWithStats && teamsWithStats.players && Array.isArray(teamsWithStats.players) && teamsWithStats.players.length > 0) {
+          // Fallback: Se não tem campo 'teams', usar o campo 'players' e agrupar por time
+          console.log('ℹ️ Campo "teams" não encontrado, usando campo "players" para identificar times')
+          console.log(`📊 Total de jogadores retornados: ${teamsWithStats.players.length}`)
+          
+          // Agrupar jogadores por time
+          const playersByTeam: Record<number, number[]> = {}
+          
+          teamsWithStats.players.forEach((p: any) => {
+            if (p.team && p.team.name && p.team.id) {
+              const match = p.team.name.match(/Time\s*(\d+)/i)
+              if (match && match[1]) {
+                const teamNumber = parseInt(match[1], 10)
+                if (!isNaN(teamNumber)) {
+                  if (!playersByTeam[teamNumber]) {
+                    playersByTeam[teamNumber] = []
+                  }
+                  playersByTeam[teamNumber].push(p.id)
+                  console.log(`  → Jogador ${p.id} (${p.nickname}) adicionado ao Time ${teamNumber}`)
+                }
+              }
+            }
+          })
+          
+          console.log('📋 Jogadores agrupados por time:', playersByTeam)
+          
+          // Preencher com os jogadores encontrados
+          if (Object.keys(playersByTeam).length > 0) {
+            // Ordenar as chaves dos times para garantir ordem correta
+            const sortedTeamNumbers = Object.keys(playersByTeam)
+              .map(n => parseInt(n, 10))
+              .filter(n => !isNaN(n))
+              .sort((a, b) => a - b)
+            
+            sortedTeamNumbers.forEach(teamNumber => {
+              if (playersByTeam[teamNumber] && playersByTeam[teamNumber].length > 0) {
+                // Garantir que o array existe no objeto reativo
+                if (!teamAssignmentsMap[teamNumber]) {
+                  teamAssignmentsMap[teamNumber] = []
+                }
+                
+                // Limpar array existente e criar novo array com todos os jogadores
+                const teamPlayers: number[] = []
+                playersByTeam[teamNumber].forEach((playerId) => {
+                  if (playerId && !isNaN(playerId)) {
+                    teamPlayers.push(playerId)
+                  }
+                })
+                
+                // Atribuir o array completo ao objeto reativo
+                // Usar splice para manter reatividade do Vue
+                teamAssignmentsMap[teamNumber].splice(0, teamAssignmentsMap[teamNumber].length, ...teamPlayers)
+                
+                console.log(`✅ Time ${teamNumber} preenchido (via players) com ${teamPlayers.length} jogador(es):`, teamPlayers)
+              }
+            })
+            
+            const teamCount = sortedTeamNumbers.length
+            const totalPlayersLoaded = Object.values(playersByTeam).reduce((sum, arr) => sum + arr.length, 0)
+            
+            // Aguardar próximo tick para garantir que Vue atualize a UI
+            await nextTick()
+            
+            toast.success(`${teamCount} time(s) já organizado(s) com ${totalPlayersLoaded} jogador(es) carregado(s). Você pode editar a organização.`)
+          } else {
+            console.warn('⚠️ Nenhum jogador com time associado encontrado')
+          }
+        } else {
+          console.log('ℹ️ Nenhum time organizado encontrado para esta pelada')
+        }
+      } else {
+        // Se retornar 404, significa que não há dados (situação esperada)
+        if (teamsWithStatsResponse.reason?.response?.status === 404) {
+          console.log('ℹ️ Nenhum jogador com estatísticas encontrado para esta pelada (404)')
+        } else {
+          console.warn('⚠️ Erro ao carregar jogadores com estatísticas:', teamsWithStatsResponse.reason)
+        }
       }
     } catch (e: any) {
-      console.warn('⚠️ Erro ao carregar times organizados (continuando com times vazios):', e)
+      console.error('❌ Erro ao carregar dados:', e)
+      toast.error('Erro ao carregar dados da pelada')
     }
     
     console.log('✅ Times inicializados:', teamFields.value.map(f => f.label))
@@ -287,7 +401,7 @@ const loadTeamContext = async () => {
 const handleOrganize = async () => {
   if (!peladaId.value) return
   
-  // Build payload
+  // Build payload e validar
   const team_assignments = teamFields.value.map(f => ({
     team_number: f.team_number,
     player_ids: (teamAssignmentsMap[f.team_number] || [])
@@ -301,6 +415,27 @@ const handleOrganize = async () => {
     return
   }
   
+  // Validar duplicatas: garantir que nenhum jogador apareça duas vezes
+  const allPlayerIds: number[] = []
+  const duplicatePlayers: number[] = []
+  
+  team_assignments.forEach(assignment => {
+    assignment.player_ids.forEach(playerId => {
+      if (allPlayerIds.includes(playerId)) {
+        if (!duplicatePlayers.includes(playerId)) {
+          duplicatePlayers.push(playerId)
+        }
+      } else {
+        allPlayerIds.push(playerId)
+      }
+    })
+  })
+  
+  if (duplicatePlayers.length > 0) {
+    toast.error(`Erro: Os seguintes jogadores estão duplicados: ${duplicatePlayers.join(', ')}. Cada jogador pode aparecer apenas uma vez.`)
+    return
+  }
+  
   const request: OrganizePeladaTeamsRequest = { team_assignments }
   
   console.log('📤 Enviando organização de times:', request)
@@ -310,6 +445,8 @@ const handleOrganize = async () => {
     result.value = await TeamService.organizeTeams(peladaId.value, request)
     console.log('✅ Times organizados:', result.value)
     toast.success('Times organizados com sucesso!')
+    // Recarregar times organizados para mostrar no formulário
+    await loadTeamContext()
   } catch (e: any) {
     console.error('❌ Erro ao organizar times:', e)
     console.error('Detalhes do erro:', {

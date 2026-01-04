@@ -23,12 +23,16 @@ export class AuthService {
 
   static async register(playerData: RegisterRequest): Promise<Player> {
     const response = await api.post<Player>('/players', playerData)
-    return response.data
+    // API pode retornar { data: Player } ou Player diretamente
+    const payload = (response as any).data?.data ?? (response as any).data
+    return payload as Player
   }
 
   static async getCurrentPlayer(): Promise<Player> {
     const response = await api.get<Player>('/me')
-    return response.data
+    // API pode retornar { data: Player } ou Player diretamente
+    const payload = (response as any).data?.data ?? (response as any).data
+    return payload as Player
   }
 
   static async logout(): Promise<void> {
@@ -58,6 +62,8 @@ export class AuthService {
 
   static async setupFirstAdmin(adminData: SetupFirstAdminRequest): Promise<{ message: string; player: Player }> {
     const response = await api.post('/setup-first-admin', adminData)
-    return response.data
+    // API pode retornar { data: {...} } ou diretamente
+    const payload = (response as any).data?.data ?? (response as any).data
+    return payload
   }
 }

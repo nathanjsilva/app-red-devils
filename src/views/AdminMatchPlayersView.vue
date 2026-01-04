@@ -38,6 +38,43 @@
       </div>
     </div>
 
+    <!-- Seção para adicionar novo jogador -->
+    <div v-if="selectedPelada && !isLoadingPlayers" class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title mb-3">Adicionar Jogador às Estatísticas</h5>
+        <div class="row g-3">
+          <div class="col-md-8">
+            <label class="form-label">Selecione um jogador</label>
+            <select 
+              v-model="newPlayerId" 
+              class="form-select"
+              :disabled="availablePlayers.length === 0 || isAddingPlayer"
+            >
+              <option :value="null" disabled selected>
+                {{ availablePlayers.length === 0 ? 'Todos os jogadores já têm estatísticas cadastradas' : 'Selecione um jogador' }}
+              </option>
+              <option 
+                v-for="player in availablePlayers" 
+                :key="player.id" 
+                :value="player.id"
+              >
+                #{{ player.id }} · {{ player.nickname }} ({{ player.position }})
+              </option>
+            </select>
+          </div>
+          <div class="col-md-4 d-flex align-items-end">
+            <button 
+              class="btn btn-primary w-100"
+              @click="addNewPlayer"
+              :disabled="!newPlayerId || isAddingPlayer"
+            >
+              {{ isAddingPlayer ? 'Adicionando...' : 'Adicionar Jogador' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Tabela de Jogadores com Estatísticas -->
     <div v-if="selectedPelada && playerStats.length > 0" class="card">
       <div class="card-body">
@@ -140,13 +177,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
 import { AdminService } from '../services/adminService'
 import { PeladaService } from '../services/peladaService'
 import { StatisticsService } from '../services/statisticsService'
-import type { Pelada, PeladaPlayersItem, PeladaStatisticsResponse, UpdateMatchPlayerRequest } from '../types'
+import { TeamService } from '../services/teamService'
+import { PlayerService } from '../services/playerService'
+import type { Pelada, PeladaPlayersItem, PeladaStatisticsResponse, UpdateMatchPlayerRequest, Player } from '../types'
 
 const route = useRoute()
 const router = useRouter()
@@ -157,6 +196,9 @@ const allPeladas = ref<Pelada[]>([])
 const isLoadingPlayers = ref(false)
 const isLoadingPeladas = ref(false)
 const isSaving = ref<number | null>(null)
+const isAddingPlayer = ref(false)
+const newPlayerId = ref<number | null>(null)
+const allPlayersList = ref<Player[]>([])
 
 interface PlayerWithStatistics {
   player: PeladaPlayersItem
@@ -174,6 +216,12 @@ const playerStats = ref<PlayerWithStatistics[]>([])
 // Form
 const form = ref({
   pelada_id: 0
+})
+
+// Jogadores disponíveis (que não têm estatísticas cadastradas ainda)
+const availablePlayers = computed(() => {
+  const playerIdsWithStats = new Set(playerStats.value.map(ps => ps.player.id))
+  return allPlayersList.value.filter(p => !playerIdsWithStats.has(p.id))
 })
 
 // Função para formatar data
@@ -199,6 +247,7 @@ const formatDate = (dateString: string): string => {
 const loadPeladaById = async (peladaId: number) => {
   isLoadingPlayers.value = true
   playerStats.value = []
+  newPlayerId.value = null
   
   try {
     // 1. Buscar dados da pelada
@@ -213,6 +262,16 @@ const loadPeladaById = async (peladaId: number) => {
       date: selectedPelada.value.date,
       location: selectedPelada.value.location
     })
+
+    // Carregar todos os jogadores disponíveis (para poder adicionar novos)
+    try {
+      const playersResponse = await PlayerService.getAllPlayers()
+      allPlayersList.value = Array.isArray(playersResponse) ? playersResponse : (playersResponse as any).data || []
+      console.log('✅ Jogadores carregados:', allPlayersList.value.length)
+    } catch (e: any) {
+      console.warn('⚠️ Erro ao carregar jogadores:', e)
+      allPlayersList.value = []
+    }
 
     // 2. Buscar estatísticas da pelada (já vem com os jogadores que têm estatísticas)
     try {
@@ -240,7 +299,9 @@ const loadPeladaById = async (peladaId: number) => {
             statistics: {
               goals: Number(fp.statistics.goals) || 0,
               assists: Number(fp.statistics.assists) || 0,
-              is_winner: fp.statistics.is_winner === 1 || fp.statistics.is_winner === true,
+              is_winner: typeof fp.statistics.is_winner === 'boolean' 
+                ? fp.statistics.is_winner 
+                : (typeof fp.statistics.is_winner === 'number' ? fp.statistics.is_winner === 1 : false),
               goals_conceded: 0,
               matchPlayerId: undefined
             }
@@ -263,7 +324,9 @@ const loadPeladaById = async (peladaId: number) => {
             statistics: {
               goals: Number(gk.statistics.goals) || 0,
               assists: Number(gk.statistics.assists) || 0,
-              is_winner: gk.statistics.is_winner === 1 || gk.statistics.is_winner === true,
+              is_winner: typeof gk.statistics.is_winner === 'boolean' 
+                ? gk.statistics.is_winner 
+                : (typeof gk.statistics.is_winner === 'number' ? gk.statistics.is_winner === 1 : false),
               goals_conceded: Number(gk.statistics.goals_conceded) || 0,
               matchPlayerId: undefined
             }
@@ -371,6 +434,54 @@ const savePlayerStatistics = async (playerStat: PlayerWithStatistics) => {
     isSaving.value = null
   }
 }
+
+// Adicionar novo jogador às estatísticas
+const addNewPlayer = async () => {
+  if (!newPlayerId.value || !selectedPelada.value) return
+  
+  isAddingPlayer.value = true
+  
+  try {
+    // Buscar dados do jogador
+    const player = allPlayersList.value.find(p => p.id === newPlayerId.value)
+    if (!player) {
+      toast.error('Jogador não encontrado')
+      return
+    }
+    
+    // Criar entrada inicial com valores padrão
+    const newPlayerStat: PlayerWithStatistics = {
+      player: {
+        id: player.id,
+        name: player.name,
+        nickname: player.nickname,
+        position: player.position,
+        phone: player.phone,
+        is_goalkeeper: player.position === 'goleiro'
+      },
+      statistics: {
+        goals: 0,
+        assists: 0,
+        is_winner: false,
+        goals_conceded: player.position === 'goleiro' ? 0 : undefined
+      }
+    }
+    
+    // Adicionar à lista
+    playerStats.value.push(newPlayerStat)
+    
+    // Limpar seleção
+    newPlayerId.value = null
+    
+    toast.success(`${player.nickname} adicionado. Preencha as estatísticas e clique em "Salvar".`)
+  } catch (e: any) {
+    console.error('Erro ao adicionar jogador:', e)
+    toast.error(`Falha ao adicionar jogador: ${e?.message || 'Erro desconhecido'}`)
+  } finally {
+    isAddingPlayer.value = false
+  }
+}
+
 
 // Carregar pelada quando a página carrega com query param
 onMounted(async () => {
