@@ -1,5 +1,6 @@
 import { config } from '@vue/test-utils'
 import { createPinia } from 'pinia'
+import { vi } from 'vitest'
 
 // Configuração global para testes
 config.global.plugins = [createPinia()]

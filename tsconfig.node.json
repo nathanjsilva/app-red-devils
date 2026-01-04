@@ -4,7 +4,12 @@
     "skipLibCheck": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "allowJs": true,
+    "outDir": "./dist"
   },
-  "include": ["vite.config.js", "vitest.config.js"]
+  "include": [
+    "vite.config.js",
+    "vitest.config.js"
+  ]
 }

@@ -45,9 +45,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
+import { useAuthStore } from '../stores/auth'
 import { useResponsive } from '../composables/useResponsive'
 import logo from '../assets/logo-red-devils.png'
 import type { MenuItem } from '../types'
@@ -56,15 +57,24 @@ const router = useRouter()
 const { logout } = useAuth()
 const { isMobile } = useResponsive()
 const sidebarOpen = ref(false)
+const authStore = useAuthStore()
+const isAdmin = computed(() => authStore.user?.is_admin === true)
 
-const menu: MenuItem[] = [
-    { name: 'Meu Perfil', path: '/register', icon: 'bi bi-person-gear' },
-    { name: 'Ranking', path: '/home', icon: 'bi bi-trophy' },
-    { name: 'Jogadores', path: '/jogadores', icon: 'bi bi-people' },
-    { name: 'Partidas', path: '/partidas', icon: 'bi bi-calendar-event' },
-    { name: 'Votação', path: '/votacao', icon: 'bi bi-ui-checks' },
-    { name: 'Configurações', path: '/config', icon: 'bi bi-gear' },
-]
+const menu = computed<MenuItem[]>(() => {
+    const items: MenuItem[] = [
+        { name: 'Dashboard', path: '/home', icon: 'bi bi-house-door' },
+        { name: 'Meu Perfil', path: '/register', icon: 'bi bi-person-gear' },
+    ]
+    if (isAdmin.value) {
+        items.push(
+            { name: 'Jogadores', path: '/admin/players', icon: 'bi bi-people' },
+            { name: 'Peladas', path: '/admin/peladas', icon: 'bi bi-calendar2-week' },
+            { name: 'Estatísticas', path: '/admin/match-players', icon: 'bi bi-graph-up' },
+            { name: 'Organizar Times', path: '/admin/organize-teams', icon: 'bi bi-diagram-3' },
+        )
+    }
+    return items
+})
 
 const handleLogout = async () => {
     await logout()

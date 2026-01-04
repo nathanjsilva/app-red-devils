@@ -51,7 +51,7 @@
               Lembrar-me
             </label>
           </div>
-          <a href="#" class="text-red-devils text-decoration-none">Esqueci a senha</a>
+          <router-link to="/forgot-password" class="text-red-devils text-decoration-none">Esqueci a senha</router-link>
         </div>
 
         <button 

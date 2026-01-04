@@ -8,11 +8,17 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 import 'bootstrap-icons/font/bootstrap-icons.css'
 import Toast, { POSITION } from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
+import { useAuthStore } from './stores/auth'
 
 const app = createApp(App)
 const pinia = createPinia()
 
 app.use(pinia)
+
+// Initialize auth BEFORE installing the router, so first navigation sees the session
+const authStore = useAuthStore()
+authStore.initializeAuth()
+
 app.use(router)
 app.use(Toast, {
   position: POSITION.TOP_RIGHT,

@@ -30,13 +30,19 @@ describe('Auth Store', () => {
 
   it('should login successfully', async () => {
     const mockResponse = {
-      access_token: 'token123',
-      token_type: 'Bearer',
-      player: {
-        id: 1,
-        name: 'Test User',
-        email: 'test@example.com',
-        position: 'linha'
+      data: {
+        access_token: 'token123',
+        token_type: 'Bearer',
+        player: {
+          id: 1,
+          name: 'Test User',
+          email: 'test@example.com',
+          position: 'linha',
+          phone: '11999999999',
+          nickname: 'Test Player',
+          created_at: '2024-01-01 12:00:00',
+          updated_at: '2024-01-01 12:00:00'
+        }
       }
     }
 
@@ -48,13 +54,22 @@ describe('Auth Store', () => {
     await store.login(credentials)
 
     expect(store.token).toBe('Bearer token123')
-    expect(store.user).toEqual(mockResponse.player)
+    expect(store.user).toEqual(mockResponse.data.player)
     expect(store.isAuthenticated).toBe(true)
   })
 
   it('should logout successfully', async () => {
     const store = useAuthStore()
-    store.user = { id: 1, name: 'Test', email: 'test@test.com', position: 'linha' }
+    store.user = { 
+      id: 1, 
+      name: 'Test', 
+      email: 'test@test.com', 
+      position: 'linha',
+      phone: '11999999999',
+      nickname: 'Test Player',
+      created_at: '2024-01-01 12:00:00',
+      updated_at: '2024-01-01 12:00:00'
+    }
     store.token = 'Bearer token123'
 
     await store.logout()

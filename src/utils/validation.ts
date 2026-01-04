@@ -6,9 +6,26 @@ export const validateEmail = (email: string): boolean => {
 }
 
 export const validatePassword = (password: string): { isValid: boolean; message?: string } => {
-  if (password.length < 6) {
-    return { isValid: false, message: 'A senha deve ter pelo menos 6 caracteres' }
+  if (password.length < 8) {
+    return { isValid: false, message: 'A senha deve ter pelo menos 8 caracteres' }
   }
+  
+  if (!/(?=.*[a-z])/.test(password)) {
+    return { isValid: false, message: 'A senha deve conter pelo menos 1 letra minúscula' }
+  }
+  
+  if (!/(?=.*[A-Z])/.test(password)) {
+    return { isValid: false, message: 'A senha deve conter pelo menos 1 letra maiúscula' }
+  }
+  
+  if (!/(?=.*\d)/.test(password)) {
+    return { isValid: false, message: 'A senha deve conter pelo menos 1 número' }
+  }
+  
+  if (!/(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/.test(password)) {
+    return { isValid: false, message: 'A senha deve conter pelo menos 1 caractere especial' }
+  }
+  
   return { isValid: true }
 }
 

@@ -3,7 +3,8 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useToast } from 'vue-toastification'
 import { validateEmail, validatePassword, validateName, sanitizeInput } from '../utils/validation'
-import type { LoginRequest, RegisterRequest } from '../types'
+import { cleanPhone } from '../utils/phoneMask'
+import type { LoginRequest, RegisterRequest, SetupFirstAdminRequest } from '../types'
 
 export function useAuth() {
   const authStore = useAuthStore()
@@ -70,6 +71,8 @@ export function useAuth() {
         name: sanitizeInput(playerData.name),
         email: sanitizeInput(playerData.email),
         password: playerData.password,
+        phone: cleanPhone(sanitizeInput(playerData.phone)), // Remove formatação do telefone
+        nickname: sanitizeInput(playerData.nickname),
         position: playerData.position
       }
 
@@ -102,6 +105,82 @@ export function useAuth() {
     return true
   }
 
+  const forgotPassword = async (email: string) => {
+    try {
+      if (!validateEmail(email)) {
+        toast.error('E-mail inválido')
+        return false
+      }
+
+      const sanitizedEmail = sanitizeInput(email)
+      await authStore.forgotPassword(sanitizedEmail)
+      toast.success('Instruções de recuperação enviadas para seu e-mail!')
+      return true
+    } catch (error) {
+      console.error('Erro ao solicitar recuperação de senha:', error)
+      toast.error('Erro ao enviar instruções de recuperação. Tente novamente.')
+      return false
+    }
+  }
+
+  const resetPassword = async (token: string, password: string) => {
+    try {
+      const passwordValidation = validatePassword(password)
+      if (!passwordValidation.isValid) {
+        toast.error(passwordValidation.message!)
+        return false
+      }
+
+      await authStore.resetPassword(token, password)
+      toast.success('Senha redefinida com sucesso!')
+      return true
+    } catch (error) {
+      console.error('Erro ao redefinir senha:', error)
+      toast.error('Erro ao redefinir senha. Tente novamente.')
+      return false
+    }
+  }
+
+  const setupFirstAdmin = async (adminData: SetupFirstAdminRequest) => {
+    try {
+      // Validações
+      const nameValidation = validateName(adminData.name)
+      if (!nameValidation.isValid) {
+        toast.error(nameValidation.message!)
+        return false
+      }
+
+      if (!validateEmail(adminData.email)) {
+        toast.error('E-mail inválido')
+        return false
+      }
+
+      const passwordValidation = validatePassword(adminData.password)
+      if (!passwordValidation.isValid) {
+        toast.error(passwordValidation.message!)
+        return false
+      }
+
+      // Sanitizar inputs
+      const sanitizedData = {
+        name: sanitizeInput(adminData.name),
+        email: sanitizeInput(adminData.email),
+        password: adminData.password,
+        phone: cleanPhone(sanitizeInput(adminData.phone)),
+        nickname: sanitizeInput(adminData.nickname),
+        position: adminData.position
+      }
+
+      await authStore.setupFirstAdmin(sanitizedData)
+      toast.success('Primeiro administrador criado com sucesso!')
+      return true
+    } catch (error) {
+      console.error('Erro ao criar primeiro admin:', error)
+      toast.error('Erro ao criar primeiro administrador. Tente novamente.')
+      return false
+    }
+  }
+
   return {
     // State
     isAuthenticated,
@@ -112,6 +191,9 @@ export function useAuth() {
     login,
     register,
     logout,
-    requireAuth
+    requireAuth,
+    forgotPassword,
+    resetPassword,
+    setupFirstAdmin
   }
 }

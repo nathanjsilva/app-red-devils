@@ -1,16 +1,15 @@
 <template>
-  <div class="register-container">
-    <div class="register-card">
+  <div class="setup-admin-container">
+    <div class="setup-admin-card">
       <div class="text-center mb-4">
         <img :src="logo" alt="Red Devils" class="logo-img" />
-        <h1 class="h4 fw-bold text-red-devils">
-          {{ isEdit ? "Editar Conta" : "Criar Conta" }}
-        </h1>
+        <h1 class="h4 fw-bold text-red-devils">Configuração Inicial</h1>
+        <p class="text-muted">Crie o primeiro administrador do sistema</p>
       </div>
 
-      <form @submit.prevent="handleSubmit">
+      <form @submit.prevent="handleSetupAdmin">
         <div class="mb-3">
-          <label for="name" class="form-label">Nome</label>
+          <label for="name" class="form-label">Nome Completo</label>
           <input 
             id="name" 
             v-model="form.name" 
@@ -19,6 +18,7 @@
             class="form-control"
             :class="{ 'is-invalid': errors.name }"
             aria-describedby="name-error"
+            placeholder="Digite seu nome completo"
           />
           <div v-if="errors.name" id="name-error" class="invalid-feedback">
             {{ errors.name }}
@@ -35,14 +35,14 @@
             class="form-control"
             :class="{ 'is-invalid': errors.email }"
             aria-describedby="email-error"
+            placeholder="Digite seu e-mail"
           />
           <div v-if="errors.email" id="email-error" class="invalid-feedback">
             {{ errors.email }}
           </div>
         </div>
 
-        <!-- Cadastro: senha única -->
-        <div v-if="!isEdit" class="mb-3">
+        <div class="mb-3">
           <label for="password" class="form-label">Senha</label>
           <div class="input-group">
             <input 
@@ -53,6 +53,7 @@
               class="form-control"
               :class="{ 'is-invalid': errors.password }"
               aria-describedby="password-error"
+              placeholder="Digite uma senha forte"
             />
             <button 
               type="button" 
@@ -66,58 +67,8 @@
           <div v-if="errors.password" id="password-error" class="invalid-feedback">
             {{ errors.password }}
           </div>
-        </div>
-
-        <!-- Edição: senha antiga + nova -->
-        <div v-else>
-          <div class="mb-3">
-            <label for="oldPassword" class="form-label">Senha Antiga</label>
-            <div class="input-group">
-              <input 
-                :type="showPassword ? 'text' : 'password'" 
-                id="oldPassword" 
-                v-model="form.oldPassword"
-                class="form-control"
-                :class="{ 'is-invalid': errors.oldPassword }"
-                aria-describedby="oldPassword-error"
-              />
-              <button 
-                type="button" 
-                class="btn btn-outline-secondary" 
-                @click="togglePassword"
-                :aria-label="showPassword ? 'Ocultar senha' : 'Mostrar senha'"
-              >
-                <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
-              </button>
-            </div>
-            <div v-if="errors.oldPassword" id="oldPassword-error" class="invalid-feedback">
-              {{ errors.oldPassword }}
-            </div>
-          </div>
-
-          <div class="mb-3">
-            <label for="newPassword" class="form-label">Senha Nova</label>
-            <div class="input-group">
-              <input 
-                :type="showPassword ? 'text' : 'password'" 
-                id="newPassword" 
-                v-model="form.newPassword"
-                class="form-control"
-                :class="{ 'is-invalid': errors.newPassword }"
-                aria-describedby="newPassword-error"
-              />
-              <button 
-                type="button" 
-                class="btn btn-outline-secondary" 
-                @click="togglePassword"
-                :aria-label="showPassword ? 'Ocultar senha' : 'Mostrar senha'"
-              >
-                <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
-              </button>
-            </div>
-            <div v-if="errors.newPassword" id="newPassword-error" class="invalid-feedback">
-              {{ errors.newPassword }}
-            </div>
+          <div class="form-text">
+            Mínimo 8 caracteres, deve conter: 1 minúscula, 1 maiúscula, 1 número, 1 caractere especial
           </div>
         </div>
 
@@ -178,17 +129,18 @@
 
         <button 
           type="submit" 
-          class="btn btn-red-devils w-100"
+          class="btn btn-red-devils w-100 fw-semibold"
           :disabled="isLoading"
         >
           <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-          {{ isLoading ? (isEdit ? 'Salvando...' : 'Cadastrando...') : (isEdit ? 'Editar' : 'Cadastrar') }}
+          {{ isLoading ? 'Criando Admin...' : 'Criar Administrador' }}
         </button>
 
-        <div v-if="!isEdit" class="text-center mt-3">
-          <small>Já tem uma conta?
-            <a href="/" class="text-red-devils text-decoration-none">Entrar</a>
-          </small>
+        <!-- Mensagem de sucesso -->
+        <div v-if="adminCreated" class="alert alert-success mt-4">
+          <i class="bi bi-check-circle me-2"></i>
+          <strong>Administrador criado com sucesso!</strong><br>
+          Agora você pode fazer login com suas credenciais.
         </div>
       </form>
     </div>
@@ -200,35 +152,37 @@ import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
 import { useForm } from '../composables/useForm'
-import { usePlayersStore } from '../stores/players'
-import { useToast } from 'vue-toastification'
+import { useSEO } from '../composables/useSEO'
 import { applyPhoneMask, cleanPhone } from '../utils/phoneMask'
 import logo from '../assets/logo-red-devils.png'
-import type { UpdatePlayerRequest } from '../types'
+import type { SetupFirstAdminRequest } from '../types'
 
 const router = useRouter()
-const toast = useToast()
-const { user, register } = useAuth()
-const playersStore = usePlayersStore()
+const { setupFirstAdmin, isLoading } = useAuth()
+const { updateSEO } = useSEO()
 
-const isEdit = ref(false)
-const showPassword = ref(false)
-
-const { form, errors, validate, executeWithLoading, isLoading } = useForm({
+const { form, errors, validate, executeWithLoading } = useForm({
   name: '',
   email: '',
   password: '',
-  oldPassword: '',
-  newPassword: '',
   phone: '',
   nickname: '',
   position: ''
 })
 
+const showPassword = ref(false)
+const adminCreated = ref(false)
+
+onMounted(() => {
+  updateSEO({
+    title: 'Configuração Inicial - Red Devils',
+    description: 'Configure o primeiro administrador do sistema Red Devils.'
+  })
+})
+
 const togglePassword = () => {
   showPassword.value = !showPassword.value
 }
-
 
 // Watch para aplicar máscara no telefone
 watch(() => form.phone, (newValue) => {
@@ -238,72 +192,41 @@ watch(() => form.phone, (newValue) => {
   }
 })
 
-onMounted(async () => {
-  if (user.value) {
-    isEdit.value = true
-    form.name = user.value.name
-    form.email = user.value.email
-    form.phone = user.value.phone
-    form.nickname = user.value.nickname
-    form.position = user.value.position
-  }
-})
-
-const handleSubmit = async () => {
-  const validations = [
+const handleSetupAdmin = async () => {
+  const isValid = validate([
     () => form.name ? true : (errors.name = 'Nome é obrigatório', false),
     () => form.email ? true : (errors.email = 'E-mail é obrigatório', false),
+    () => form.password ? true : (errors.password = 'Senha é obrigatória', false),
     () => form.phone ? true : (errors.phone = 'Telefone é obrigatório', false),
     () => form.nickname ? true : (errors.nickname = 'Apelido é obrigatório', false),
     () => form.position ? true : (errors.position = 'Posição é obrigatória', false)
-  ]
+  ])
 
-  if (!isEdit.value) {
-    validations.push(
-      () => form.password ? true : (errors.password = 'Senha é obrigatória', false)
-    )
-  }
-
-  const isValid = validate(validations)
   if (!isValid) return
 
   await executeWithLoading(async () => {
-    try {
-      if (isEdit.value && user.value) {
-        const updateData: UpdatePlayerRequest = {
-          name: form.name,
-          email: form.email,
-          phone: cleanPhone(form.phone),
-          nickname: form.nickname,
-          position: form.position as 'linha' | 'goleiro'
-        }
-
-        if (form.oldPassword && form.newPassword) {
-          updateData.old_password = form.oldPassword
-          updateData.new_password = form.newPassword
-        }
-
-        await playersStore.updatePlayer(user.value.id, updateData)
-        toast.success('Perfil atualizado com sucesso!')
-      } else {
-        await register({
-          name: form.name,
-          email: form.email,
-          password: form.password,
-          phone: cleanPhone(form.phone),
-          nickname: form.nickname,
-          position: form.position as 'linha' | 'goleiro'
-        })
-      }
-    } catch (error) {
-      console.error('Erro ao salvar:', error)
+    const success = await setupFirstAdmin({
+      name: form.name,
+      email: form.email,
+      password: form.password,
+      phone: cleanPhone(form.phone), // Remove formatação
+      nickname: form.nickname,
+      position: form.position as 'linha' | 'goleiro'
+    })
+    
+    if (success) {
+      adminCreated.value = true
+      // Redirecionar para login após 3 segundos
+      setTimeout(() => {
+        router.push('/')
+      }, 3000)
     }
   })
 }
 </script>
 
 <style scoped>
-.register-container {
+.setup-admin-container {
   display: flex;
   min-height: 100vh;
   justify-content: center;
@@ -313,7 +236,7 @@ const handleSubmit = async () => {
   padding-right: 1rem;
 }
 
-.register-card {
+.setup-admin-card {
   width: 100%;
   max-width: 400px;
   padding: 2rem;
@@ -340,4 +263,11 @@ const handleSubmit = async () => {
 .btn-red-devils:hover {
   background-color: var(--red-devils-hover);
 }
+
+.alert {
+  border-radius: 0.5rem;
+}
 </style>
+
+
+
