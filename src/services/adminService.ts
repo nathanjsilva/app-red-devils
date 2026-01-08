@@ -9,10 +9,19 @@ import type {
   CreateMatchPlayerRequest,
   UpdateMatchPlayerRequest,
   OrganizeTeamsRequest,
-  OrganizeTeamsResponse
+  OrganizeTeamsResponse,
+  User
 } from '../types'
 
 export class AdminService {
+  // ===== GERENCIAMENTO DE USUÁRIOS (ADMIN) =====
+  
+  static async getUsers(): Promise<User[]> {
+    const response = await api.get<User[]>('/admin/users')
+    const payload = (response as any).data?.data ?? (response as any).data
+    return payload as User[]
+  }
+
   // ===== GERENCIAMENTO DE JOGADORES (ADMIN) =====
   
   static async createPlayer(playerData: CreatePlayerRequest): Promise<Player> {

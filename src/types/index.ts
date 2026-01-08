@@ -1,13 +1,26 @@
 // Tipos principais da aplicação
 
-export interface Player {
+export interface User {
   id: number
   name: string
   email: string
   position: 'linha' | 'goleiro'
+  profile: 'admin' | 'common'
+  player?: Player | null
+  created_at: string
+  updated_at: string
+}
+
+export interface Player {
+  id: number
+  name: string
+  email: string | null
+  position: 'linha' | 'goleiro'
   phone: string
   nickname: string
   is_admin: boolean
+  user_id: number | null
+  user?: User | null
   created_at: string
   updated_at: string
 }
@@ -40,6 +53,7 @@ export interface UpdatePlayerRequest {
   nickname?: string
   old_password?: string
   new_password?: string
+  user_id?: number | null
 }
 
 export interface Pelada {
@@ -199,6 +213,29 @@ export interface PeladaStatisticsResponse {
   }
 }
 
+export interface TeamsWithStatisticsResponse {
+  pelada: Pick<Pelada, 'id' | 'date' | 'location' | 'qtd_times' | 'qtd_jogadores_por_time' | 'qtd_goleiros'>
+  teams: Array<{
+    id: number
+    name: string
+    players: Array<{
+      id: number
+      name: string
+      nickname: string
+      position: string
+      phone: string
+      statistics: {
+        goals: number
+        assists: number
+        goals_conceded: number
+        is_winner: number
+        result: string
+        goal_participation: number
+      } | null
+    }>
+  }>
+}
+
 export interface ApiError {
   message: string
   errors?: Record<string, string[]>
@@ -231,10 +268,11 @@ export interface SetupFirstAdminRequest {
 
 export interface CreatePlayerRequest {
   name: string
-  email: string
-  password: string
+  email?: string
+  password?: string
   position: 'linha' | 'goleiro'
   phone: string
   nickname: string
   is_admin?: boolean
+  user_id?: number | null
 }

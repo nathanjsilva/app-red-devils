@@ -3,7 +3,8 @@ import type {
   TeamFieldsResponse,
   PeladaPlayersResponse,
   OrganizePeladaTeamsRequest,
-  OrganizedPeladaTeamsResponse
+  OrganizedPeladaTeamsResponse,
+  TeamsWithStatisticsResponse
 } from '../types'
 
 export class TeamService {
@@ -48,11 +49,11 @@ export class TeamService {
    * Busca times organizados com estatísticas dos jogadores
    * Retorna estrutura organizada por times com estatísticas anexadas
    */
-  static async getTeamsWithStatistics(peladaId: number): Promise<any> {
+  static async getTeamsWithStatistics(peladaId: number): Promise<TeamsWithStatisticsResponse> {
     const response = await api.get(`/teams/pelada/${peladaId}/players-with-statistics`)
     // API pode retornar { data: ... } ou diretamente
     const payload = (response as any).data?.data ?? (response as any).data
-    return payload
+    return payload as TeamsWithStatisticsResponse
   }
 }
 
