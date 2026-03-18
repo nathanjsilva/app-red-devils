@@ -3,6 +3,7 @@ import type {
   LoginRequest, 
   LoginResponse, 
   RegisterRequest, 
+  User,
   Player, 
   ForgotPasswordRequest,
   ResetPasswordRequest,
@@ -21,18 +22,31 @@ export class AuthService {
     return payload
   }
 
-  static async register(playerData: RegisterRequest): Promise<Player> {
-    const response = await api.post<Player>('/players', playerData)
-    // API pode retornar { data: Player } ou Player diretamente
+  static async register(userData: RegisterRequest): Promise<Player> {
+    const response = await api.post<User>('/users', userData)
     const payload = (response as any).data?.data ?? (response as any).data
-    return payload as Player
+    const player = (payload as User | null)?.player ?? payload
+
+    if (!player) {
+      throw new Error('Resposta inválida ao cadastrar usuário')
+    }
+
+    return player as Player
   }
 
   static async getCurrentPlayer(): Promise<Player> {
-    const response = await api.get<Player>('/me')
-    // API pode retornar { data: Player } ou Player diretamente
+    console.log('getCurrentPlayer() called - making request to /me')
+    const response = await api.get('/me')
+    console.log('Current player API raw response:', response.data)
+    // API retorna { data: User } onde User contém { player: Player }
+    // Precisamos extrair o player do User
     const payload = (response as any).data?.data ?? (response as any).data
-    return payload as Player
+    console.log('Extracted payload:', payload)
+    // Se o payload tem uma propriedade 'player', extraímos o player
+    // Caso contrário, assumimos que o payload já é um Player
+    const player = (payload as any)?.player ?? payload
+    console.log('Extracted player:', player)
+    return player as Player
   }
 
   static async logout(): Promise<void> {

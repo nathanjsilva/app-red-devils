@@ -88,18 +88,34 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  const initializeAuth = () => {
+  const initializeAuth = async () => {
     const savedToken = localStorage.getItem(STORAGE_KEYS.TOKEN)
     const savedPlayer = localStorage.getItem(STORAGE_KEYS.PLAYER)
+    
+    console.log('initializeAuth called', { hasToken: !!savedToken, hasPlayer: !!savedPlayer })
     
     if (savedToken && savedPlayer) {
       try {
         token.value = savedToken
         user.value = JSON.parse(savedPlayer)
+        console.log('Restored user from localStorage:', user.value)
+        
+        // Atualizar dados do usuário do backend para garantir campos como is_admin estão atualizados
+        try {
+          console.log('Calling /me to refresh user data...')
+          const current = await AuthService.getCurrentPlayer()
+          user.value = current
+          localStorage.setItem(STORAGE_KEYS.PLAYER, JSON.stringify(current))
+          console.log('Refreshed current player from /me on init:', current)
+        } catch (e) {
+          console.warn('Não foi possível atualizar o usuário atual (/me) na inicialização. Usando dados do localStorage.', e)
+        }
       } catch (error) {
         console.error('Erro ao restaurar sessão:', error)
         logout()
       }
+    } else {
+      console.log('No saved token or player found')
     }
   }
 
