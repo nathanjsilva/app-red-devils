@@ -8,28 +8,29 @@
 
       <form @submit.prevent="handleLogin">
         <div class="mb-3">
-          <label for="email" class="form-label">E-mail</label>
-          <input 
-            id="email" 
-            v-model="form.email" 
-            type="email" 
-            required 
+          <label for="username" class="form-label">Usuario</label>
+          <input
+            id="username"
+            v-model="form.username"
+            type="text"
+            required
             class="form-control"
-            :class="{ 'is-invalid': errors.email }"
-            aria-describedby="email-error"
+            :class="{ 'is-invalid': errors.username }"
+            aria-describedby="username-error"
+            placeholder="Ex.: ADMIN"
           />
-          <div v-if="errors.email" id="email-error" class="invalid-feedback">
-            {{ errors.email }}
+          <div v-if="errors.username" id="username-error" class="invalid-feedback">
+            {{ errors.username }}
           </div>
         </div>
 
-        <div class="mb-3">
+        <div class="mb-4">
           <label for="password" class="form-label">Senha</label>
-          <input 
-            id="password" 
-            v-model="form.password" 
-            type="password" 
-            required 
+          <input
+            id="password"
+            v-model="form.password"
+            type="password"
+            required
             class="form-control"
             :class="{ 'is-invalid': errors.password }"
             aria-describedby="password-error"
@@ -39,23 +40,8 @@
           </div>
         </div>
 
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <div class="form-check">
-            <input 
-              class="form-check-input" 
-              type="checkbox" 
-              id="rememberMe" 
-              v-model="form.rememberMe" 
-            />
-            <label class="form-check-label" for="rememberMe">
-              Lembrar-me
-            </label>
-          </div>
-          <router-link to="/forgot-password" class="text-red-devils text-decoration-none">Esqueci a senha</router-link>
-        </div>
-
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           class="btn btn-red-devils w-100 fw-semibold"
           :disabled="isLoading"
         >
@@ -65,12 +51,12 @@
 
         <div class="text-center my-3 text-muted">ou</div>
 
-        <button 
-          type="button" 
-          class="btn btn-outline-danger w-100 mt-2" 
-          @click="goToRegister"
+        <button
+          type="button"
+          class="btn btn-outline-danger w-100"
+          @click="goToOverview"
         >
-          Criar conta
+          Ver estatisticas publicas
         </button>
       </form>
     </div>
@@ -79,10 +65,10 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
 import { useForm } from '../composables/useForm'
 import { useSEO } from '../composables/useSEO'
-import { useRouter } from 'vue-router'
 import logo from '../assets/logo-red-devils.png'
 
 const router = useRouter()
@@ -90,40 +76,35 @@ const { login, isLoading } = useAuth()
 const { updateSEO } = useSEO()
 
 const { form, errors, validate, executeWithLoading } = useForm({
-  email: '',
-  password: '',
-  rememberMe: false
+  username: '',
+  password: ''
 })
 
 onMounted(() => {
   updateSEO({
     title: 'Login - Red Devils',
-    description: 'Faça login no sistema Red Devils para acessar estatísticas e rankings da pelada.'
+    description: 'Faca login no sistema Red Devils para acessar a area administrativa.'
   })
 })
 
 const handleLogin = async () => {
   const isValid = validate([
-    () => form.email ? true : (errors.email = 'E-mail é obrigatório', false),
-    () => form.password ? true : (errors.password = 'Senha é obrigatória', false)
+    () => form.username ? true : (errors.username = 'Usuario e obrigatorio', false),
+    () => form.password ? true : (errors.password = 'Senha e obrigatoria', false)
   ])
 
   if (!isValid) return
 
   await executeWithLoading(async () => {
-    const success = await login({
-      email: form.email,
+    await login({
+      username: form.username,
       password: form.password
     })
-    
-    if (success) {
-      router.push('/home')
-    }
   })
 }
 
-const goToRegister = () => {
-  router.push('/register')
+const goToOverview = () => {
+  router.push('/players-overview')
 }
 </script>
 

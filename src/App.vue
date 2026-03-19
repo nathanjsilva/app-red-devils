@@ -13,7 +13,7 @@ import Sidebar from './components/SidebarComponent.vue'
 const route = useRoute()
 
 const hideSidebar = computed(() => {
-  const publicRoutes = ['/', '/register', '/forgot-password', '/reset-password', '/setup-admin']
+  const publicRoutes = ['/login']
   return publicRoutes.includes(route.path)
 })
 </script>

@@ -1,12 +1,8 @@
-// Tipos principais da aplicação
-
 export interface User {
   id: number
   name: string
-  email: string
-  position: 'linha' | 'goleiro'
+  username: string
   profile: 'admin' | 'common'
-  player?: Player | null
   created_at: string
   updated_at: string
 }
@@ -14,46 +10,27 @@ export interface User {
 export interface Player {
   id: number
   name: string
-  email: string | null
-  position: 'linha' | 'goleiro'
-  phone: string
   nickname: string
-  is_admin: boolean
-  user_id: number | null
-  user?: User | null
+  position: 'linha' | 'goleiro'
   created_at: string
   updated_at: string
 }
 
 export interface LoginRequest {
-  email: string
+  username: string
   password: string
 }
 
 export interface LoginResponse {
   access_token: string
   token_type: string
-  player: Player
-}
-
-export interface RegisterRequest {
-  name: string
-  email: string
-  password: string
-  position: 'linha' | 'goleiro'
-  phone: string
-  nickname: string
+  user: User
 }
 
 export interface UpdatePlayerRequest {
   name?: string
-  email?: string
-  position?: 'linha' | 'goleiro'
-  phone?: string
   nickname?: string
-  old_password?: string
-  new_password?: string
-  user_id?: number | null
+  position?: 'linha' | 'goleiro'
 }
 
 export interface Pelada {
@@ -79,10 +56,13 @@ export interface MatchPlayer {
   id: number
   player_id: number
   pelada_id: number
-  goals: number
-  assists: number
+  player: Player | null
+  pelada: Pelada | null
+  goals: number | null
+  assists: number | null
+  goals_conceded: number | null
   is_winner: boolean
-  goals_conceded?: number
+  result: 'win' | 'loss' | 'draw'
   created_at: string
   updated_at: string
 }
@@ -90,28 +70,19 @@ export interface MatchPlayer {
 export interface CreateMatchPlayerRequest {
   player_id: number
   pelada_id: number
-  goals: number
-  assists: number
-  is_winner: boolean
+  goals?: number
+  assists?: number
   goals_conceded?: number
+  is_winner: boolean
+  result: 'win' | 'loss' | 'draw'
 }
 
 export interface UpdateMatchPlayerRequest {
   goals?: number
   assists?: number
-  is_winner?: boolean
   goals_conceded?: number
-}
-
-export interface PlayerStatistics {
-  player_id: number
-  total_goals: number
-  total_assists: number
-  total_wins: number
-  total_matches: number
-  goals_per_match: number
-  assists_per_match: number
-  win_rate: number
+  is_winner?: boolean
+  result?: 'win' | 'loss' | 'draw'
 }
 
 export interface RankingPlayer {
@@ -144,7 +115,6 @@ export interface OrganizeTeamsResponse {
   teams: Team[]
 }
 
-// ===== Times (público) =====
 export interface TeamField {
   field_name: string
   label: string
@@ -156,7 +126,7 @@ export interface TeamFieldsResponse {
   team_fields: TeamField[]
 }
 
-export interface PeladaPlayersItem extends Pick<Player, 'id' | 'name' | 'nickname' | 'position' | 'phone'> {
+export interface PeladaPlayersItem extends Pick<Player, 'id' | 'name' | 'nickname' | 'position'> {
   is_goalkeeper: boolean
 }
 
@@ -190,26 +160,29 @@ export interface PeladaStatisticsResponse {
     field_players: Array<{
       player: Pick<Player, 'id' | 'name' | 'nickname' | 'position'>
       statistics: {
-        goals: number
-        assists: number
+        goals: number | null
+        assists: number | null
         is_winner: boolean
+        result: 'win' | 'loss' | 'draw'
         goal_participation: number
       }
     }>
     goalkeepers: Array<{
       player: Pick<Player, 'id' | 'name' | 'nickname' | 'position'>
       statistics: {
-        goals: number
-        assists: number
+        goals: number | null
+        assists: number | null
         is_winner: boolean
+        result: 'win' | 'loss' | 'draw'
         goal_participation: number
-        goals_conceded: number
+        goals_conceded: number | null
       }
     }>
     total_players: number
     total_goals: number
     total_assists: number
     winners_count: number
+    draws_count?: number
   }
 }
 
@@ -222,22 +195,90 @@ export interface TeamsWithStatisticsResponse {
       id: number
       name: string
       nickname: string
-      position: string
-      phone: string
+      position: 'linha' | 'goleiro'
       statistics: {
-        goals: number
-        assists: number
-        goals_conceded: number
-        is_winner: number
-        result: string
+        goals: number | null
+        assists: number | null
+        goals_conceded: number | null
+        is_winner: boolean | number
+        result: 'win' | 'loss' | 'draw'
         goal_participation: number
       } | null
     }>
   }>
+  players?: Array<{
+    id: number
+    name: string
+    nickname: string
+    position: 'linha' | 'goleiro'
+    statistics: {
+      goals: number | null
+      assists: number | null
+      goals_conceded: number | null
+      is_winner: boolean | number
+      result: 'win' | 'loss' | 'draw'
+      goal_participation: number
+    } | null
+    team: {
+      id: number
+      name: string
+    } | null
+  }>
+}
+
+export interface PlayerPeladaStatisticsResponse {
+  player: Player
+  pelada: Pelada
+  statistics: {
+    goals: number | null
+    assists: number | null
+    goals_conceded: number | null
+    is_winner: boolean
+    result: 'win' | 'loss' | 'draw'
+    goal_participation: number
+  }
+}
+
+export interface PlayerTotalStatisticsResponse {
+  player: Player
+  total_statistics: {
+    total_goals: number
+    total_assists: number
+    total_goals_conceded: number
+    total_matches: number
+    total_wins: number
+    total_losses: number
+    total_draws: number
+    win_rate: number
+    avg_goal_participation: number
+  }
+}
+
+export interface PlayerOverviewItem {
+  player: Pick<Player, 'id' | 'name' | 'nickname' | 'position'>
+  statistics: {
+    total_matches: number
+    total_wins: number
+    total_goals: number
+    total_assists: number
+    avg_goal_participation: number
+    avg_goals_per_match: number
+    avg_assists_per_match: number
+    total_goals_conceded: number | null
+    eligible_for_ranking: boolean
+  }
+}
+
+export interface PlayersOverviewResponse {
+  reference_year: number
+  total_peladas_in_year: number
+  minimum_matches_for_ranking: number
+  players: PlayerOverviewItem[]
 }
 
 export interface ApiError {
   message: string
+  error?: string
   errors?: Record<string, string[]>
 }
 
@@ -247,32 +288,8 @@ export interface MenuItem {
   icon: string
 }
 
-export interface ForgotPasswordRequest {
-  email: string
-}
-
-export interface ResetPasswordRequest {
-  token: string
-  password: string
-  password_confirmation: string
-}
-
-export interface SetupFirstAdminRequest {
-  name: string
-  email: string
-  password: string
-  position: 'linha' | 'goleiro'
-  phone: string
-  nickname: string
-}
-
 export interface CreatePlayerRequest {
   name: string
-  email?: string
-  password?: string
-  position: 'linha' | 'goleiro'
-  phone: string
   nickname: string
-  is_admin?: boolean
-  user_id?: number | null
+  position: 'linha' | 'goleiro'
 }

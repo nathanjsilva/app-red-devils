@@ -14,8 +14,6 @@ const app = createApp(App)
 const pinia = createPinia()
 
 app.use(pinia)
-
-// Initialize auth BEFORE installing the router, so first navigation sees the session
 const authStore = useAuthStore()
 authStore.initializeAuth()
 

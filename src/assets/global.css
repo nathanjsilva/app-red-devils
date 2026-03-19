@@ -1,11 +1,16 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
 
-/* Definição de variáveis */
 :root {
     --red-devils: #b91c1c;
     --red-devils-hover: #991b1b;
     --red-devils-border: #dc2626;
-    --gray-light: #f8f9fa;
+    --gray-light: #f5f7fb;
+    --surface: #ffffff;
+    --surface-muted: #f8fafc;
+    --text-main: #172033;
+    --text-muted: #667085;
+    --line-soft: rgba(15, 23, 42, 0.08);
+    --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.08);
 }
 
 body {
@@ -13,6 +18,7 @@ body {
     background-color: var(--gray-light);
     margin: 0;
     padding: 0;
+    color: var(--text-main);
 }
 
 .text-red-devils {
@@ -23,33 +29,217 @@ body {
     background-color: var(--red-devils) !important;
 }
 
-.bg-red-devils-hover:hover {
-    background-color: var(--red-devils-hover) !important;
-}
-
 .border-red-devils {
     border-color: var(--red-devils-border) !important;
 }
 
-.btn-red-devils {
+.btn-red-devils,
+.btn-red {
     background-color: var(--red-devils);
     border: 1px solid var(--red-devils-border);
     color: #fff;
-    font-weight: 600;
-    transition: background-color 0.2s;
+    font-weight: 700;
+    transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
-.btn-red-devils:hover {
+.btn-red-devils:hover,
+.btn-red:hover {
     background-color: var(--red-devils-hover);
     color: #fff;
+    transform: translateY(-1px);
 }
 
-.red-devils-bg {
-    background-color: #651717;
+.page-shell {
+    width: min(100%, 1380px);
+    margin: 0 auto;
 }
 
-.red-devils-card {
-    border-radius: 16px;
-    background-color: #ffffff;
-    border: 1px solid #ddd;
+.page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.page-title {
+    margin: 0;
+    font-size: clamp(1.75rem, 2vw, 2.25rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.page-subtitle {
+    margin: 0.35rem 0 0;
+    color: var(--text-muted);
+}
+
+.surface-card {
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-radius: 1.25rem;
+    box-shadow: var(--shadow-soft);
+}
+
+.surface-card + .surface-card {
+    margin-top: 1.25rem;
+}
+
+.surface-card-body {
+    padding: 1.25rem;
+}
+
+.section-title {
+    margin: 0 0 1rem;
+    font-size: 1.05rem;
+    font-weight: 800;
+}
+
+.section-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.red-table {
+    margin: 0;
+}
+
+.red-table thead th {
+    background: linear-gradient(135deg, var(--red-devils) 0%, #3b0a0a 100%);
+    color: #fff;
+    border: 0;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    padding: 0.9rem 0.85rem;
+}
+
+.red-table tbody td {
+    padding: 0.95rem 0.85rem;
+    vertical-align: middle;
+    border-color: var(--line-soft);
+}
+
+.red-table tbody tr:nth-child(even) {
+    background: rgba(185, 28, 28, 0.03);
+}
+
+.red-table tbody tr:hover {
+    background: rgba(185, 28, 28, 0.06);
+}
+
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.metric-card {
+    padding: 1rem 1.1rem;
+    border-radius: 1rem;
+    background: linear-gradient(180deg, #fff 0%, #fbfbfd 100%);
+    border: 1px solid var(--line-soft);
+}
+
+.metric-card span {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-bottom: 0.3rem;
+}
+
+.metric-card strong {
+    font-size: 1.25rem;
+    font-weight: 800;
+}
+
+.pill-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border-radius: 999px;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.pill-ok {
+    background: rgba(34, 197, 94, 0.12);
+    color: #15803d;
+}
+
+.pill-muted {
+    background: rgba(100, 116, 139, 0.12);
+    color: #475569;
+}
+
+.pill-info {
+    background: rgba(59, 130, 246, 0.12);
+    color: #1d4ed8;
+}
+
+.modal-shell {
+    position: fixed;
+    inset: 0;
+    z-index: 1500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(15, 23, 42, 0.48);
+    backdrop-filter: blur(6px);
+}
+
+.modal-card {
+    width: min(100%, 880px);
+    max-height: calc(100vh - 2rem);
+    overflow: auto;
+    border-radius: 1.25rem;
+    background: #fff;
+    box-shadow: 0 28px 80px rgba(15, 23, 42, 0.25);
+}
+
+@media (max-width: 1024px) {
+    .metric-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 991px) {
+    .container,
+    .container-fluid {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+@media (max-width: 767px) {
+    h1,
+    .h1 {
+        font-size: 2rem;
+    }
+
+    h2,
+    .h2 {
+        font-size: 1.5rem;
+    }
+
+    .page-header,
+    .section-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .surface-card-body {
+        padding: 1rem;
+    }
+
+    .metric-grid {
+        grid-template-columns: 1fr;
+    }
 }

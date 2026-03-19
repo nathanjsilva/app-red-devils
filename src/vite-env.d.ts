@@ -6,7 +6,6 @@ declare module '*.vue' {
   export default component
 }
 
-// Declarações para aliases
 declare module '@/utils/constants'
 declare module '@/types'
 declare module '@/services/authService'

@@ -1,317 +1,507 @@
 <template>
-  <div class="container py-5">
-    <!-- Cabeçalho -->
-    <div class="text-center mb-5">
-      <img :src="logo" alt="Red Devils" class="logo-img mb-3" />
-      <h1 class="fw-bold text-red display-6">Dashboard Red Devils</h1>
-      <p class="text-muted">Estatísticas atualizadas dos peladeiros</p>
-      
-      <!-- Total de Jogos -->
-      <div class="mt-3" v-if="totalMatches > 0">
-        <div class="total-matches-badge">
-          <strong>Total de Jogos: {{ totalMatches }}</strong>
+  <div class="page-shell py-4 py-lg-5">
+    <section class="hero-panel mb-4 mb-lg-5">
+      <div class="hero-copy">
+        <div class="hero-brand">
+          <img :src="logo" alt="Red Devils" class="logo-img" />
+          <div>
+            <p class="hero-kicker">Painel Publico</p>
+            <h1 class="hero-title">Dashboard Red Devils</h1>
+          </div>
         </div>
+        <p class="hero-description">
+          Acompanhe os rankings mais importantes da temporada e navegue rapidamente para o resumo geral dos jogadores.
+        </p>
+      </div>
+
+      <div class="hero-highlight">
+        <span class="highlight-label">Total de jogos mapeados</span>
+        <strong class="highlight-value">{{ totalMatches }}</strong>
+        <small class="highlight-caption">Atualizado a partir dos rankings publicos</small>
+      </div>
+    </section>
+
+    <section class="metric-grid mb-4" v-if="!isLoading && !error && rankingsList.length > 0">
+      <div v-for="summary in rankingSummaries" :key="summary.title" class="metric-card">
+        <span>{{ summary.title }}</span>
+        <strong>{{ summary.value }}</strong>
+      </div>
+    </section>
+
+    <div v-if="isLoading" class="surface-card">
+      <div class="surface-card-body text-center py-5">
+        <div class="spinner-border text-red-devils" role="status">
+          <span class="visually-hidden">Carregando...</span>
+        </div>
+        <p class="mt-3 text-muted mb-0">Carregando rankings...</p>
       </div>
     </div>
 
-    <!-- Loading State -->
-    <div v-if="isLoading" class="text-center py-5">
-      <div class="spinner-border text-red-devils" role="status">
-        <span class="visually-hidden">Carregando...</span>
-      </div>
-      <p class="mt-3 text-muted">Carregando rankings...</p>
-    </div>
-
-    <!-- Error State -->
-    <div v-else-if="error" class="text-center py-5">
-      <div class="alert alert-warning" role="alert">
-        <h4 class="alert-heading">Ops! Algo deu errado</h4>
-        <p>{{ error }}</p>
-        <hr>
+    <div v-else-if="error" class="surface-card">
+      <div class="surface-card-body text-center py-5">
+        <h4 class="mb-2">Ops! Algo deu errado</h4>
+        <p class="text-muted mb-3">{{ error }}</p>
         <button class="btn btn-outline-warning" @click="fetchRankings">
-          Tentar Novamente
+          Tentar novamente
         </button>
       </div>
     </div>
 
-    <!-- Empty State -->
-    <div v-else-if="!isLoading && rankingsList.length === 0" class="text-center py-5">
-      <div class="alert alert-info" role="alert">
-        <h4 class="alert-heading">Nenhum ranking disponível</h4>
-        <p>Não há dados de estatísticas para exibir no momento.</p>
+    <div v-else-if="rankingsList.length === 0" class="surface-card">
+      <div class="surface-card-body text-center py-5">
+        <h4 class="mb-2">Nenhum ranking disponivel</h4>
+        <p class="text-muted mb-0">Nao ha dados de estatisticas para exibir no momento.</p>
       </div>
     </div>
 
-    <!-- Rankings -->
-    <div v-else class="row g-4">
-      <div class="col-12 col-lg-6" v-for="(ranking, index) in rankingsList" :key="index">
-        <div class="leaderboard-card">
-          <!-- Título -->
-          <div class="leaderboard-header">
-            <h5 class="m-0">Ranking de {{ ranking.type }}</h5>
+    <section v-else class="dashboard-grid">
+      <article v-for="(ranking, index) in rankingsList" :key="index" class="ranking-panel">
+        <header class="ranking-panel-header">
+          <div>
+            <p class="ranking-kicker">Ranking</p>
+            <h2 class="ranking-title">{{ ranking.type }}</h2>
           </div>
+          <span class="ranking-pill">{{ ranking.players.length }} jogador{{ ranking.players.length !== 1 ? 'es' : '' }}</span>
+        </header>
 
-          <!-- Lista -->
-          <div class="leaderboard-body">
-            <div 
-              v-for="(player, i) in ranking.players" 
-              :key="player.id" 
-              class="leaderboard-item"
-              :class="{ 'first-place': i === 0 }"
-            >
-              <div class="rank-number">#{{ i + 1 }}</div>
-              <div class="player-info">
-                <div class="player-avatar">
-                  {{ player.name.charAt(0).toUpperCase() }}
-                </div>
-                <div class="player-details">
-                  <span class="player-name">{{ player.name }}</span>
-                  <span class="player-nickname">{{ player.nickname }}</span>
-                </div>
+        <div class="ranking-panel-body">
+          <div
+            v-for="(player, i) in ranking.players"
+            :key="player.id"
+            class="ranking-row"
+            :class="{ featured: i === 0 }"
+          >
+            <div class="ranking-order">#{{ i + 1 }}</div>
+            <div class="ranking-player">
+              <div class="player-avatar">
+                {{ player.name.charAt(0).toUpperCase() }}
               </div>
-              <div class="player-stats">
-                <div class="player-total">{{ formatTotal(ranking.type, player.total) }}</div>
-                <div class="player-average">
-                  {{ formatAverage(ranking.type, player.average) }} / Jogos: {{ player.matches || 0 }}
-                </div>
+              <div class="player-copy">
+                <span class="player-name">{{ player.name }}</span>
+                <span class="player-nickname">{{ player.nickname }}</span>
               </div>
+            </div>
+            <div class="ranking-stats">
+              <strong class="ranking-total">{{ formatTotal(ranking.type, player.total) }}</strong>
+              <span class="ranking-average">{{ formatAverage(ranking.type, player.average) }}</span>
+              <span class="ranking-matches">{{ player.matches || 0 }} jogo{{ player.matches === 1 ? '' : 's' }}</span>
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </article>
+    </section>
 
-    <!-- Botão -->
-    <div class="text-center mt-5">
-      <button 
-        class="btn btn-lg btn-red px-5 py-3 rounded-pill fw-semibold shadow-sm"
-        @click="goToProfile"
-      >
-        Editar Meu Perfil
-      </button>
-    </div>
+    <section class="surface-card action-panel mt-4 mt-lg-5">
+      <div class="surface-card-body action-panel-body">
+        <div>
+          <h2 class="section-title mb-1">Proximos passos</h2>
+          <p class="page-subtitle mb-0">Explore o resumo completo ou acesse a area de administracao quando estiver logado.</p>
+        </div>
+        <div class="action-buttons">
+          <button
+            class="btn btn-lg btn-red px-4 py-3 rounded-pill fw-semibold"
+            @click="goToOverview"
+          >
+            Ver resumo dos jogadores
+          </button>
+          <button
+            v-if="isAdmin"
+            class="btn btn-lg btn-outline-danger px-4 py-3 rounded-pill fw-semibold"
+            @click="goToAdminPlayers"
+          >
+            Gerenciar jogadores
+          </button>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed, ref } from 'vue'
+import { computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { useRankingsStore } from '../stores/rankings'
+import { useAuthStore } from '../stores/auth'
 import { useSEO } from '../composables/useSEO'
 import logo from '../assets/logo-red-devils.png'
 
 const router = useRouter()
 const rankingsStore = useRankingsStore()
+const authStore = useAuthStore()
 const { updateSEO } = useSEO()
 
-// Usar storeToRefs para manter reatividade das refs do store
 const { rankings, isLoading, error } = storeToRefs(rankingsStore)
+const { fetchRankings } = rankingsStore
 
-// Actions não precisam de storeToRefs, podem ser acessadas diretamente
-const { fetchRankings, getTotalMatches } = rankingsStore
+const rankingsList = computed(() => rankings.value || [])
+const totalMatches = computed(() => rankingsStore.getTotalMatches())
+const isAdmin = computed(() => authStore.user?.profile === 'admin')
 
-// Computed para rankings (facilita acesso no template)
-const rankingsList = computed(() => {
-  return rankings.value || []
+const rankingSummaries = computed(() => {
+  return rankingsList.value.slice(0, 4).map((ranking) => ({
+    title: ranking.type,
+    value: ranking.players[0]?.name || 'Sem dados'
+  }))
 })
 
-// Computed para total de jogos
-const totalMatches = computed(() => {
-  return rankingsStore.getTotalMatches()
-})
-
-// Função para formatar o total baseado no tipo de ranking
 const formatTotal = (type: string, total: number): string => {
-  if (type.includes('Vitória') || type.includes('Vitórias')) {
+  if (type.includes('Vitoria') || type.includes('Vitorias')) {
     return `${total}`
   }
   return `${total}`
 }
 
-// Função para formatar a média baseado no tipo de ranking
 const formatAverage = (type: string, average: number): string => {
-  if (type.includes('Vitória') || type.includes('Vitórias')) {
-    return `Taxa: ${average.toFixed(2)}%`
+  if (type.includes('Vitoria') || type.includes('Vitorias')) {
+    return `${average.toFixed(2)}%`
   }
-  return `Média: ${average.toFixed(2)}`
+  return `Media ${average.toFixed(2)}`
 }
 
 onMounted(async () => {
   updateSEO({
     title: 'Dashboard - Red Devils',
-    description: 'Visualize rankings e estatísticas dos jogadores da pelada Red Devils.'
+    description: 'Visualize rankings e estatisticas publicas dos jogadores da pelada Red Devils.'
   })
-  
-  // Só buscar se não estiver carregando e não tiver dados
+
   if (!isLoading.value && (!rankings.value || rankings.value.length === 0)) {
     try {
       await fetchRankings()
-    } catch (err) {
-      console.error('❌ Error fetching rankings:', err)
+    } catch (fetchError) {
+      console.error('Error fetching rankings:', fetchError)
     }
   }
 })
 
-const goToProfile = () => {
-  router.push('/register')
+const goToAdminPlayers = () => {
+  router.push('/admin/players')
+}
+
+const goToOverview = () => {
+  router.push('/players-overview')
 }
 </script>
 
 <style scoped>
-:root {
-  --card-bg: rgba(255, 255, 255, 0.8);
-  --card-border: rgba(255, 255, 255, 0.2);
+.hero-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(260px, 0.8fr);
+  gap: 1.25rem;
+  align-items: stretch;
+}
+
+.hero-copy,
+.hero-highlight,
+.ranking-panel {
+  border-radius: 1.4rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+}
+
+.hero-copy {
+  padding: 1.5rem;
+  background:
+    radial-gradient(circle at top left, rgba(185, 28, 28, 0.14), transparent 30%),
+    linear-gradient(135deg, #ffffff 0%, #fbfcfe 100%);
+}
+
+.hero-brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
 .logo-img {
-  height: 70px;
+  width: 72px;
+  height: 72px;
 }
 
-.text-red {
+.hero-kicker,
+.ranking-kicker {
+  margin: 0 0 0.35rem;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   color: var(--red-devils);
+  font-weight: 800;
 }
 
-.btn-red {
-  background-color: var(--red-devils);
-  color: white;
-  border: none;
+.hero-title {
+  margin: 0;
+  font-size: clamp(1.9rem, 3vw, 2.8rem);
+  line-height: 1.05;
+  font-weight: 800;
+  letter-spacing: -0.03em;
 }
 
-.btn-red:hover {
-  background-color: var(--red-devils-hover);
+.hero-description {
+  max-width: 62ch;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 1rem;
 }
 
-/* Badge de total de jogos */
-.total-matches-badge {
-  display: inline-block;
-  background-color: var(--red-devils);
-  color: white;
-  padding: 0.5rem 1.5rem;
-  border-radius: 2rem;
-  font-size: 1.1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Card estilo glassmorphism */
-.leaderboard-card {
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  backdrop-filter: blur(12px);
-  border-radius: 1rem;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+.hero-highlight {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  justify-content: center;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, var(--red-devils) 0%, #2b0909 100%);
+  color: #fff;
 }
 
-/* Header */
-.leaderboard-header {
-  background: var(--red-devils);
-  color: white;
-  padding: 0.75rem 1rem;
-  font-weight: 600;
+.highlight-label,
+.highlight-caption {
+  color: rgba(255, 255, 255, 0.74);
 }
 
-/* Corpo com scroll invisível */
-.leaderboard-body {
-  padding: 0.5rem 0;
-  max-height: 260px;
-  overflow-y: auto;
-  scrollbar-width: none;
+.highlight-label {
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.65rem;
 }
 
-.leaderboard-body::-webkit-scrollbar {
-  display: none;
+.highlight-value {
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  line-height: 1;
+  font-weight: 800;
 }
 
-/* Linha do ranking */
-.leaderboard-item {
+.highlight-caption {
+  margin-top: 0.75rem;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.ranking-panel {
+  overflow: hidden;
+  background: #fff;
+}
+
+.ranking-panel-header {
   display: flex;
-  align-items: center;
-  padding: 0.6rem 1rem;
-  transition: background 0.2s ease;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.2rem 1.2rem 1rem;
+  background: linear-gradient(135deg, rgba(185, 28, 28, 0.08) 0%, rgba(23, 32, 51, 0.02) 100%);
 }
 
-.leaderboard-item:hover {
-  background: rgba(0, 0, 0, 0.04);
+.ranking-title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 800;
 }
 
-/* Posição */
-.rank-number {
+.ranking-pill {
+  background: rgba(185, 28, 28, 0.1);
+  color: var(--red-devils);
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
   font-weight: 700;
-  width: 40px;
-  text-align: center;
-  font-size: 1.1rem;
-  color: #999;
+  white-space: nowrap;
 }
 
-/* Jogador */
-.player-info {
-  flex: 1;
+.ranking-panel-body {
+  padding: 0.5rem;
+  max-height: 420px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(185, 28, 28, 0.45) rgba(15, 23, 42, 0.06);
+}
+
+.ranking-panel-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.ranking-panel-body::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.06);
+  border-radius: 999px;
+}
+
+.ranking-panel-body::-webkit-scrollbar-thumb {
+  background: rgba(185, 28, 28, 0.45);
+  border-radius: 999px;
+}
+
+.ranking-panel-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(185, 28, 28, 0.7);
+}
+
+.ranking-row {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  gap: 0.85rem;
+  align-items: center;
+  padding: 0.9rem;
+  border-radius: 1rem;
+}
+
+.ranking-row + .ranking-row {
+  margin-top: 0.35rem;
+}
+
+.ranking-row:hover {
+  background: rgba(15, 23, 42, 0.04);
+}
+
+.ranking-row.featured {
+  background: linear-gradient(90deg, var(--red-devils) 0%, #2d0909 100%);
+  color: #fff;
+}
+
+.ranking-order {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: rgba(15, 23, 42, 0.06);
+  font-weight: 800;
+}
+
+.ranking-row.featured .ranking-order {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.ranking-player {
   display: flex;
   align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
 }
 
 .player-avatar {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   background-color: var(--red-devils);
   color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  margin-right: 0.75rem;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  flex-shrink: 0;
 }
 
-.player-details {
+.ranking-row.featured .player-avatar {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.player-copy {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .player-name {
-  font-weight: 500;
-  font-size: 0.9rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .player-nickname {
-  font-size: 0.8rem;
-  color: #666;
-  font-style: italic;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* Estatísticas */
-.player-stats {
+.ranking-row.featured .player-nickname,
+.ranking-row.featured .ranking-average,
+.ranking-row.featured .ranking-matches {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.ranking-stats {
   text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
-.player-total {
-  font-weight: 700;
+.ranking-total {
+  font-size: 1.15rem;
   color: var(--red-devils);
-  font-size: 1.1rem;
 }
 
-.player-average {
+.ranking-row.featured .ranking-total {
+  color: #fff;
+}
+
+.ranking-average,
+.ranking-matches {
   font-size: 0.8rem;
-  color: #666;
+  color: var(--text-muted);
 }
 
-/* Destaque primeiro lugar */
-.first-place {
-  background: linear-gradient(90deg, var(--red-devils) 0%, #1d1c1c 100%);
-  color: white;
+.action-panel-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
-.first-place .rank-number,
-.first-place .player-total,
-.first-place .player-average {
-  color: white;
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
 }
 
-.first-place .player-nickname {
-  color: rgba(255, 255, 255, 0.8);
+@media (max-width: 1100px) {
+  .hero-panel,
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 767px) {
+  .hero-copy,
+  .hero-highlight {
+    padding: 1.2rem;
+  }
+
+  .hero-brand {
+    align-items: flex-start;
+  }
+
+  .logo-img {
+    width: 60px;
+    height: 60px;
+  }
+
+  .ranking-panel-header,
+  .action-panel-body {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ranking-row {
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+
+  .ranking-stats {
+    grid-column: 2;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .action-buttons {
+    justify-content: stretch;
+  }
+
+  .action-buttons .btn {
+    width: 100%;
+  }
 }
 </style>

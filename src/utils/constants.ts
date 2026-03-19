@@ -1,19 +1,18 @@
-// Constantes da aplicação
-
 export const API_BASE_URL = 'http://localhost/api'
 
 export const STORAGE_KEYS = {
   TOKEN: 'token',
-  PLAYER: 'player'
+  USER: 'user'
 } as const
 
 export const ROUTES = {
-  LOGIN: '/',
-  REGISTER: '/register',
+  LOGIN: '/login',
   HOME: '/home',
-  FORGOT_PASSWORD: '/forgot-password',
-  RESET_PASSWORD: '/reset-password',
-  SETUP_ADMIN: '/setup-admin'
+  PLAYERS_OVERVIEW: '/players-overview',
+  ADMIN_PLAYERS: '/admin/players',
+  ADMIN_PELADAS: '/admin/peladas',
+  ADMIN_MATCH_PLAYERS: '/admin/match-players',
+  ADMIN_ORGANIZE_TEAMS: '/admin/organize-teams'
 } as const
 
 export const POSITIONS = {

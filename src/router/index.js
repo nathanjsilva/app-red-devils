@@ -4,36 +4,23 @@ import { STORAGE_KEYS } from '../utils/constants'
 const routes = [
   {
     path: '/',
+    redirect: '/home'
+  },
+  {
+    path: '/login',
     name: 'Login',
     component: () => import('../views/LoginView.vue')
   },
   {
-    path: '/register',
-    name: 'Register',
-    component: () => import('../views/RegisterView.vue')
-  },
-  {
-    path: '/forgot-password',
-    name: 'ForgotPassword',
-    component: () => import('../views/ForgotPasswordView.vue')
-  },
-  {
-    path: '/reset-password',
-    name: 'ResetPassword',
-    component: () => import('../views/ResetPasswordView.vue')
-  },
-  {
-    path: '/setup-admin',
-    name: 'SetupAdmin',
-    component: () => import('../views/SetupAdminView.vue')
+    path: '/players-overview',
+    name: 'PlayersOverview',
+    component: () => import('../views/PlayersOverviewView.vue')
   },
   {
     path: '/home',
     name: 'Home',
-    component: () => import('../views/HomeView.vue'),
-    meta: { requiresAuth: true }
+    component: () => import('../views/HomeView.vue')
   },
-  // Admin routes
   {
     path: '/admin/players',
     name: 'AdminPlayers',
@@ -65,28 +52,33 @@ const router = createRouter({
   routes,
 })
 
-// Guard de rota para verificar autenticação sem depender do store (evita race conditions)
 router.beforeEach((to, from, next) => {
-  if (to.meta.requiresAuth) {
-    const hasToken = !!localStorage.getItem(STORAGE_KEYS.TOKEN)
-    const hasPlayer = !!localStorage.getItem(STORAGE_KEYS.PLAYER)
-    if (!hasToken || !hasPlayer) {
-      next('/')
-      return
-    }
-    if (to.meta.requiresAdmin) {
-      try {
-        const player = JSON.parse(localStorage.getItem(STORAGE_KEYS.PLAYER) || 'null')
-        if (!player || player.is_admin !== true) {
-          next('/home')
-          return
-        }
-      } catch (e) {
-        next('/')
+  if (!to.meta.requiresAuth) {
+    next()
+    return
+  }
+
+  const hasToken = !!localStorage.getItem(STORAGE_KEYS.TOKEN)
+  const savedUser = localStorage.getItem(STORAGE_KEYS.USER)
+
+  if (!hasToken || !savedUser) {
+    next('/login')
+    return
+  }
+
+  if (to.meta.requiresAdmin) {
+    try {
+      const user = JSON.parse(savedUser)
+      if (!user || user.profile !== 'admin') {
+        next('/home')
         return
       }
+    } catch (error) {
+      next('/login')
+      return
     }
   }
+
   next()
 })
 

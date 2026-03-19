@@ -1,64 +1,42 @@
 import api from './api'
 import type {
-  TeamFieldsResponse,
-  PeladaPlayersResponse,
-  OrganizePeladaTeamsRequest,
   OrganizedPeladaTeamsResponse,
-  TeamsWithStatisticsResponse
+  OrganizePeladaTeamsRequest,
+  PeladaPlayersResponse,
+  TeamsWithStatisticsResponse,
+  TeamFieldsResponse
 } from '../types'
 
 export class TeamService {
   static async getTeamFields(peladaId: number): Promise<TeamFieldsResponse> {
-    const response = await api.get<TeamFieldsResponse>(`/teams/pelada/${peladaId}/fields`)
-    // API pode retornar { data: TeamFieldsResponse } ou TeamFieldsResponse diretamente
-    const payload = (response as any).data?.data ?? (response as any).data
-    return payload as TeamFieldsResponse
+    const response = await api.get<TeamFieldsResponse>(`/admin/teams/pelada/${peladaId}/fields`)
+    return (response as any).data?.data ?? response.data
   }
 
   static async getPeladaPlayers(peladaId: number): Promise<PeladaPlayersResponse> {
-    const response = await api.get(`/teams/pelada/${peladaId}/players`)
-    console.log('Pelada Players API raw response:', response.data)
-    // API pode retornar { data: PeladaPlayersResponse } ou PeladaPlayersResponse diretamente
-    const payload = (response as any).data?.data ?? (response as any).data
-    return payload as PeladaPlayersResponse
+    const response = await api.get<PeladaPlayersResponse>(`/admin/teams/pelada/${peladaId}/players`)
+    return (response as any).data?.data ?? response.data
   }
 
   static async organizeTeams(peladaId: number, request: OrganizePeladaTeamsRequest): Promise<OrganizedPeladaTeamsResponse> {
-    const response = await api.post<OrganizedPeladaTeamsResponse>(`/teams/pelada/${peladaId}/organize`, request)
-    // API pode retornar { data: OrganizedPeladaTeamsResponse } ou OrganizedPeladaTeamsResponse diretamente
-    const payload = (response as any).data?.data ?? (response as any).data
-    return payload as OrganizedPeladaTeamsResponse
+    const response = await api.post<OrganizedPeladaTeamsResponse>(`/admin/teams/pelada/${peladaId}/organize`, request)
+    return (response as any).data?.data ?? response.data
   }
 
   static async getOrganizedTeams(peladaId: number): Promise<OrganizedPeladaTeamsResponse | null> {
     try {
-      const response = await api.get<OrganizedPeladaTeamsResponse>(`/teams/pelada/${peladaId}/organized`)
-      // API pode retornar { data: OrganizedPeladaTeamsResponse } ou OrganizedPeladaTeamsResponse diretamente
-      const payload = (response as any).data?.data ?? (response as any).data
-      return payload as OrganizedPeladaTeamsResponse
-    } catch (e: any) {
-      // Se retornar 404, significa que os times ainda não foram organizados (situação esperada)
-      if (e?.response?.status === 404) {
+      const response = await api.get<OrganizedPeladaTeamsResponse>(`/admin/teams/pelada/${peladaId}/organized`)
+      return (response as any).data?.data ?? response.data
+    } catch (error: any) {
+      if (error?.response?.status === 404) {
         return null
       }
-      throw e
+      throw error
     }
   }
 
-  /**
-   * Busca times organizados com estatísticas dos jogadores
-   * Retorna estrutura organizada por times com estatísticas anexadas
-   */
   static async getTeamsWithStatistics(peladaId: number): Promise<TeamsWithStatisticsResponse> {
-    const response = await api.get(`/teams/pelada/${peladaId}/players-with-statistics`)
-    // API pode retornar { data: ... } ou diretamente
-    const payload = (response as any).data?.data ?? (response as any).data
-    return payload as TeamsWithStatisticsResponse
+    const response = await api.get<TeamsWithStatisticsResponse>(`/admin/teams/pelada/${peladaId}/players-with-statistics`)
+    return (response as any).data?.data ?? response.data
   }
 }
-
-
-
-
-
-

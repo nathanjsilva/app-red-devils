@@ -1,17 +1,14 @@
 <template>
     <div class="app-layout d-flex">
-        <!-- Botão hambúrguer (somente mobile) -->
         <button v-if="isMobile" class="hamburger-btn" @click="sidebarOpen = true">
             <i class="bi bi-list"></i>
         </button>
 
-        <!-- Sidebar -->
         <aside class="sidebar d-flex flex-column" :class="{ 'sidebar-mobile': isMobile, 'sidebar-open': sidebarOpen }">
             <div class="sidebar-header text-center py-3">
                 <img :src="logo" alt="Logo" class="logo-img mb-2" />
                 <h6 class="m-0 text-white fw-bold">Red Devils</h6>
 
-                <!-- Botão fechar (somente mobile) -->
                 <button v-if="isMobile" class="close-btn" @click="sidebarOpen = false">
                     <i class="bi bi-x-lg"></i>
                 </button>
@@ -20,9 +17,12 @@
             <nav class="flex-grow-1">
                 <ul class="nav flex-column">
                     <li v-for="item in menu" :key="item.name" class="nav-item">
-                        <router-link :to="item.path" class="nav-link d-flex align-items-center"
+                        <router-link
+                            :to="item.path"
+                            class="nav-link d-flex align-items-center"
                             :class="{ active: $route.path === item.path }"
-                            @click="isMobile ? sidebarOpen = false : null">
+                            @click="isMobile ? sidebarOpen = false : null"
+                        >
                             <i :class="item.icon"></i>
                             <span class="ms-2">{{ item.name }}</span>
                         </router-link>
@@ -31,13 +31,15 @@
             </nav>
 
             <div class="sidebar-footer text-center py-3">
-                <button class="btn btn-sm btn-outline-light" @click="handleLogout">
+                <button v-if="isAuthenticated" class="btn btn-sm btn-outline-light" @click="handleLogout">
                     <i class="bi bi-box-arrow-right me-1"></i> Sair
+                </button>
+                <button v-else class="btn btn-sm btn-outline-light" @click="goToLogin">
+                    <i class="bi bi-box-arrow-in-right me-1"></i> Entrar
                 </button>
             </div>
         </aside>
 
-        <!-- Conteúdo -->
         <main class="flex-grow-1 p-4">
             <router-view />
         </main>
@@ -45,10 +47,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
 import { useAuthStore } from '../stores/auth'
+import { ROUTES } from '../utils/constants'
 import { useResponsive } from '../composables/useResponsive'
 import logo from '../assets/logo-red-devils.png'
 import type { MenuItem } from '../types'
@@ -58,35 +61,42 @@ const { logout } = useAuth()
 const { isMobile } = useResponsive()
 const sidebarOpen = ref(false)
 const authStore = useAuthStore()
-const isAdmin = computed(() => authStore.user?.is_admin === true)
+const isAuthenticated = computed(() => authStore.isAuthenticated)
+const isAdmin = computed(() => authStore.user?.profile === 'admin')
 
 const menu = computed<MenuItem[]>(() => {
     const items: MenuItem[] = [
-        { name: 'Dashboard', path: '/home', icon: 'bi bi-house-door' },
-        { name: 'Meu Perfil', path: '/register', icon: 'bi bi-person-gear' },
+        { name: 'Dashboard', path: ROUTES.HOME, icon: 'bi bi-house-door' },
+        { name: 'Resumo dos Jogadores', path: ROUTES.PLAYERS_OVERVIEW, icon: 'bi bi-bar-chart-line' },
     ]
+
     if (isAdmin.value) {
         items.push(
-            { name: 'Jogadores', path: '/admin/players', icon: 'bi bi-people' },
-            { name: 'Peladas', path: '/admin/peladas', icon: 'bi bi-calendar2-week' },
-            { name: 'Estatísticas', path: '/admin/match-players', icon: 'bi bi-graph-up' },
-            { name: 'Organizar Times', path: '/admin/organize-teams', icon: 'bi bi-diagram-3' },
+            { name: 'Jogadores', path: ROUTES.ADMIN_PLAYERS, icon: 'bi bi-people' },
+            { name: 'Peladas', path: ROUTES.ADMIN_PELADAS, icon: 'bi bi-calendar2-week' },
+            { name: 'Estatisticas', path: ROUTES.ADMIN_MATCH_PLAYERS, icon: 'bi bi-graph-up' },
+            { name: 'Organizar Times', path: ROUTES.ADMIN_ORGANIZE_TEAMS, icon: 'bi bi-diagram-3' },
         )
     }
+
     return items
 })
 
 const handleLogout = async () => {
     await logout()
 }
+
+const goToLogin = () => {
+    router.push(ROUTES.LOGIN)
+}
 </script>
 
 <style scoped>
 .app-layout {
     min-height: 100vh;
+    background: linear-gradient(180deg, #ffffff 0%, #f6f7f9 100%);
 }
 
-/* Sidebar */
 .sidebar {
     background: linear-gradient(180deg, var(--red-devils) 0%, #1d0000 100%);
     width: 240px;
@@ -94,6 +104,7 @@ const handleLogout = async () => {
     color: white;
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.05);
     transition: transform 0.3s ease;
+    flex-shrink: 0;
 }
 
 .sidebar-header {
@@ -126,7 +137,6 @@ const handleLogout = async () => {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Botão hambúrguer */
 .hamburger-btn {
     position: fixed;
     top: 15px;
@@ -138,7 +148,6 @@ const handleLogout = async () => {
     color: var(--red-devils);
 }
 
-/* Botão fechar (mobile) */
 .close-btn {
     position: absolute;
     top: 15px;
@@ -149,7 +158,6 @@ const handleLogout = async () => {
     color: white;
 }
 
-/* Mobile */
 .sidebar-mobile {
     position: fixed;
     top: 0;
@@ -158,10 +166,24 @@ const handleLogout = async () => {
     height: 100%;
     z-index: 1100;
     width: 90%;
-    /* max-width: 280px;s */
 }
 
 .sidebar-open {
     transform: translateX(0);
+}
+
+main {
+    min-width: 0;
+}
+
+@media (max-width: 768px) {
+    main {
+        width: 100%;
+        padding: 4.75rem 1rem 1.25rem !important;
+    }
+
+    .sidebar {
+        box-shadow: 12px 0 32px rgba(0, 0, 0, 0.24);
+    }
 }
 </style>

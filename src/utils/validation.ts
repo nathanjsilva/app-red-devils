@@ -1,5 +1,3 @@
-// Utilitários de validação
-
 export const validateEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   return emailRegex.test(email)
@@ -9,23 +7,23 @@ export const validatePassword = (password: string): { isValid: boolean; message?
   if (password.length < 8) {
     return { isValid: false, message: 'A senha deve ter pelo menos 8 caracteres' }
   }
-  
+
   if (!/(?=.*[a-z])/.test(password)) {
-    return { isValid: false, message: 'A senha deve conter pelo menos 1 letra minúscula' }
+    return { isValid: false, message: 'A senha deve conter pelo menos 1 letra minuscula' }
   }
-  
+
   if (!/(?=.*[A-Z])/.test(password)) {
-    return { isValid: false, message: 'A senha deve conter pelo menos 1 letra maiúscula' }
+    return { isValid: false, message: 'A senha deve conter pelo menos 1 letra maiuscula' }
   }
-  
+
   if (!/(?=.*\d)/.test(password)) {
-    return { isValid: false, message: 'A senha deve conter pelo menos 1 número' }
+    return { isValid: false, message: 'A senha deve conter pelo menos 1 numero' }
   }
-  
+
   if (!/(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/.test(password)) {
     return { isValid: false, message: 'A senha deve conter pelo menos 1 caractere especial' }
   }
-  
+
   return { isValid: true }
 }
 
