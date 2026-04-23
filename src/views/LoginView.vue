@@ -1,12 +1,13 @@
-<template>
-  <div class="login-container">
+﻿<template>
+  <div class="login-page">
     <div class="login-card">
-      <div class="text-center mb-4">
-        <img :src="logo" alt="Red Devils" class="logo-img" />
-        <h1 class="h4 fw-bold text-red-devils">Red Devils</h1>
+      <div class="login-brand text-center">
+        <img :src="logo" alt="Red Devils" class="login-logo" />
+        <p class="login-kicker">Acesso administrativo</p>
+        <h1 class="login-title">Entrar no painel</h1>
       </div>
 
-      <form @submit.prevent="handleLogin">
+      <form @submit.prevent="handleLogin" class="login-form">
         <div class="mb-3">
           <label for="username" class="form-label">Usuario</label>
           <input
@@ -34,6 +35,7 @@
             class="form-control"
             :class="{ 'is-invalid': errors.password }"
             aria-describedby="password-error"
+            placeholder="Digite sua senha"
           />
           <div v-if="errors.password" id="password-error" class="invalid-feedback">
             {{ errors.password }}
@@ -42,18 +44,16 @@
 
         <button
           type="submit"
-          class="btn btn-red-devils w-100 fw-semibold"
+          class="btn btn-red-devils w-100 fw-semibold login-submit"
           :disabled="isLoading"
         >
           <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
           {{ isLoading ? 'Entrando...' : 'Entrar' }}
         </button>
 
-        <div class="text-center my-3 text-muted">ou</div>
-
         <button
           type="button"
-          class="btn btn-outline-danger w-100"
+          class="btn btn-outline-danger w-100 login-secondary"
           @click="goToOverview"
         >
           Ver estatisticas publicas
@@ -107,43 +107,3 @@ const goToOverview = () => {
   router.push('/players-overview')
 }
 </script>
-
-<style scoped>
-.login-container {
-  display: flex;
-  min-height: 100vh;
-  justify-content: center;
-  align-items: center;
-  background-color: #fff;
-  padding-left: 1rem;
-  padding-right: 1rem;
-}
-
-.login-card {
-  width: 100%;
-  max-width: 400px;
-  padding: 2rem;
-  border-radius: 1rem;
-  background-color: #fff;
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
-}
-
-.logo-img {
-  height: 60px;
-}
-
-.text-red-devils {
-  color: var(--red-devils);
-}
-
-.btn-red-devils {
-  background-color: var(--red-devils);
-  border: 1px solid var(--red-devils-border);
-  color: #fff;
-  transition: background-color 0.2s;
-}
-
-.btn-red-devils:hover {
-  background-color: var(--red-devils-hover);
-}
-</style>

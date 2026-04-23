@@ -1,0 +1,77 @@
+﻿.login-page {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 1.5rem;
+    background:
+        radial-gradient(circle at top, rgba(185, 28, 28, 0.18), transparent 24%),
+        linear-gradient(180deg, #fff 0%, #f5f6f8 100%);
+}
+
+.login-card {
+    width: min(100%, 430px);
+    padding: 2rem;
+    border-radius: 1.5rem;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid var(--line-soft);
+    box-shadow: var(--shadow-strong);
+}
+
+.login-brand {
+    margin-bottom: 1.5rem;
+}
+
+.login-logo {
+    width: 68px;
+    height: 68px;
+    object-fit: contain;
+    margin: 0 auto 0.9rem;
+}
+
+.login-kicker {
+    margin: 0 0 0.45rem;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--red-devils);
+    font-weight: 800;
+}
+
+.login-title {
+    margin: 0;
+    font-size: 1.85rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+}
+
+.login-copy {
+    margin: 0.75rem 0 0;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+.login-form .form-label {
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.login-form .form-control {
+    min-height: 48px;
+    border-radius: 0.95rem;
+    border-color: var(--line-strong);
+    padding-inline: 0.95rem;
+}
+
+.login-form .form-control:focus {
+    border-color: var(--red-devils);
+}
+
+.login-submit,
+.login-secondary {
+    min-height: 48px;
+    border-radius: 999px;
+}
+
+.login-secondary {
+    margin-top: 0.85rem;
+}
