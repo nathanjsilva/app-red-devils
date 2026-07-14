@@ -7,8 +7,7 @@ Distribuir os jogadores de uma pelada em times (considerando `qtd_times`, `qtd_j
 ## Arquivos envolvidos
 
 - `src/views/AdminOrganizeTeamsView.vue` — tela admin de organização.
-- `src/services/teamService.ts` — fluxo "novo" (`getTeamFields`, `getPeladaPlayers`, `organizeTeams`, `getOrganizedTeams`, `getTeamsWithStatistics`), todas sob `/admin/teams/pelada/:peladaId/...`.
-- `src/services/adminService.ts` — método `organizeTeams(peladaId, playerIds)` (fluxo "legado", `POST /admin/peladas/:id/organize-teams`).
+- `src/services/teamService.ts` — único service de times. Leituras (`getTeamFields`, `getPeladaPlayers`, `getOrganizedTeams`, `getTeamsWithStatistics`) são **públicas**, sob `/teams/pelada/:peladaId/...`. Escrita (`organizeTeams`) exige admin, sob `/admin/teams/pelada/:peladaId/organize`.
 - `src/types/index.ts` — `Team`, `TeamField`, `TeamFieldsResponse`, `PeladaPlayersItem`, `PeladaPlayersResponse`, `TeamAssignmentEntry`, `OrganizePeladaTeamsRequest`, `OrganizedPeladaTeamsResponse`, `TeamsWithStatisticsResponse`.
 
 ## Fluxo (via `TeamService`, o caminho atual da view)
@@ -26,5 +25,6 @@ Distribuir os jogadores de uma pelada em times (considerando `qtd_times`, `qtd_j
 
 ## Pontos de atenção
 
-- **Dois fluxos de organização de times coexistem**: `AdminService.organizeTeams` (legado, só `player_ids`, sem distribuição manual por time) e `TeamService.organizeTeams` (atual, com `team_assignments` explícito por `team_number`). Antes de alterar qualquer um, confirmar com o usuário qual está de fato em uso na `AdminOrganizeTeamsView.vue` — não presumir que o legado pode ser removido sem checar se algo ainda o referencia.
+- O fluxo legado (`AdminService.organizeTeams`, `POST /admin/peladas/:id/organize-teams`, só `player_ids` sem distribuição manual) **foi removido** por não ter nenhuma referência em nenhuma view — `TeamService.organizeTeams` (com `team_assignments` explícito por `team_number`) é hoje o único caminho. Se precisar de organização 100% automática (sem escolher manualmente quem vai em cada time), isso teria que ser reimplementado do zero — confirmar com o usuário antes, pois é uma funcionalidade que existia e foi retirada.
 - `is_winner` em `TeamsWithStatisticsResponse` aparece tipado como `boolean | number` — o backend pode retornar `0`/`1` em vez de `true`/`false` nesse endpoint específico; ao consumir esse campo, não assumir tipo estritamente booleano.
+- Como as leituras viraram públicas (refactor do backend), o frontend chegou a apontar pro caminho antigo `/admin/teams/pelada/...` pra tudo — isso quebrava silenciosamente `AdminOrganizeTeamsView` (404 em toda leitura). Corrigido em `teamService.ts`. Ao adicionar uma leitura nova de times, checar `routes/api.php` do backend antes de assumir que precisa de `/admin`.

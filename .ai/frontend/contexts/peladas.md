@@ -13,15 +13,20 @@ CRUD das "peladas" — o evento/jogo em si (data, local, quantidade de times, jo
 
 ## Modelo
 
-`Pelada { id, date, location, qtd_times, qtd_jogadores_por_time, qtd_goleiros }`.
+`Pelada { id, date, division: 'quinta' | 'sabado', location, qtd_times, qtd_jogadores_por_time, qtd_goleiros }`.
 
 Esses três campos numéricos (`qtd_times`, `qtd_jogadores_por_time`, `qtd_goleiros`) definem a "forma" da pelada e são usados depois pela organização de times (ver `.ai/frontend/contexts/teams.md`) para calcular quantos times/campos existem.
+
+### `division` — obrigatória, derivada da data, não escolhida pelo usuário
+
+O backend exige `division` (`required|in:quinta,sabado`) na criação e valida que ela bate com o dia da semana de `date` (quinta-feira → `quinta`, sábado → `sabado`) — qualquer outra combinação retorna 422. Como essa regra é 1:1 (não existe pelada de quinta com `division: sabado`), `AdminPeladasView.vue` **não** expõe um seletor: um `computed` (`divisionByDate`) calcula o valor a partir de `form.date.getDay()` e mostra um badge de confirmação ("Quinta-feira"/"Sábado") ou aviso de erro se a data não cair numa dessas duas — o botão "Criar pelada" fica desabilitado nesse caso. Se o backend um dia aceitar mais divisões, essa lógica de derivação (e a validação correspondente no backend) precisam mudar juntas.
 
 ## Fluxo
 
 - Admin cria/edita/remove peladas em `AdminPeladasView`.
 - `getPeladasByDate` trata 404 como lista vazia (`[]`) em vez de erro — comportamento intencional para buscas por data sem resultado.
 - Uma pelada criada é o pré-requisito para: registrar estatísticas de partida (`match-players`) e organizar times (`teams`).
+- Leitura (`GET /peladas`, `/peladas/:id`, `/peladas/date/:date`) é **pública** — não exige token. Só escrita (`POST/PUT/DELETE /admin/peladas...`) exige admin. Isso já causou um bug real: o frontend apontava as leituras para `/admin/peladas/...` (caminho antigo, removido num refactor do backend), o que quebrava silenciosamente a listagem — corrigido em `peladaService.ts`.
 
 ## Pontos de atenção
 

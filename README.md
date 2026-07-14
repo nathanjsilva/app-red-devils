@@ -1,168 +1,76 @@
-# Red Devils - Sistema de Estatísticas de Futebol
+# Red Devils — Sistema de Estatísticas de Futebol
 
-Sistema moderno de gerenciamento de estatísticas para peladas de futebol, desenvolvido com Vue 3, TypeScript e Pinia.
+Frontend (SPA) para gerenciar peladas (partidas amadoras de futebol), jogadores, estatísticas por partida, organização de times e rankings/gráficos da temporada.
+
+Este repositório é **só o frontend**. O backend (Laravel + Sanctum) vive em outro repositório (`api-red-devils`) e é consumido via API REST — ver `.ai/project-context.md` para o contrato completo de endpoints.
 
 ## 🚀 Tecnologias
 
-- **Vue 3** - Framework JavaScript progressivo
-- **TypeScript** - Tipagem estática para JavaScript
-- **Pinia** - Gerenciamento de estado
-- **Vue Router** - Roteamento
-- **Vite** - Build tool e dev server
-- **Bootstrap 5** - Framework CSS
-- **Axios** - Cliente HTTP
-- **Vitest** - Framework de testes
-- **Vue Test Utils** - Utilitários para testes Vue
+- **Vue 3** (Composition API, `<script setup>`)
+- **TypeScript**
+- **Pinia** — estado (`auth`, `rankings`)
+- **Vue Router 4**
+- **Bootstrap 5** + Bootstrap Icons — sistema visual base
+- **Chart.js** + **vue-chartjs** — gráficos da página `/estatisticas`
+- **Axios** — cliente HTTP
+- **vue-toastification** — feedback de erro/sucesso
+- **Vite** — build e dev server
 
-## 📁 Estrutura do Projeto
+## 📁 Estrutura do projeto
 
 ```
 src/
-├── components/          # Componentes reutilizáveis
-├── views/              # Páginas da aplicação
-├── stores/             # Stores do Pinia
-├── services/           # Serviços de API
-├── composables/        # Composables reutilizáveis
-├── utils/              # Funções utilitárias
-├── types/              # Definições TypeScript
-├── assets/             # Recursos estáticos
-└── test/               # Testes
+├── components/
+│   ├── SidebarComponent.vue   # Navegação: sidebar (desktop) + barra de abas fixa (mobile)
+│   └── charts/                 # Wrappers vue-chartjs (linha, barras, radar)
+├── views/                      # Páginas roteadas (1 por rota)
+├── stores/                     # Pinia: auth.ts, rankings.ts
+├── services/                   # 1 classe por recurso da API (métodos static async)
+├── composables/                 # useAuth, useForm, useResponsive, useSEO
+├── utils/                       # constants.ts, validation.ts, chartSetup.ts
+├── types/                       # Contratos TypeScript espelhando a API Laravel
+├── assets/                      # 1 CSS por página + estilos globais, logo
+└── router/index.js              # Rotas + guards de auth/admin
 ```
 
-## 🛠️ Instalação
+## 🗺️ Páginas
+
+| Rota | Acesso | Descrição |
+|---|---|---|
+| `/home` | Público | Dashboard com os 5 rankings da temporada |
+| `/players-overview` | Público | Tabela paginada de estatísticas por jogador |
+| `/estatisticas` | Público | KPIs da temporada, evolução mensal, rankings em gráfico de barras, comparador de jogadores (radar) |
+| `/login` | Público | Login de administrador |
+| `/admin/players` | Admin | Cadastro de jogadores |
+| `/admin/peladas` | Admin | Cadastro de peladas |
+| `/admin/match-players` | Admin | Lançamento de estatísticas por partida |
+| `/admin/organize-teams` | Admin | Organização manual de times por pelada |
+
+## 🛠️ Instalação e uso
 
 ```bash
-# Instalar dependências
 npm install
-
-# Executar em desenvolvimento
-npm run dev
-
-# Build para produção
-npm run build
-
-# Executar testes
-npm run test
-
-# Executar testes com UI
-npm run test:ui
-
-# Executar testes com coverage
-npm run test:coverage
+npm run dev        # http://localhost:3000
+npm run build       # build de produção em dist/
+npm run preview     # servir o build localmente
 ```
 
-## 🏗️ Arquitetura
-
-### Stores (Pinia)
-- **auth** - Gerenciamento de autenticação
-- **players** - Gerenciamento de jogadores
-- **rankings** - Gerenciamento de rankings
-
-### Serviços
-- **api** - Cliente HTTP centralizado com interceptors
-- **authService** - Operações de autenticação
-- **playerService** - Operações de jogadores
-- **rankingService** - Operações de rankings
-
-### Composables
-- **useAuth** - Lógica de autenticação
-- **useForm** - Gerenciamento de formulários
-- **useResponsive** - Detecção de responsividade
-- **useLocalStorage** - Gerenciamento de localStorage
-- **useSEO** - Gerenciamento de meta tags
-
-## 🔧 Configurações
-
-### Vite
-- Alias `@` para `src/`
-- Chunks otimizados para vendor e UI
-- Source maps habilitados
-- Dev server na porta 3000
-
-### TypeScript
-- Strict mode habilitado
-- Path mapping configurado
-- Suporte completo ao Vue 3
-
-### Testes
-- Vitest como test runner
-- Vue Test Utils para testes de componentes
-- JSDOM como ambiente de teste
-- Coverage reports
-
-## 📱 Funcionalidades
-
-- ✅ Sistema de autenticação completo
-- ✅ Dashboard com rankings
-- ✅ Gerenciamento de perfil
-- ✅ Interface responsiva
-- ✅ Validação de formulários
-- ✅ Tratamento de erros centralizado
-- ✅ SEO otimizado
-- ✅ Acessibilidade
-- ✅ Testes automatizados
-
-## 🎨 Design System
-
-- Tema "Red Devils" consistente
-- Variáveis CSS customizadas
-- Bootstrap 5 + customizações
-- Glassmorphism nos cards
-- Animações suaves
-
-## 🔒 Segurança
-
-- Validação de inputs
-- Sanitização de dados
-- Interceptors de autenticação
-- Tratamento de tokens JWT
-
-## 📊 Performance
-
-- Lazy loading de componentes
-- Chunks otimizados
-- Dependências pré-carregadas
-- Fallback para dados mockados
+Não há tokens de ambiente (`.env`) hoje — `API_BASE_URL` fica hardcoded em `src/utils/constants.ts`. **Confira esse valor antes de buildar**: durante desenvolvimento local ele pode estar apontando para `http://localhost/api` (API rodando via Docker); em produção precisa apontar para a URL real do backend.
 
 ## 🧪 Testes
 
-```bash
-# Executar todos os testes
-npm run test
+O projeto usa **Vitest** + **Vue Test Utils** (`npm run test`, `npm run test:ui`, `npm run test:coverage`), mas hoje **não há testes escritos** em `src/` — a suíte está configurada (`vitest.config.js`) e pronta para receber testes, sem cobertura ainda.
 
-# Executar testes em modo watch
-npm run test -- --watch
+## 🎨 Design system
 
-# Executar testes com coverage
-npm run test:coverage
-```
+- Paleta ancorada em vermelho (`--red-devils` e derivados, `src/assets/global.css`) + gradientes escuros — mantida deliberadamente em todo o app.
+- Mobile-first: sidebar completa só no desktop (≥1024px); em telas menores a navegação principal é uma barra de abas fixa no rodapé.
+- Tabelas de dados usam um sistema único (`.data-table`, `global.css`) que vira lista de cards empilhados em telas ≤640px (`.stack-mobile`), em vez de rolagem horizontal.
+- Gráficos (`components/charts/`) seguem a mesma paleta vermelha + tons de apoio neutros.
 
-## 🚀 Deploy
+## 📄 Documentação para IA / onboarding
 
-```bash
-# Build para produção
-npm run build
-
-# Preview do build
-npm run preview
-```
-
-## 📝 Scripts Disponíveis
-
-- `dev` - Servidor de desenvolvimento
-- `build` - Build para produção
-- `preview` - Preview do build
-- `test` - Executar testes
-- `test:ui` - Interface de testes
-- `test:coverage` - Testes com coverage
-
-## 🤝 Contribuição
-
-1. Fork o projeto
-2. Crie uma branch para sua feature
-3. Commit suas mudanças
-4. Push para a branch
-5. Abra um Pull Request
+Antes de alterar qualquer coisa neste repositório, leia `CLAUDE.md` (raiz) e os arquivos em `.ai/` — regras do projeto, contexto de cada funcionalidade e o contrato de endpoints consumidos da API.
 
 ## 📄 Licença
 
