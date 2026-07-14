@@ -1,12 +1,8 @@
 ﻿<template>
   <div class="app-layout">
-    <button v-if="isMobile" class="sidebar-toggle" @click="sidebarOpen = true" aria-label="Abrir navegacao">
-      <i class="bi bi-list"></i>
-    </button>
+    <div v-if="!isDesktop && sidebarOpen" class="sidebar-overlay" @click="sidebarOpen = false"></div>
 
-    <div v-if="isMobile && sidebarOpen" class="sidebar-overlay" @click="sidebarOpen = false"></div>
-
-    <aside class="sidebar-panel" :class="{ 'is-mobile': isMobile, 'is-open': sidebarOpen }">
+    <aside class="sidebar-panel" :class="{ 'is-mobile': !isDesktop, 'is-open': sidebarOpen }">
       <div class="sidebar-header">
         <img :src="logo" alt="Red Devils" class="sidebar-logo" />
         <div class="sidebar-brand-copy">
@@ -14,7 +10,7 @@
           <h1 class="sidebar-brand">Red Devils</h1>
         </div>
 
-        <button v-if="isMobile" class="sidebar-close" @click="sidebarOpen = false" aria-label="Fechar navegacao">
+        <button v-if="!isDesktop" class="sidebar-close" @click="sidebarOpen = false" aria-label="Fechar navegacao">
           <i class="bi bi-x-lg"></i>
         </button>
       </div>
@@ -28,7 +24,7 @@
                 :to="item.path"
                 class="sidebar-link"
                 :class="{ active: $route.path === item.path }"
-                @click="isMobile ? sidebarOpen = false : null"
+                @click="!isDesktop ? sidebarOpen = false : null"
               >
                 <i :class="item.icon"></i>
                 <span>{{ item.name }}</span>
@@ -53,7 +49,36 @@
       </div>
     </aside>
 
-    <main class="app-main">
+    <nav v-if="!isDesktop" class="bottom-tab-bar" aria-label="Navegacao principal">
+      <router-link to="/home" class="tab-item">
+        <i class="bi bi-house-door"></i>
+        <span>Home</span>
+      </router-link>
+      <router-link to="/players-overview" class="tab-item">
+        <i class="bi bi-bar-chart-line"></i>
+        <span>Jogadores</span>
+      </router-link>
+      <router-link to="/estatisticas" class="tab-item">
+        <i class="bi bi-clipboard-data"></i>
+        <span>Estatisticas</span>
+      </router-link>
+      <button
+        v-if="isAuthenticated"
+        type="button"
+        class="tab-item"
+        :class="{ 'router-link-active': sidebarOpen }"
+        @click="sidebarOpen = true"
+      >
+        <i class="bi bi-grid-3x3-gap"></i>
+        <span>Mais</span>
+      </button>
+      <router-link v-else to="/login" class="tab-item">
+        <i class="bi bi-box-arrow-in-right"></i>
+        <span>Entrar</span>
+      </router-link>
+    </nav>
+
+    <main class="app-main" :class="{ 'has-bottom-nav': !isDesktop }">
       <router-view />
     </main>
   </div>
@@ -69,7 +94,7 @@ import logo from '../assets/logo-red-devils.png'
 import type { MenuItem } from '../types'
 
 const { logout } = useAuth()
-const { isMobile } = useResponsive()
+const { isDesktop } = useResponsive()
 const sidebarOpen = ref(false)
 const authStore = useAuthStore()
 const isAuthenticated = computed(() => authStore.isAuthenticated)
@@ -79,13 +104,14 @@ const menu = computed<MenuItem[]>(() => {
   const items: MenuItem[] = [
     { name: 'Home', path: ROUTES.HOME, icon: 'bi bi-house-door' },
     { name: 'Jogadores', path: ROUTES.PLAYERS_OVERVIEW, icon: 'bi bi-bar-chart-line' },
+    { name: 'Estatisticas', path: ROUTES.STATISTICS, icon: 'bi bi-clipboard-data' },
   ]
 
   if (isAdmin.value) {
     items.push(
       { name: 'Cadastro de jogadores', path: ROUTES.ADMIN_PLAYERS, icon: 'bi bi-people' },
       { name: 'Peladas', path: ROUTES.ADMIN_PELADAS, icon: 'bi bi-calendar2-week' },
-      { name: 'Estatisticas', path: ROUTES.ADMIN_MATCH_PLAYERS, icon: 'bi bi-graph-up' },
+      { name: 'Registrar estatisticas', path: ROUTES.ADMIN_MATCH_PLAYERS, icon: 'bi bi-pencil-square' },
       { name: 'Organizar times', path: ROUTES.ADMIN_ORGANIZE_TEAMS, icon: 'bi bi-diagram-3' },
     )
   }

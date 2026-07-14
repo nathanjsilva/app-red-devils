@@ -4,8 +4,6 @@ import type {
   CreatePeladaRequest,
   CreatePlayerRequest,
   MatchPlayer,
-  OrganizeTeamsRequest,
-  OrganizeTeamsResponse,
   Pelada,
   Player,
   UpdateMatchPlayerRequest,
@@ -60,12 +58,6 @@ export class AdminService {
 
   static async deleteMatchPlayer(id: number): Promise<{ message: string }> {
     const response = await api.delete(`/admin/match-players/${id}`)
-    return (response as any).data?.data ?? response.data
-  }
-
-  static async organizeTeams(peladaId: number, playerIds: number[]): Promise<OrganizeTeamsResponse> {
-    const requestData: OrganizeTeamsRequest = { player_ids: playerIds }
-    const response = await api.post<OrganizeTeamsResponse>(`/admin/peladas/${peladaId}/organize-teams`, requestData)
     return (response as any).data?.data ?? response.data
   }
 }

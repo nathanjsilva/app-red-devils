@@ -8,7 +8,7 @@ export class PlayerService {
   }
 
   static async getAllPlayers(): Promise<Player[]> {
-    const response = await api.get<Player[]>('/players')
+    const response = await api.get<Player[]>('/players', { params: { per_page: 100 } })
     return (response as any).data?.data ?? response.data
   }
 }

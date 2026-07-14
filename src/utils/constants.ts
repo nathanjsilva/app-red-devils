@@ -1,4 +1,4 @@
-export const API_BASE_URL = 'http://137.131.133.133/api'
+export const API_BASE_URL = 'http://localhost/api'
 
 export const STORAGE_KEYS = {
   TOKEN: 'token',
@@ -9,6 +9,7 @@ export const ROUTES = {
   LOGIN: '/login',
   HOME: '/home',
   PLAYERS_OVERVIEW: '/players-overview',
+  STATISTICS: '/estatisticas',
   ADMIN_PLAYERS: '/admin/players',
   ADMIN_PELADAS: '/admin/peladas',
   ADMIN_MATCH_PLAYERS: '/admin/match-players',

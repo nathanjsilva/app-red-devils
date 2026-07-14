@@ -36,6 +36,7 @@ export interface UpdatePlayerRequest {
 export interface Pelada {
   id: number
   date: string
+  division: 'quinta' | 'sabado'
   location: string
   qtd_times: number
   qtd_jogadores_por_time: number
@@ -46,6 +47,7 @@ export interface Pelada {
 
 export interface CreatePeladaRequest {
   date: string
+  division: 'quinta' | 'sabado'
   location: string
   qtd_times: number
   qtd_jogadores_por_time: number
@@ -104,15 +106,6 @@ export interface Team {
   id: number
   name: string
   players: Player[]
-}
-
-export interface OrganizeTeamsRequest {
-  player_ids: number[]
-}
-
-export interface OrganizeTeamsResponse {
-  message: string
-  teams: Team[]
 }
 
 export interface TeamField {
@@ -292,4 +285,74 @@ export interface CreatePlayerRequest {
   name: string
   nickname: string
   position: 'linha' | 'goleiro'
+}
+
+export interface StatisticsFilters {
+  start_date?: string
+  end_date?: string
+  year?: number | string
+  month?: number | string
+  division?: 'quinta' | 'sabado'
+}
+
+export interface StatLeader {
+  player: Pick<Player, 'id' | 'name' | 'nickname' | 'position'>
+  matches: number
+  value: number
+  average_per_match: number
+}
+
+export interface DashboardOverview {
+  total_peladas: number
+  total_players: number
+  total_goals: number
+  total_assists: number
+  total_goal_participations: number
+  avg_goals_per_pelada: number
+  avg_assists_per_pelada: number
+  avg_players_per_pelada: number
+  pelada_with_most_goals: { pelada_id: number; date: string; location: string; total_goals: number } | null
+  top_scorer: StatLeader | null
+  top_assister: StatLeader | null
+  top_goal_participation: StatLeader | null
+  most_wins: StatLeader | null
+  best_win_rate: StatLeader | null
+  best_goalkeeper: StatLeader | null
+  best_duo: {
+    players: Array<Pick<Player, 'id' | 'name' | 'nickname'>>
+    matches_together: number
+    wins_together: number
+    win_rate_together: number
+  } | null
+  minimum_matches_for_leaders: number
+}
+
+export interface EvolutionPoint {
+  period: string
+  total_peladas: number
+  total_goals: number
+  total_assists: number
+  total_goal_participations: number
+  avg_goals: number
+  avg_assists: number
+  total_players: number
+}
+
+export interface ComparePlayerEntry {
+  player: Pick<Player, 'id' | 'name' | 'nickname' | 'position'>
+  total_matches: number
+  total_goals: number
+  total_assists: number
+  total_goal_participations: number
+  total_wins: number
+  win_rate: number
+  avg_goals_per_match: number
+  avg_assists_per_match: number
+  radar: {
+    total_goals: number
+    total_assists: number
+    total_goal_participations: number
+    win_rate: number
+    avg_goal_participations_per_match: number
+  }
 }

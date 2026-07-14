@@ -17,6 +17,9 @@
           <div class="col-12 col-md-6 col-xl-3">
             <label class="form-label">Data</label>
             <input v-model="form.date" type="date" class="form-control" required />
+            <span v-if="form.date" class="pill-badge mt-2" :class="divisionByDate ? 'pill-ok' : 'pill-muted'">
+              {{ divisionLabel }}
+            </span>
           </div>
           <div class="col-12 col-md-6 col-xl-3">
             <label class="form-label">Local</label>
@@ -35,7 +38,7 @@
             <input v-model.number="form.qtd_goleiros" type="number" min="0" class="form-control" required />
           </div>
           <div class="col-12">
-            <button class="btn btn-red" :disabled="isLoading">
+            <button class="btn btn-red" :disabled="isLoading || !divisionByDate">
               {{ isLoading ? 'Salvando...' : 'Criar pelada' }}
             </button>
           </div>
@@ -53,28 +56,32 @@
         <div v-if="isLoading" class="text-muted">Carregando...</div>
         <div v-else-if="peladas.length === 0" class="text-muted">Nenhuma pelada encontrada.</div>
         <div v-else class="table-responsive">
-          <table class="table red-table align-middle">
+          <table class="data-table stack-mobile">
             <thead>
               <tr>
-                <th>ID</th>
+                <th class="hide-mobile">ID</th>
                 <th>Data</th>
+                <th class="hide-mobile">Divisao</th>
                 <th>Local</th>
-                <th>Times</th>
-                <th>Jogadores/Time</th>
-                <th>Goleiros</th>
+                <th class="hide-mobile">Times</th>
+                <th class="hide-mobile">Jogadores/Time</th>
+                <th class="hide-mobile">Goleiros</th>
                 <th>Status</th>
                 <th class="text-end">Acoes</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="pelada in peladas" :key="pelada.id">
-                <td>{{ pelada.id }}</td>
-                <td class="fw-bold">{{ formatDate(pelada.date) }}</td>
-                <td>{{ pelada.location }}</td>
-                <td>{{ pelada.qtd_times }}</td>
-                <td>{{ pelada.qtd_jogadores_por_time }}</td>
-                <td>{{ pelada.qtd_goleiros }}</td>
-                <td>
+                <td class="hide-mobile" data-label="ID">{{ pelada.id }}</td>
+                <td class="fw-bold" data-label="Data">{{ formatDate(pelada.date) }}</td>
+                <td class="hide-mobile" data-label="Divisao">
+                  <span class="pill-badge pill-info">{{ pelada.division === 'sabado' ? 'Sabado' : 'Quinta' }}</span>
+                </td>
+                <td data-label="Local">{{ pelada.location }}</td>
+                <td class="hide-mobile" data-label="Times">{{ pelada.qtd_times }}</td>
+                <td class="hide-mobile" data-label="Jogadores/Time">{{ pelada.qtd_jogadores_por_time }}</td>
+                <td class="hide-mobile" data-label="Goleiros">{{ pelada.qtd_goleiros }}</td>
+                <td data-label="Status">
                   <span v-if="pelada.hasStatistics === undefined" class="pill-badge pill-muted">
                     Verificando
                   </span>
@@ -82,7 +89,7 @@
                     {{ pelada.hasStatistics ? 'Com estatisticas' : 'Sem estatisticas' }}
                   </span>
                 </td>
-                <td class="text-end">
+                <td class="text-end" data-label="Acoes">
                   <div class="d-flex flex-wrap justify-content-end gap-2">
                     <button class="btn btn-sm btn-outline-primary" @click="editPelada(pelada.id)" :disabled="isLoading">
                       Estatisticas
@@ -118,12 +125,26 @@ const router = useRouter()
 const toast = useToast()
 const peladas = ref<PeladaWithStats[]>([])
 const isLoading = ref(false)
-const form = ref<CreatePeladaRequest>({
+const form = ref<Omit<CreatePeladaRequest, 'division'>>({
   date: '',
   location: '',
   qtd_times: 2,
   qtd_jogadores_por_time: 5,
   qtd_goleiros: 0
+})
+
+const divisionByDate = computed<'quinta' | 'sabado' | null>(() => {
+  if (!form.value.date) return null
+  const weekday = new Date(`${form.value.date}T00:00:00`).getDay()
+  if (weekday === 4) return 'quinta'
+  if (weekday === 6) return 'sabado'
+  return null
+})
+
+const divisionLabel = computed(() => {
+  if (divisionByDate.value === 'quinta') return 'Quinta-feira'
+  if (divisionByDate.value === 'sabado') return 'Sabado'
+  return 'A data deve cair numa quinta-feira ou sabado'
 })
 
 const formatDate = (dateString: string): string => {
@@ -170,9 +191,15 @@ const fetchPeladas = async () => {
 }
 
 const handleCreate = async () => {
+  const division = divisionByDate.value
+  if (!division) {
+    toast.error('A data deve cair numa quinta-feira ou sabado')
+    return
+  }
+
   isLoading.value = true
   try {
-    const created = await AdminService.createPelada(form.value)
+    const created = await AdminService.createPelada({ ...form.value, division })
     toast.success(`Pelada #${created.id} criada`)
     await fetchPeladas()
     form.value = {

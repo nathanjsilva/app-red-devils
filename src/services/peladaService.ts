@@ -8,13 +8,13 @@ export class PeladaService {
   }
 
   static async getAllPeladas(): Promise<Pelada[]> {
-    const response = await api.get<Pelada[]>('/admin/peladas')
+    const response = await api.get<Pelada[]>('/peladas')
     return (response as any).data?.data ?? response.data
   }
 
   static async getPeladasByDate(date: string): Promise<Pelada[]> {
     try {
-      const response = await api.get<Pelada[]>(`/admin/peladas/date/${date}`)
+      const response = await api.get<Pelada[]>(`/peladas/date/${date}`)
       return (response as any).data?.data ?? response.data
     } catch (error: any) {
       if (error?.response?.status === 404) {
@@ -25,7 +25,7 @@ export class PeladaService {
   }
 
   static async getPelada(id: number): Promise<Pelada> {
-    const response = await api.get<Pelada>(`/admin/peladas/${id}`)
+    const response = await api.get<Pelada>(`/peladas/${id}`)
     return (response as any).data?.data ?? response.data
   }
 

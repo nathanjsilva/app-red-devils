@@ -61,10 +61,10 @@
         <div v-if="isLoading" class="text-muted">Carregando...</div>
         <div v-else-if="players.length === 0" class="text-muted">Nenhum jogador encontrado.</div>
         <div v-else class="table-responsive">
-          <table class="table red-table align-middle">
+          <table class="data-table stack-mobile">
             <thead>
               <tr>
-                <th>ID</th>
+                <th class="hide-mobile">ID</th>
                 <th>Nome</th>
                 <th>Apelido</th>
                 <th>Posicao</th>
@@ -73,15 +73,15 @@
             </thead>
             <tbody>
               <tr v-for="player in players" :key="player.id">
-                <td>{{ player.id }}</td>
-                <td class="fw-bold">{{ player.name }}</td>
-                <td>{{ player.nickname }}</td>
-                <td>
+                <td class="hide-mobile" data-label="ID">{{ player.id }}</td>
+                <td class="fw-bold" data-label="Nome">{{ player.name }}</td>
+                <td data-label="Apelido">{{ player.nickname }}</td>
+                <td data-label="Posicao">
                   <span class="pill-badge" :class="player.position === 'goleiro' ? 'pill-info' : 'pill-muted'">
                     {{ player.position }}
                   </span>
                 </td>
-                <td class="text-end">
+                <td class="text-end" data-label="Acoes">
                   <div class="d-flex flex-wrap justify-content-end gap-2">
                     <button class="btn btn-sm btn-outline-primary" @click="editPlayer(player)" :disabled="isLoading">
                       Editar

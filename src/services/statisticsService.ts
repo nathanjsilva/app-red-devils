@@ -1,13 +1,33 @@
 import api from './api'
 import type {
+  ComparePlayerEntry,
+  DashboardOverview,
+  EvolutionPoint,
   PeladaStatisticsResponse,
   PlayerPeladaStatisticsResponse,
   PlayersOverviewResponse,
   PlayerTotalStatisticsResponse,
-  Ranking
+  StatisticsFilters
 } from '../types'
 
 export class StatisticsService {
+  static async getDashboard(filters: StatisticsFilters = {}): Promise<DashboardOverview> {
+    const response = await api.get('/statistics/dashboard', { params: filters })
+    return response.data.data
+  }
+
+  static async getEvolution(groupBy: 'match' | 'month' | 'year' = 'month', filters: StatisticsFilters = {}, limit?: number): Promise<EvolutionPoint[]> {
+    const response = await api.get('/statistics/evolution', { params: { group_by: groupBy, limit, ...filters } })
+    return response.data.data
+  }
+
+  static async comparePlayers(playerIds: number[], filters: StatisticsFilters = {}): Promise<ComparePlayerEntry[]> {
+    const response = await api.get('/statistics/players/compare', {
+      params: { player_ids: playerIds, ...filters }
+    })
+    return response.data.data
+  }
+
   static async getPlayersOverview(): Promise<PlayersOverviewResponse> {
     const response = await api.get<PlayersOverviewResponse>('/statistics/players/overview')
     return (response as any).data?.data ?? response.data
@@ -15,31 +35,6 @@ export class StatisticsService {
 
   static async getPlayerTotalStatistics(playerId: number): Promise<PlayerTotalStatisticsResponse> {
     const response = await api.get<PlayerTotalStatisticsResponse>(`/statistics/player/${playerId}/total`)
-    return (response as any).data?.data ?? response.data
-  }
-
-  static async getWinsRanking(): Promise<Ranking> {
-    const response = await api.get<Ranking>('/statistics/rankings/wins')
-    return (response as any).data?.data ?? response.data
-  }
-
-  static async getGoalsRanking(): Promise<Ranking> {
-    const response = await api.get<Ranking>('/statistics/rankings/goals')
-    return (response as any).data?.data ?? response.data
-  }
-
-  static async getAssistsRanking(): Promise<Ranking> {
-    const response = await api.get<Ranking>('/statistics/rankings/assists')
-    return (response as any).data?.data ?? response.data
-  }
-
-  static async getGoalParticipationRanking(): Promise<Ranking> {
-    const response = await api.get<Ranking>('/statistics/rankings/goal-participation')
-    return (response as any).data?.data ?? response.data
-  }
-
-  static async getGoalkeepersRanking(): Promise<Ranking> {
-    const response = await api.get<Ranking>('/statistics/rankings/goalkeepers')
     return (response as any).data?.data ?? response.data
   }
 

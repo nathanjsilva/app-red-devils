@@ -30,7 +30,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           vendor: ['vue', 'vue-router', 'pinia'],
-          ui: ['bootstrap', 'bootstrap-icons']
+          ui: ['bootstrap']
         }
       }
     }

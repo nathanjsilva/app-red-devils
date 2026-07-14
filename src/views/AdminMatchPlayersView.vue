@@ -49,7 +49,7 @@
         </div>
 
         <div class="table-responsive">
-          <table class="table red-table align-middle">
+          <table class="data-table stack-mobile">
             <thead>
               <tr>
                 <th>Jogador</th>
@@ -58,22 +58,21 @@
                 <th>Assistencias</th>
                 <th>Gols sofridos</th>
                 <th>Resultado</th>
-                <th>Vencedor</th>
                 <th class="text-end">Acoes</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="playerStat in playerStats" :key="playerStat.player.id">
-                <td>
+                <td data-label="Jogador">
                   <div class="fw-bold">{{ playerStat.player.nickname }}</div>
                   <div class="text-muted small">{{ playerStat.player.name }}</div>
                 </td>
-                <td>
+                <td data-label="Posicao">
                   <span class="pill-badge" :class="playerStat.player.position === 'goleiro' ? 'pill-info' : 'pill-muted'">
                     {{ playerStat.player.position }}
                   </span>
                 </td>
-                <td>
+                <td data-label="Gols">
                   <input
                     v-model.number="playerStat.statistics.goals"
                     type="number"
@@ -82,7 +81,7 @@
                     :disabled="playerStat.player.position === 'goleiro'"
                   />
                 </td>
-                <td>
+                <td data-label="Assistencias">
                   <input
                     v-model.number="playerStat.statistics.assists"
                     type="number"
@@ -91,7 +90,7 @@
                     :disabled="playerStat.player.position === 'goleiro'"
                   />
                 </td>
-                <td>
+                <td data-label="Gols sofridos">
                   <input
                     v-if="playerStat.player.position === 'goleiro'"
                     v-model.number="playerStat.statistics.goals_conceded"
@@ -101,17 +100,14 @@
                   />
                   <span v-else class="text-muted">—</span>
                 </td>
-                <td>
+                <td data-label="Resultado">
                   <select v-model="playerStat.statistics.result" class="form-select form-select-sm result-select" @change="syncWinner(playerStat)">
                     <option value="win">Vitoria</option>
                     <option value="draw">Empate</option>
                     <option value="loss">Derrota</option>
                   </select>
                 </td>
-                <td>
-                  <input v-model="playerStat.statistics.is_winner" type="checkbox" class="form-check-input" disabled />
-                </td>
-                <td class="text-end">
+                <td class="text-end" data-label="Acoes">
                   <button class="btn btn-sm btn-red" @click="savePlayerStatistics(playerStat)" :disabled="isSaving === playerStat.player.id">
                     {{ isSaving === playerStat.player.id ? 'Salvando...' : 'Salvar' }}
                   </button>
@@ -330,5 +326,12 @@ watch(() => route.query.pelada_id, async (newPeladaId) => {
 
 .result-select {
   min-width: 118px;
+}
+
+@media (max-width: 640px) {
+  .stat-input,
+  .result-select {
+    min-width: 140px;
+  }
 }
 </style>

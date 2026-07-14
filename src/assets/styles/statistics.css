@@ -1,0 +1,214 @@
+.stats-page {
+    min-height: 100%;
+}
+
+.stats-hero {
+    position: relative;
+    overflow: hidden;
+    padding: 2.5rem 0 2rem;
+    background:
+        radial-gradient(circle at top left, rgba(185, 28, 28, 0.4), transparent 24%),
+        linear-gradient(135deg, #240505 0%, #140202 60%, #090101 100%);
+}
+
+.stats-hero-noise {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at top left, rgba(255, 255, 255, 0.05), transparent 18%),
+        radial-gradient(circle at bottom right, rgba(185, 28, 28, 0.24), transparent 22%);
+    pointer-events: none;
+}
+
+.stats-hero-inner {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 1.1rem;
+}
+
+.stats-hero-brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.stats-hero-logo {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.3));
+}
+
+.stats-hero-kicker {
+    margin: 0 0 0.3rem;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.74);
+}
+
+.stats-hero-title {
+    margin: 0;
+    font-size: clamp(1.8rem, 3.6vw, 2.75rem);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    color: #fff;
+}
+
+.stats-hero-subtitle {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.74);
+    max-width: 60ch;
+}
+
+.stats-division-filter {
+    width: fit-content;
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.14);
+}
+
+.stats-division-filter .seg-btn {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.stats-division-filter .seg-btn:not(:last-child) {
+    border-right-color: rgba(255, 255, 255, 0.1);
+}
+
+.stats-division-filter .seg-btn:hover,
+.stats-division-filter .seg-btn:focus-visible {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+.stats-main {
+    padding: 1.5rem 1rem 3rem;
+    display: grid;
+    gap: 1.25rem;
+}
+
+.stats-kpi-grid {
+    margin-bottom: 0;
+}
+
+.stats-spotlight-grid {
+    margin-top: 0;
+}
+
+.stats-section-card {
+    margin-top: 0;
+}
+
+.stats-section-kicker {
+    margin: 0 0 0.3rem;
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 800;
+    color: var(--red-devils);
+}
+
+.stats-ranking-toolbar {
+    align-items: flex-start;
+}
+
+.stats-compare-picker {
+    display: grid;
+    gap: 0.85rem;
+    margin-bottom: 1.25rem;
+}
+
+.stats-compare-search {
+    max-width: 420px;
+}
+
+.stats-compare-suggestions {
+    position: absolute;
+    z-index: 20;
+    top: calc(100% + 0.35rem);
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 0.4rem;
+    list-style: none;
+    background: #fff;
+    border: 1px solid var(--line-strong);
+    border-radius: 0.95rem;
+    box-shadow: var(--shadow-strong);
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+.stats-compare-suggestions li {
+    padding: 0.55rem 0.7rem;
+    border-radius: 0.7rem;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.stats-compare-suggestions li:hover {
+    background: rgba(185, 28, 28, 0.06);
+}
+
+.stats-compare-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.stats-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.5rem 0.4rem 0.85rem;
+    border-radius: 999px;
+    background: rgba(185, 28, 28, 0.08);
+    color: var(--red-devils);
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.stats-chip button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 0;
+    background: rgba(185, 28, 28, 0.16);
+    color: var(--red-devils);
+    line-height: 0;
+}
+
+.stats-chip button:hover {
+    background: var(--red-devils);
+    color: #fff;
+}
+
+@media (max-width: 767px) {
+    .stats-hero {
+        padding-top: 4.5rem;
+    }
+
+    .stats-hero-logo {
+        width: 52px;
+        height: 52px;
+    }
+
+    .stats-ranking-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .stats-ranking-toolbar .seg-control {
+        overflow-x: auto;
+    }
+
+    .stats-compare-search {
+        max-width: 100%;
+    }
+}

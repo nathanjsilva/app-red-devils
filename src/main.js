@@ -10,8 +10,10 @@ import './assets/styles/layout.css'
 import './assets/styles/home.css'
 import './assets/styles/players-overview.css'
 import './assets/styles/login.css'
+import './assets/styles/statistics.css'
 import Toast, { POSITION } from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
+import './utils/chartSetup'
 import { useAuthStore } from './stores/auth'
 
 const app = createApp(App)

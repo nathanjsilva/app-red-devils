@@ -53,14 +53,6 @@
           </div>
         </div>
       </div>
-
-      <div class="metric-grid" v-if="!isLoading && !error && rankingsList.length > 0">
-        <div v-for="summary in rankingSummaries" :key="summary.title" class="metric-card home-metric-card">
-          <span>{{ summary.title }}</span>
-          <strong>{{ summary.value }}</strong>
-          <small>{{ summary.caption }}</small>
-        </div>
-      </div>
     </section>
 
     <div v-if="isLoading" class="surface-card">
@@ -173,14 +165,6 @@ const { fetchRankings } = rankingsStore
 const rankingsList = computed(() => rankings.value || [])
 const totalMatches = computed(() => rankingsStore.getTotalMatches())
 const isAdmin = computed(() => authStore.user?.profile === 'admin')
-
-const rankingSummaries = computed(() => {
-  return rankingsList.value.slice(0, 4).map((ranking) => ({
-    title: ranking.type,
-    value: ranking.players[0]?.name || 'Sem dados',
-    caption: ranking.players[0] ? `${ranking.players[0].matches || 0} jogos` : 'Aguardando dados'
-  }))
-})
 
 const featuredLeaders = computed(() => {
   return rankingsList.value

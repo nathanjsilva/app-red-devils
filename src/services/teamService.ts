@@ -9,12 +9,12 @@ import type {
 
 export class TeamService {
   static async getTeamFields(peladaId: number): Promise<TeamFieldsResponse> {
-    const response = await api.get<TeamFieldsResponse>(`/admin/teams/pelada/${peladaId}/fields`)
+    const response = await api.get<TeamFieldsResponse>(`/teams/pelada/${peladaId}/fields`)
     return (response as any).data?.data ?? response.data
   }
 
   static async getPeladaPlayers(peladaId: number): Promise<PeladaPlayersResponse> {
-    const response = await api.get<PeladaPlayersResponse>(`/admin/teams/pelada/${peladaId}/players`)
+    const response = await api.get<PeladaPlayersResponse>(`/teams/pelada/${peladaId}/players`)
     return (response as any).data?.data ?? response.data
   }
 
@@ -25,7 +25,7 @@ export class TeamService {
 
   static async getOrganizedTeams(peladaId: number): Promise<OrganizedPeladaTeamsResponse | null> {
     try {
-      const response = await api.get<OrganizedPeladaTeamsResponse>(`/admin/teams/pelada/${peladaId}/organized`)
+      const response = await api.get<OrganizedPeladaTeamsResponse>(`/teams/pelada/${peladaId}/organized`)
       return (response as any).data?.data ?? response.data
     } catch (error: any) {
       if (error?.response?.status === 404) {
@@ -36,7 +36,7 @@ export class TeamService {
   }
 
   static async getTeamsWithStatistics(peladaId: number): Promise<TeamsWithStatisticsResponse> {
-    const response = await api.get<TeamsWithStatisticsResponse>(`/admin/teams/pelada/${peladaId}/players-with-statistics`)
+    const response = await api.get<TeamsWithStatisticsResponse>(`/teams/pelada/${peladaId}/players-with-statistics`)
     return (response as any).data?.data ?? response.data
   }
 }
