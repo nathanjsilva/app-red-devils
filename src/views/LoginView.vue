@@ -44,7 +44,7 @@
 
         <button
           type="submit"
-          class="btn btn-red-devils w-100 fw-semibold login-submit"
+          class="btn btn-red w-100 fw-semibold login-submit"
           :disabled="isLoading"
         >
           <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
@@ -53,7 +53,7 @@
 
         <button
           type="button"
-          class="btn btn-outline-danger w-100 login-secondary"
+          class="btn btn-outline-secondary w-100 login-secondary"
           @click="goToOverview"
         >
           Ver estatisticas publicas

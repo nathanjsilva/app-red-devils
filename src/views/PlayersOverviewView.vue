@@ -195,11 +195,7 @@
 
             <div class="pag-size">
               <label class="filter-label">por pagina</label>
-              <select v-model="pageSize" @change="currentPage = 1" class="pag-select">
-                <option :value="10">10</option>
-                <option :value="20">20</option>
-                <option :value="50">50</option>
-              </select>
+              <SearchableSelect v-model="pageSize" :options="pageSizeOptions" input-class="pag-select" @change="currentPage = 1" />
             </div>
           </div>
         </div>
@@ -270,6 +266,10 @@
                 <strong class="stat-val">{{ selectedPlayer.statistics.eligible_for_ranking ? 'Elegivel' : 'Nao elegivel' }}</strong>
               </div>
             </div>
+
+            <button class="btn btn-outline-secondary w-100 mt-3" @click="goToPlayerDetail(selectedPlayer.player.id)">
+              Ver perfil completo
+            </button>
           </div>
         </div>
       </div>
@@ -279,12 +279,19 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import SearchableSelect from '../components/ui/SearchableSelect.vue'
 import { useSEO } from '../composables/useSEO'
 import { StatisticsService } from '../services/statisticsService'
 import type { PlayerOverviewItem, PlayersOverviewResponse } from '../types'
 import logo from '../assets/logo-red-devils.png'
 
 const { updateSEO } = useSEO()
+const router = useRouter()
+
+const goToPlayerDetail = (playerId: number) => {
+  router.push(`/players/${playerId}`)
+}
 
 const overview = ref<PlayersOverviewResponse | null>(null)
 const isLoading = ref(false)
@@ -295,6 +302,11 @@ const eligibilityFilter = ref<'all' | 'eligible' | 'not_eligible'>('all')
 const selectedPlayer = ref<PlayerOverviewItem | null>(null)
 const currentPage = ref(1)
 const pageSize = ref<number>(10)
+const pageSizeOptions = [
+  { value: 10, label: '10' },
+  { value: 20, label: '20' },
+  { value: 50, label: '50' }
+]
 
 const positionOptions = [
   { value: 'all', label: 'Todos' },
@@ -309,7 +321,7 @@ const eligibilityOptions = [
 ] as const
 
 const filteredPlayers = computed(() => {
-  const base = overview.value?.players ?? []
+  const base = overview.value?.players?.data ?? []
   const q = search.value.trim().toLowerCase()
 
   return base

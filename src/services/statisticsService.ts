@@ -3,8 +3,13 @@ import type {
   ComparePlayerEntry,
   DashboardOverview,
   EvolutionPoint,
+  GoalkeeperDetail,
+  GoalkeeperRankingItem,
+  MatchDetail,
   PeladaStatisticsResponse,
+  PeladasPerMonthPoint,
   PlayerPeladaStatisticsResponse,
+  PlayerProfile,
   PlayersOverviewResponse,
   PlayerTotalStatisticsResponse,
   StatisticsFilters
@@ -29,7 +34,7 @@ export class StatisticsService {
   }
 
   static async getPlayersOverview(): Promise<PlayersOverviewResponse> {
-    const response = await api.get<PlayersOverviewResponse>('/statistics/players/overview')
+    const response = await api.get<PlayersOverviewResponse>('/statistics/players/overview', { params: { per_page: 100 } })
     return (response as any).data?.data ?? response.data
   }
 
@@ -46,6 +51,31 @@ export class StatisticsService {
   static async getPlayerStatisticsForPelada(playerId: number, peladaId: number): Promise<PlayerPeladaStatisticsResponse> {
     const response = await api.get<PlayerPeladaStatisticsResponse>(`/statistics/player/${playerId}/pelada/${peladaId}`)
     return (response as any).data?.data ?? response.data
+  }
+
+  static async getPeladasPerMonth(filters: StatisticsFilters = {}): Promise<PeladasPerMonthPoint[]> {
+    const response = await api.get('/statistics/peladas-per-month', { params: filters })
+    return response.data.data
+  }
+
+  static async getMatchDetail(peladaId: number): Promise<MatchDetail> {
+    const response = await api.get(`/statistics/matches/${peladaId}`)
+    return response.data.data
+  }
+
+  static async getPlayerProfile(playerId: number, filters: StatisticsFilters = {}): Promise<PlayerProfile> {
+    const response = await api.get(`/statistics/players/${playerId}`, { params: filters })
+    return response.data.data
+  }
+
+  static async getGoalkeepers(filters: StatisticsFilters = {}): Promise<GoalkeeperRankingItem[]> {
+    const response = await api.get('/statistics/goalkeepers', { params: filters })
+    return response.data.data
+  }
+
+  static async getGoalkeeperDetail(playerId: number, filters: StatisticsFilters = {}): Promise<GoalkeeperDetail> {
+    const response = await api.get(`/statistics/goalkeepers/${playerId}`, { params: filters })
+    return response.data.data
   }
 
   static async hasPeladaStatistics(peladaId: number): Promise<boolean> {

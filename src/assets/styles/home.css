@@ -12,6 +12,11 @@
     overflow: hidden;
 }
 
+.division-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: 420px;
+}
+
 .home-hero-body {
     display: grid;
     grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.8fr);

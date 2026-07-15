@@ -86,7 +86,16 @@
 .stats-main {
     padding: 1.5rem 1rem 3rem;
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 1.25rem;
+}
+
+.stats-goalkeeper-row {
+    cursor: pointer;
+}
+
+.stats-goalkeeper-row:hover {
+    background: rgba(185, 28, 28, 0.04);
 }
 
 .stats-kpi-grid {
@@ -169,6 +178,15 @@
     color: var(--red-devils);
     font-weight: 700;
     font-size: 0.85rem;
+}
+
+.stats-chip-link {
+    color: inherit;
+    text-decoration: none;
+}
+
+.stats-chip-link:hover {
+    text-decoration: underline;
 }
 
 .stats-chip button {

@@ -26,11 +26,7 @@
 
           <div class="col-12 col-lg-4">
             <label class="form-label">Posicao</label>
-            <select v-model="form.position" class="form-select" required>
-              <option disabled value="">Selecione</option>
-              <option value="linha">Jogador de linha</option>
-              <option value="goleiro">Goleiro</option>
-            </select>
+            <SearchableSelect v-model="form.position" :options="positionOptions" placeholder="Selecione" />
           </div>
 
           <div class="col-12 d-flex flex-wrap gap-2">
@@ -103,9 +99,15 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useToast } from 'vue-toastification'
+import SearchableSelect from '../components/ui/SearchableSelect.vue'
 import { AdminService } from '../services/adminService'
 import { PlayerService } from '../services/playerService'
 import type { CreatePlayerRequest, Player, UpdatePlayerRequest } from '../types'
+
+const positionOptions = [
+  { value: 'linha', label: 'Jogador de linha' },
+  { value: 'goleiro', label: 'Goleiro' }
+]
 
 const toast = useToast()
 const players = ref<Player[]>([])

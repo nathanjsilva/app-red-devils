@@ -122,6 +122,24 @@
         </div>
       </section>
 
+      <!-- Peladas por mês -->
+      <section class="surface-card stats-section-card">
+        <div class="surface-card-body">
+          <div class="section-toolbar">
+            <div>
+              <p class="stats-section-kicker">Frequência</p>
+              <h2 class="section-title mb-0">Peladas por mês</h2>
+            </div>
+          </div>
+
+          <div v-if="isLoadingPeladasPerMonth" class="state-box">
+            <span class="spinner"></span>
+          </div>
+          <p v-else-if="peladasPerMonth.length === 0" class="text-muted mb-0">Sem dados suficientes para esse período.</p>
+          <PeladasPerMonthChart v-else :points="peladasPerMonth" />
+        </div>
+      </section>
+
       <!-- Rankings -->
       <section class="surface-card stats-section-card">
         <div class="surface-card-body">
@@ -149,6 +167,104 @@
           <RankingBarChart v-else :players="currentRanking.players" :value-suffix="activeRankingSuffix" />
         </div>
       </section>
+
+      <!-- Goleiros -->
+      <section class="surface-card stats-section-card">
+        <div class="surface-card-body">
+          <div class="section-toolbar">
+            <div>
+              <p class="stats-section-kicker">Detalhe</p>
+              <h2 class="section-title mb-0">Goleiros</h2>
+            </div>
+          </div>
+
+          <div v-if="isLoadingGoalkeepers" class="state-box">
+            <span class="spinner"></span>
+          </div>
+          <p v-else-if="goalkeepers.length === 0" class="text-muted mb-0">
+            Nenhum goleiro elegível nesse recorte.
+          </p>
+          <div v-else class="table-responsive">
+            <table class="data-table stack-mobile">
+              <thead>
+                <tr>
+                  <th>Goleiro</th>
+                  <th>Jogos</th>
+                  <th>Vitórias</th>
+                  <th>Aproveitamento</th>
+                  <th>Gols sofridos</th>
+                  <th>Média/jogo</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="goalkeeper in goalkeepers"
+                  :key="goalkeeper.player.id"
+                  class="stats-goalkeeper-row"
+                  @click="openGoalkeeperDetail(goalkeeper.player.id)"
+                >
+                  <td data-label="Goleiro">
+                    <div class="fw-bold">{{ goalkeeper.player.nickname || goalkeeper.player.name }}</div>
+                  </td>
+                  <td data-label="Jogos">{{ goalkeeper.matches }}</td>
+                  <td data-label="Vitórias">{{ goalkeeper.wins }}</td>
+                  <td data-label="Aproveitamento">{{ formatDec(goalkeeper.win_rate) }}%</td>
+                  <td data-label="Gols sofridos">{{ goalkeeper.goals_conceded }}</td>
+                  <td data-label="Média/jogo">{{ formatDec(goalkeeper.avg_goals_conceded_per_match) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <Transition name="modal-fade">
+        <div v-if="goalkeeperDetail" class="modal-veil" @click.self="closeGoalkeeperDetail">
+          <div class="modal-card" role="dialog" aria-modal="true">
+            <div class="modal-head">
+              <div class="modal-head-text">
+                <h2>{{ goalkeeperDetail.player.nickname || goalkeeperDetail.player.name }}</h2>
+                <p>{{ goalkeeperDetail.player.name }}</p>
+              </div>
+              <button class="modal-close" @click="closeGoalkeeperDetail" aria-label="Fechar">
+                <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+
+            <div class="modal-section-label">Estatísticas da temporada</div>
+
+            <div class="modal-body">
+              <div class="stat-grid">
+                <div class="stat-card highlight">
+                  <span class="stat-label">Jogos</span>
+                  <strong class="stat-val">{{ goalkeeperDetail.total_matches }}</strong>
+                </div>
+                <div class="stat-card highlight">
+                  <span class="stat-label">Vitórias</span>
+                  <strong class="stat-val">{{ goalkeeperDetail.total_wins }}</strong>
+                </div>
+                <div class="stat-card highlight">
+                  <span class="stat-label">Aproveitamento</span>
+                  <strong class="stat-val">{{ formatDec(goalkeeperDetail.win_rate) }}%</strong>
+                </div>
+                <div class="stat-card highlight">
+                  <span class="stat-label">Assiduidade</span>
+                  <strong class="stat-val">{{ formatDec(goalkeeperDetail.attendance_rate) }}%</strong>
+                </div>
+
+                <div class="stat-card">
+                  <span class="stat-label">Melhor sequência sem perder</span>
+                  <strong class="stat-val">{{ goalkeeperDetail.best_unbeaten_streak }}</strong>
+                </div>
+                <div class="stat-card" v-if="goalkeeperDetail.best_duo">
+                  <span class="stat-label">Melhor dupla</span>
+                  <strong class="stat-val">{{ goalkeeperDetail.best_duo.players.map(p => p.nickname || p.name).join(' + ') }}</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Transition>
 
       <!-- Comparador -->
       <section class="surface-card stats-section-card">
@@ -178,7 +294,7 @@
 
             <div class="stats-compare-chips">
               <span v-for="id in selectedPlayerIds" :key="id" class="stats-chip">
-                {{ playerLabel(id) }}
+                <router-link :to="`/players/${id}`" class="stats-chip-link">{{ playerLabel(id) }}</router-link>
                 <button type="button" @click="removePlayer(id)" aria-label="Remover">
                   <i class="bi bi-x"></i>
                 </button>
@@ -206,9 +322,10 @@ import { useSEO } from '../composables/useSEO'
 import { PlayerService } from '../services/playerService'
 import { RankingService } from '../services/rankingService'
 import { StatisticsService } from '../services/statisticsService'
-import type { ComparePlayerEntry, DashboardOverview, EvolutionPoint, Player, Ranking, StatisticsFilters } from '../types'
+import type { ComparePlayerEntry, DashboardOverview, EvolutionPoint, GoalkeeperDetail, GoalkeeperRankingItem, PeladasPerMonthPoint, Player, Ranking, StatisticsFilters } from '../types'
 import logo from '../assets/logo-red-devils.png'
 import EvolutionChart from '../components/charts/EvolutionChart.vue'
+import PeladasPerMonthChart from '../components/charts/PeladasPerMonthChart.vue'
 import RankingBarChart from '../components/charts/RankingBarChart.vue'
 import ComparisonRadarChart from '../components/charts/ComparisonRadarChart.vue'
 
@@ -263,8 +380,10 @@ const fetchEvolution = async () => {
 const rankingCategories = [
   { value: 'goals' as const, label: 'Gols', suffix: '' },
   { value: 'assists' as const, label: 'Assistências', suffix: '' },
+  { value: 'goal-participations' as const, label: 'Participações', suffix: '' },
   { value: 'wins' as const, label: 'Vitórias', suffix: '' },
   { value: 'win-rate' as const, label: 'Aproveitamento', suffix: '%' },
+  { value: 'appearances' as const, label: 'Presenças', suffix: '' },
   { value: 'goalkeepers' as const, label: 'Goleiros', suffix: '/jogo' }
 ]
 const rankingType = ref<(typeof rankingCategories)[number]['value']>('goals')
@@ -335,10 +454,57 @@ const fetchCompare = async () => {
   }
 }
 
+// --- Peladas por mês ---
+const peladasPerMonth = ref<PeladasPerMonthPoint[]>([])
+const isLoadingPeladasPerMonth = ref(false)
+
+const fetchPeladasPerMonth = async () => {
+  isLoadingPeladasPerMonth.value = true
+  try {
+    peladasPerMonth.value = await StatisticsService.getPeladasPerMonth(filters.value)
+  } catch (error) {
+    console.error(error)
+    peladasPerMonth.value = []
+  } finally {
+    isLoadingPeladasPerMonth.value = false
+  }
+}
+
+// --- Goleiros ---
+const goalkeepers = ref<GoalkeeperRankingItem[]>([])
+const isLoadingGoalkeepers = ref(false)
+const goalkeeperDetail = ref<GoalkeeperDetail | null>(null)
+
+const fetchGoalkeepers = async () => {
+  isLoadingGoalkeepers.value = true
+  try {
+    goalkeepers.value = await StatisticsService.getGoalkeepers(filters.value)
+  } catch (error) {
+    console.error(error)
+    goalkeepers.value = []
+  } finally {
+    isLoadingGoalkeepers.value = false
+  }
+}
+
+const openGoalkeeperDetail = async (playerId: number) => {
+  try {
+    goalkeeperDetail.value = await StatisticsService.getGoalkeeperDetail(playerId, filters.value)
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const closeGoalkeeperDetail = () => {
+  goalkeeperDetail.value = null
+}
+
 watch(division, () => {
   fetchDashboard()
   fetchEvolution()
+  fetchPeladasPerMonth()
   fetchRanking()
+  fetchGoalkeepers()
   fetchCompare()
 })
 watch(rankingType, fetchRanking)
@@ -352,7 +518,9 @@ onMounted(async () => {
 
   fetchDashboard()
   fetchEvolution()
+  fetchPeladasPerMonth()
   fetchRanking()
+  fetchGoalkeepers()
 
   try {
     allPlayers.value = await PlayerService.getAllPlayers()

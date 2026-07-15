@@ -53,8 +53,25 @@
           <span class="text-muted small">{{ peladas.length }} registro{{ peladas.length !== 1 ? 's' : '' }}</span>
         </div>
 
+        <div class="row g-3 align-items-end mb-3">
+          <div class="col-12 col-md-4">
+            <label class="form-label">Buscar por data</label>
+            <input v-model="searchDate" type="date" class="form-control" />
+          </div>
+          <div class="col-12 col-md-auto d-flex gap-2">
+            <button class="btn btn-outline-secondary" @click="searchByDate" :disabled="isLoading || !searchDate">
+              Buscar
+            </button>
+            <button v-if="isSearchActive" class="btn btn-outline-secondary" @click="clearSearch" :disabled="isLoading">
+              Limpar busca
+            </button>
+          </div>
+        </div>
+
         <div v-if="isLoading" class="text-muted">Carregando...</div>
-        <div v-else-if="peladas.length === 0" class="text-muted">Nenhuma pelada encontrada.</div>
+        <div v-else-if="peladas.length === 0" class="text-muted">
+          {{ isSearchActive ? 'Nenhuma pelada encontrada nessa data.' : 'Nenhuma pelada encontrada.' }}
+        </div>
         <div v-else class="table-responsive">
           <table class="data-table stack-mobile">
             <thead>
@@ -91,6 +108,9 @@
                 </td>
                 <td class="text-end" data-label="Acoes">
                   <div class="d-flex flex-wrap justify-content-end gap-2">
+                    <button class="btn btn-sm btn-outline-secondary" @click="router.push(`/peladas/${pelada.id}`)" :disabled="isLoading">
+                      Ver detalhe
+                    </button>
                     <button class="btn btn-sm btn-outline-primary" @click="editPelada(pelada.id)" :disabled="isLoading">
                       Estatisticas
                     </button>
@@ -125,6 +145,8 @@ const router = useRouter()
 const toast = useToast()
 const peladas = ref<PeladaWithStats[]>([])
 const isLoading = ref(false)
+const searchDate = ref('')
+const isSearchActive = ref(false)
 const form = ref<Omit<CreatePeladaRequest, 'division'>>({
   date: '',
   location: '',
@@ -162,32 +184,56 @@ const formatDate = (dateString: string): string => {
   }
 }
 
+const applyPeladas = (fetchedPeladas: Pelada[]) => {
+  peladas.value = fetchedPeladas.map((pelada) => ({ ...pelada, hasStatistics: undefined }))
+  isLoading.value = false
+
+  fetchedPeladas.forEach(async (pelada) => {
+    try {
+      const hasStats = await StatisticsService.hasPeladaStatistics(pelada.id)
+      const index = peladas.value.findIndex((item) => item.id === pelada.id)
+      if (index !== -1) {
+        peladas.value[index].hasStatistics = hasStats
+      }
+    } catch {
+      const index = peladas.value.findIndex((item) => item.id === pelada.id)
+      if (index !== -1) {
+        peladas.value[index].hasStatistics = false
+      }
+    }
+  })
+}
+
 const fetchPeladas = async () => {
   isLoading.value = true
   try {
     const fetchedPeladas = await PeladaService.getAllPeladas()
-    peladas.value = fetchedPeladas.map((pelada) => ({ ...pelada, hasStatistics: undefined }))
-    isLoading.value = false
-
-    fetchedPeladas.forEach(async (pelada) => {
-      try {
-        const hasStats = await StatisticsService.hasPeladaStatistics(pelada.id)
-        const index = peladas.value.findIndex((item) => item.id === pelada.id)
-        if (index !== -1) {
-          peladas.value[index].hasStatistics = hasStats
-        }
-      } catch {
-        const index = peladas.value.findIndex((item) => item.id === pelada.id)
-        if (index !== -1) {
-          peladas.value[index].hasStatistics = false
-        }
-      }
-    })
+    applyPeladas(fetchedPeladas)
   } catch (error) {
     console.error(error)
     toast.error('Falha ao carregar peladas')
     isLoading.value = false
   }
+}
+
+const searchByDate = async () => {
+  if (!searchDate.value) return
+  isLoading.value = true
+  isSearchActive.value = true
+  try {
+    const fetchedPeladas = await PeladaService.getPeladasByDate(searchDate.value)
+    applyPeladas(fetchedPeladas)
+  } catch (error) {
+    console.error(error)
+    toast.error('Falha ao buscar peladas por data')
+    isLoading.value = false
+  }
+}
+
+const clearSearch = () => {
+  searchDate.value = ''
+  isSearchActive.value = false
+  fetchPeladas()
 }
 
 const handleCreate = async () => {

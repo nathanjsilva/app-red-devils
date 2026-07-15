@@ -7,6 +7,10 @@ import type {
   TeamFieldsResponse
 } from '../types'
 
+export interface OrganizeTeamsAutomaticRequest {
+  player_ids: number[]
+}
+
 export class TeamService {
   static async getTeamFields(peladaId: number): Promise<TeamFieldsResponse> {
     const response = await api.get<TeamFieldsResponse>(`/teams/pelada/${peladaId}/fields`)
@@ -33,6 +37,11 @@ export class TeamService {
       }
       throw error
     }
+  }
+
+  static async organizeTeamsAutomatically(peladaId: number, request: OrganizeTeamsAutomaticRequest): Promise<OrganizedPeladaTeamsResponse> {
+    const response = await api.post<OrganizedPeladaTeamsResponse>(`/admin/peladas/${peladaId}/organize-teams`, request)
+    return (response as any).data?.data ?? response.data
   }
 
   static async getTeamsWithStatistics(peladaId: number): Promise<TeamsWithStatisticsResponse> {

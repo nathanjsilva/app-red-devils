@@ -18,7 +18,7 @@
               </button>
               <button
                 v-if="isAdmin"
-                class="btn btn-outline-danger home-secondary-btn"
+                class="btn btn-outline-secondary home-secondary-btn"
                 @click="goToAdminPlayers"
               >
                 Gerenciar jogadores
@@ -55,6 +55,31 @@
       </div>
     </section>
 
+    <section class="surface-card division-section">
+      <div class="surface-card-body">
+        <div class="section-toolbar">
+          <div>
+            <p class="home-section-kicker">Peladas</p>
+            <h2 class="section-title mb-0">Numeros por divisao</h2>
+          </div>
+        </div>
+
+        <div v-if="isLoadingPeladaCounts" class="text-muted small">Carregando...</div>
+        <div v-else class="metric-grid division-grid">
+          <div class="metric-card">
+            <span>Quinta</span>
+            <strong>{{ peladaCountByDivision.quinta }}</strong>
+            <small>pelada{{ peladaCountByDivision.quinta !== 1 ? 's' : '' }}</small>
+          </div>
+          <div class="metric-card">
+            <span>Sabado</span>
+            <strong>{{ peladaCountByDivision.sabado }}</strong>
+            <small>pelada{{ peladaCountByDivision.sabado !== 1 ? 's' : '' }}</small>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <div v-if="isLoading" class="surface-card">
       <div class="surface-card-body home-state-card text-center py-5">
         <div class="spinner-border text-red-devils" role="status">
@@ -68,7 +93,7 @@
       <div class="surface-card-body home-state-card text-center py-5">
         <h2 class="section-title mb-2">Nao foi possivel carregar os rankings</h2>
         <p class="text-muted mb-3">{{ error }}</p>
-        <button class="btn btn-outline-danger" @click="fetchRankings">Tentar novamente</button>
+        <button class="btn btn-outline-secondary" @click="fetchRankings">Tentar novamente</button>
       </div>
     </div>
 
@@ -146,12 +171,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { useRankingsStore } from '../stores/rankings'
 import { useAuthStore } from '../stores/auth'
 import { useSEO } from '../composables/useSEO'
+import { PeladaService } from '../services/peladaService'
 import logo from '../assets/logo-red-devils.png'
 
 const router = useRouter()
@@ -161,6 +187,9 @@ const { updateSEO } = useSEO()
 
 const { rankings, isLoading, error } = storeToRefs(rankingsStore)
 const { fetchRankings } = rankingsStore
+
+const isLoadingPeladaCounts = ref(false)
+const peladaCountByDivision = ref({ quinta: 0, sabado: 0 })
 
 const rankingsList = computed(() => rankings.value || [])
 const totalMatches = computed(() => rankingsStore.getTotalMatches())
@@ -211,6 +240,19 @@ onMounted(async () => {
     } catch (fetchError) {
       console.error('Error fetching rankings:', fetchError)
     }
+  }
+
+  isLoadingPeladaCounts.value = true
+  try {
+    const peladas = await PeladaService.getAllPeladas()
+    peladaCountByDivision.value = {
+      quinta: peladas.filter((pelada) => pelada.division === 'quinta').length,
+      sabado: peladas.filter((pelada) => pelada.division === 'sabado').length
+    }
+  } catch (fetchError) {
+    console.error('Error fetching peladas for division counts:', fetchError)
+  } finally {
+    isLoadingPeladaCounts.value = false
   }
 })
 

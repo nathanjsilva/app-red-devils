@@ -27,6 +27,16 @@ const routes = [
     component: () => import('../views/StatisticsView.vue')
   },
   {
+    path: '/players/:id',
+    name: 'PlayerDetail',
+    component: () => import('../views/PlayerDetailView.vue')
+  },
+  {
+    path: '/peladas/:id',
+    name: 'PeladaDetail',
+    component: () => import('../views/PeladaDetailView.vue')
+  },
+  {
     path: '/admin/players',
     name: 'AdminPlayers',
     component: () => import('../views/AdminPlayersView.vue'),

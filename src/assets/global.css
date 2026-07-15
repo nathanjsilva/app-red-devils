@@ -54,7 +54,14 @@ h3,
     border-color: var(--red-devils-border) !important;
 }
 
-.btn-red-devils,
+/*
+ * Variantes canônicas de botão usadas em todo o app — não criar classes novas,
+ * reaproveitar uma destas:
+ *   .btn-red                    -> ação primária (salvar, criar, confirmar)
+ *   .btn-outline-secondary      -> cancelar / voltar / recarregar
+ *   .btn-outline-primary btn-sm -> editar linha de tabela
+ *   .btn-outline-danger  btn-sm -> excluir / ação destrutiva
+ */
 .btn-red {
     background: linear-gradient(135deg, var(--red-devils) 0%, #7f1010 100%);
     border: 1px solid var(--red-devils-border);
@@ -63,9 +70,7 @@ h3,
     box-shadow: 0 10px 24px rgba(185, 28, 28, 0.18);
 }
 
-.btn-red-devils:hover,
 .btn-red:hover,
-.btn-red-devils:focus-visible,
 .btn-red:focus-visible {
     background: linear-gradient(135deg, var(--red-devils-hover) 0%, #660d0d 100%);
     border-color: var(--red-devils-hover);
@@ -215,6 +220,11 @@ select:focus-visible {
 .pill-info {
     background: rgba(59, 130, 246, 0.12);
     color: #1d4ed8;
+}
+
+.pill-danger {
+    background: rgba(185, 28, 28, 0.1);
+    color: var(--red-devils);
 }
 
 .modal-shell,

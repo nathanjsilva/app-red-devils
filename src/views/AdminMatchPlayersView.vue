@@ -13,17 +13,13 @@
         <div class="row g-3">
           <div class="col-12 col-lg-8">
             <label class="form-label">Pelada</label>
-            <select
-              v-model.number="form.pelada_id"
-              class="form-select"
-              @change="loadPeladaData"
+            <SearchableSelect
+              v-model="form.pelada_id"
+              :options="peladaOptions"
+              placeholder="Selecione a pelada"
               :disabled="allPeladas.length === 0 || isLoadingPeladas"
-            >
-              <option :value="0">Selecione a pelada</option>
-              <option v-for="pelada in allPeladas" :key="pelada.id" :value="pelada.id">
-                {{ pelada.location }} ({{ formatDate(pelada.date) }})
-              </option>
-            </select>
+              @change="loadPeladaData"
+            />
           </div>
         </div>
       </div>
@@ -101,16 +97,27 @@
                   <span v-else class="text-muted">—</span>
                 </td>
                 <td data-label="Resultado">
-                  <select v-model="playerStat.statistics.result" class="form-select form-select-sm result-select" @change="syncWinner(playerStat)">
-                    <option value="win">Vitoria</option>
-                    <option value="draw">Empate</option>
-                    <option value="loss">Derrota</option>
-                  </select>
+                  <SearchableSelect
+                    v-model="playerStat.statistics.result"
+                    :options="resultOptions"
+                    input-class="form-select-sm result-select"
+                    @change="syncWinner(playerStat)"
+                  />
                 </td>
                 <td class="text-end" data-label="Acoes">
-                  <button class="btn btn-sm btn-red" @click="savePlayerStatistics(playerStat)" :disabled="isSaving === playerStat.player.id">
-                    {{ isSaving === playerStat.player.id ? 'Salvando...' : 'Salvar' }}
-                  </button>
+                  <div class="d-flex flex-wrap justify-content-end gap-2">
+                    <button class="btn btn-sm btn-red" @click="savePlayerStatistics(playerStat)" :disabled="isSaving === playerStat.player.id">
+                      {{ isSaving === playerStat.player.id ? 'Salvando...' : 'Salvar' }}
+                    </button>
+                    <button
+                      v-if="playerStat.matchPlayerId"
+                      class="btn btn-sm btn-outline-danger"
+                      @click="removePlayerStatistics(playerStat)"
+                      :disabled="isSaving === playerStat.player.id"
+                    >
+                      Excluir
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -132,16 +139,24 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
+import SearchableSelect from '../components/ui/SearchableSelect.vue'
 import { AdminService } from '../services/adminService'
 import { PeladaService } from '../services/peladaService'
 import { TeamService } from '../services/teamService'
 import type { Pelada, PeladaPlayersItem, UpdateMatchPlayerRequest } from '../types'
 
+const resultOptions = [
+  { value: 'win', label: 'Vitoria' },
+  { value: 'draw', label: 'Empate' },
+  { value: 'loss', label: 'Derrota' }
+]
+
 interface PlayerWithStatistics {
   player: PeladaPlayersItem
+  matchPlayerId?: number
   statistics: {
     goals: number
     assists: number
@@ -161,6 +176,13 @@ const isLoadingPeladas = ref(false)
 const isSaving = ref<number | null>(null)
 const playerStats = ref<PlayerWithStatistics[]>([])
 const form = ref({ pelada_id: 0 })
+
+const peladaOptions = computed(() =>
+  allPeladas.value.map((pelada) => ({
+    value: pelada.id,
+    label: `${pelada.location} (${formatDate(pelada.date)})`
+  }))
+)
 
 const formatDate = (dateString: string): string => {
   if (!dateString) return 'Data nao informada'
@@ -280,12 +302,30 @@ const savePlayerStatistics = async (playerStat: PlayerWithStatistics) => {
       statsData.assists = playerStat.statistics.assists || 0
     }
 
-    await AdminService.updatePlayerStatistics(selectedPelada.value.id, playerStat.player.id, statsData)
+    const updated = await AdminService.updatePlayerStatistics(selectedPelada.value.id, playerStat.player.id, statsData)
+    playerStat.matchPlayerId = updated.id
     syncWinner(playerStat)
     toast.success(`Estatisticas de ${playerStat.player.nickname} salvas com sucesso`)
   } catch (error: any) {
     console.error(error)
     toast.error(`Falha ao salvar estatisticas: ${error?.response?.data?.message || error?.message || 'Erro desconhecido'}`)
+  } finally {
+    isSaving.value = null
+  }
+}
+
+const removePlayerStatistics = async (playerStat: PlayerWithStatistics) => {
+  if (!playerStat.matchPlayerId) return
+  if (!confirm(`Excluir as estatisticas de ${playerStat.player.nickname} nessa pelada?`)) return
+
+  isSaving.value = playerStat.player.id
+  try {
+    await AdminService.deleteMatchPlayer(playerStat.matchPlayerId)
+    playerStats.value = playerStats.value.filter((item) => item.player.id !== playerStat.player.id)
+    toast.success(`Estatisticas de ${playerStat.player.nickname} excluidas`)
+  } catch (error: any) {
+    console.error(error)
+    toast.error(`Falha ao excluir estatisticas: ${error?.response?.data?.message || error?.message || 'Erro desconhecido'}`)
   } finally {
     isSaving.value = null
   }
