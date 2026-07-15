@@ -1,4 +1,4 @@
-export const API_BASE_URL = 'http://localhost/api'
+export const API_BASE_URL = 'http://137.131.133.133/api'
 
 export const STORAGE_KEYS = {
   TOKEN: 'token',
