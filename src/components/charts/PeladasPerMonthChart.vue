@@ -49,7 +49,7 @@ const chartOptions = {
   },
   scales: {
     x: { grid: { display: false }, ticks: { font: { size: 11 } } },
-    y: { beginAtZero: true, grid: { color: 'rgba(15, 23, 42, 0.06)' }, ticks: { precision: 0, font: { size: 11 } } }
+    y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.08)' }, ticks: { precision: 0, font: { size: 11 } } }
   }
 }
 </script>

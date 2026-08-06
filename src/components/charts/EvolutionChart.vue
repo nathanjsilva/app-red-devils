@@ -44,9 +44,9 @@ const chartData = computed(() => ({
     {
       label: 'Assistências',
       data: props.points.map((point) => point.total_assists),
-      borderColor: '#172033',
-      backgroundColor: 'rgba(23, 32, 51, 0.08)',
-      pointBackgroundColor: '#172033',
+      borderColor: '#f59e0b',
+      backgroundColor: 'rgba(245, 158, 11, 0.14)',
+      pointBackgroundColor: '#f59e0b',
       pointBorderColor: '#fff',
       pointRadius: 4,
       pointHoverRadius: 6,
@@ -75,7 +75,7 @@ const chartOptions = {
   },
   scales: {
     x: { grid: { display: false }, ticks: { font: { size: 11 } } },
-    y: { beginAtZero: true, grid: { color: 'rgba(15, 23, 42, 0.06)' }, ticks: { precision: 0, font: { size: 11 } } }
+    y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.08)' }, ticks: { precision: 0, font: { size: 11 } } }
   }
 }
 </script>

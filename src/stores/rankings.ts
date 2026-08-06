@@ -1,18 +1,18 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { RankingService } from '../services/rankingService'
-import type { Ranking } from '../types'
+import type { Ranking, StatisticsFilters } from '../types'
 
 export const useRankingsStore = defineStore('rankings', () => {
   const rankings = ref<Ranking[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
 
-  const fetchRankings = async () => {
+  const fetchRankings = async (filters: StatisticsFilters = {}) => {
     isLoading.value = true
     error.value = null
     try {
-      rankings.value = await RankingService.getAllRankings()
+      rankings.value = await RankingService.getAllRankings(filters)
     } catch (err) {
       console.warn('Erro ao buscar rankings:', err)
       error.value = 'Erro ao carregar rankings'
@@ -30,18 +30,6 @@ export const useRankingsStore = defineStore('rankings', () => {
     error.value = null
   }
 
-  const getTotalMatches = (): number => {
-    let maxMatches = 0
-    rankings.value.forEach((ranking) => {
-      ranking.players.forEach((player) => {
-        if (player.matches > maxMatches) {
-          maxMatches = player.matches
-        }
-      })
-    })
-    return maxMatches
-  }
-
   return {
     rankings,
     isLoading,
@@ -51,7 +39,6 @@ export const useRankingsStore = defineStore('rankings', () => {
     fetchAssistsRanking,
     fetchWinsRanking,
     fetchGoalkeepersRanking,
-    clearError,
-    getTotalMatches
+    clearError
   }
 })

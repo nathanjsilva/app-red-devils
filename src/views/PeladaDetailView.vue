@@ -50,17 +50,17 @@
           <div class="metric-grid">
             <div v-if="match.top_scorer" class="metric-card">
               <span>Artilheiro</span>
-              <strong>{{ match.top_scorer.player.nickname || match.top_scorer.player.name }}</strong>
+              <strong>{{ match.top_scorer.player.name }}</strong>
               <small>{{ match.top_scorer.value }} gols</small>
             </div>
             <div v-if="match.top_assister" class="metric-card">
               <span>Garçom</span>
-              <strong>{{ match.top_assister.player.nickname || match.top_assister.player.name }}</strong>
+              <strong>{{ match.top_assister.player.name }}</strong>
               <small>{{ match.top_assister.value }} assistências</small>
             </div>
             <div v-if="match.top_goal_participation" class="metric-card">
               <span>Maior participação</span>
-              <strong>{{ match.top_goal_participation.player.nickname || match.top_goal_participation.player.name }}</strong>
+              <strong>{{ match.top_goal_participation.player.name }}</strong>
               <small>{{ match.top_goal_participation.value }} participações</small>
             </div>
           </div>
@@ -110,7 +110,7 @@
               <tbody>
                 <tr v-for="item in match.field_players" :key="item.player.id">
                   <td data-label="Jogador">
-                    <router-link :to="`/players/${item.player.id}`" class="fw-bold">{{ item.player.nickname || item.player.name }}</router-link>
+                    <router-link :to="`/players/${item.player.id}`" class="fw-bold">{{ item.player.name }}</router-link>
                   </td>
                   <td data-label="Gols">{{ item.statistics.goals }}</td>
                   <td data-label="Assistências">{{ item.statistics.assists }}</td>
@@ -141,7 +141,7 @@
               <tbody>
                 <tr v-for="item in match.goalkeepers" :key="item.player.id">
                   <td data-label="Goleiro">
-                    <router-link :to="`/players/${item.player.id}`" class="fw-bold">{{ item.player.nickname || item.player.name }}</router-link>
+                    <router-link :to="`/players/${item.player.id}`" class="fw-bold">{{ item.player.name }}</router-link>
                   </td>
                   <td data-label="Gols sofridos">{{ item.statistics.goals_conceded }}</td>
                   <td data-label="Participações">{{ item.statistics.goal_participation }}</td>

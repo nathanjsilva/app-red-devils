@@ -8,7 +8,9 @@ const RANKING_LABELS: Record<string, string> = {
   'goal-participations': 'Participação em Gols',
   goalkeepers: 'Goleiros (Gols Sofridos)',
   'win-rate': 'Aproveitamento',
-  appearances: 'Presenças'
+  appearances: 'Presenças',
+  'top-scorer-frequency': 'Artilheiro da pelada',
+  'top-assister-frequency': 'Garçom da pelada'
 }
 
 export class RankingService {
@@ -33,19 +35,19 @@ export class RankingService {
     }
   }
 
-  static getWinsRanking = () => this.getFullRanking('wins')
-  static getGoalsRanking = () => this.getFullRanking('goals')
-  static getAssistsRanking = () => this.getFullRanking('assists')
-  static getGoalParticipationRanking = () => this.getFullRanking('goal-participations')
-  static getGoalkeepersRanking = () => this.getFullRanking('goalkeepers')
+  static getWinsRanking = (filters: StatisticsFilters = {}) => this.getFullRanking('wins', 10, filters)
+  static getGoalsRanking = (filters: StatisticsFilters = {}) => this.getFullRanking('goals', 10, filters)
+  static getAssistsRanking = (filters: StatisticsFilters = {}) => this.getFullRanking('assists', 10, filters)
+  static getGoalParticipationRanking = (filters: StatisticsFilters = {}) => this.getFullRanking('goal-participations', 10, filters)
+  static getGoalkeepersRanking = (filters: StatisticsFilters = {}) => this.getFullRanking('goalkeepers', 10, filters)
 
-  static async getAllRankings(): Promise<Ranking[]> {
+  static async getAllRankings(filters: StatisticsFilters = {}): Promise<Ranking[]> {
     const rankingEndpoints = [
-      this.getWinsRanking.bind(this),
-      this.getGoalsRanking.bind(this),
-      this.getAssistsRanking.bind(this),
-      this.getGoalParticipationRanking.bind(this),
-      this.getGoalkeepersRanking.bind(this)
+      () => this.getWinsRanking(filters),
+      () => this.getGoalsRanking(filters),
+      () => this.getAssistsRanking(filters),
+      () => this.getGoalParticipationRanking(filters),
+      () => this.getGoalkeepersRanking(filters)
     ]
 
     const results = await Promise.allSettled(rankingEndpoints.map((fn) => fn()))

@@ -7,8 +7,8 @@ export class PeladaService {
     return (response as any).data?.data ?? response.data
   }
 
-  static async getAllPeladas(): Promise<Pelada[]> {
-    const response = await api.get<Pelada[]>('/peladas')
+  static async getAllPeladas(division?: 'quinta' | 'sabado'): Promise<Pelada[]> {
+    const response = await api.get<Pelada[]>('/peladas', { params: { per_page: 100, division } })
     return (response as any).data?.data ?? response.data
   }
 

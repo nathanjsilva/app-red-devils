@@ -72,10 +72,6 @@
         <i class="bi bi-grid-3x3-gap"></i>
         <span>Mais</span>
       </button>
-      <router-link v-else to="/login" class="tab-item">
-        <i class="bi bi-box-arrow-in-right"></i>
-        <span>Entrar</span>
-      </router-link>
     </nav>
 
     <main class="app-main" :class="{ 'has-bottom-nav': !isDesktop }">

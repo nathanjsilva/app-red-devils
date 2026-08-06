@@ -22,3 +22,6 @@ Chart.register(
   RadialLinearScale,
   Tooltip
 )
+
+Chart.defaults.color = '#b3a29b'
+Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.08)'

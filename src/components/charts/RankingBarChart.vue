@@ -22,7 +22,7 @@ const barsHeight = computed(() => `${Math.max(220, props.players.length * 46)}px
 const chartData = computed(() => {
   const ordered = [...props.players].reverse()
   return {
-    labels: ordered.map((player) => player.nickname || player.name),
+    labels: ordered.map((player) => player.name),
     datasets: [
       {
         label: 'Valor',
@@ -53,7 +53,7 @@ const chartOptions = computed(() => ({
     }
   },
   scales: {
-    x: { beginAtZero: true, grid: { color: 'rgba(15, 23, 42, 0.06)' }, ticks: { precision: 0, font: { size: 11 } } },
+    x: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.08)' }, ticks: { precision: 0, font: { size: 11 } } },
     y: { grid: { display: false }, ticks: { font: { size: 12, weight: 700 } } }
   }
 }))

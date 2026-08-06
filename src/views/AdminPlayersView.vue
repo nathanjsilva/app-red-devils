@@ -62,7 +62,6 @@
               <tr>
                 <th class="hide-mobile">ID</th>
                 <th>Nome</th>
-                <th>Apelido</th>
                 <th>Posicao</th>
                 <th class="text-end">Acoes</th>
               </tr>
@@ -71,7 +70,6 @@
               <tr v-for="player in players" :key="player.id">
                 <td class="hide-mobile" data-label="ID">{{ player.id }}</td>
                 <td class="fw-bold" data-label="Nome">{{ player.name }}</td>
-                <td data-label="Apelido">{{ player.nickname }}</td>
                 <td data-label="Posicao">
                   <span class="pill-badge" :class="player.position === 'goleiro' ? 'pill-info' : 'pill-muted'">
                     {{ player.position }}

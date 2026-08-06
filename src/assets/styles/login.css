@@ -4,15 +4,15 @@
     place-items: center;
     padding: 1.5rem;
     background:
-        radial-gradient(circle at top, rgba(185, 28, 28, 0.18), transparent 24%),
-        linear-gradient(180deg, #fff 0%, #f5f6f8 100%);
+        radial-gradient(circle at top, rgba(220, 38, 38, 0.2), transparent 30%),
+        linear-gradient(180deg, #140d0b 0%, #0c0807 100%);
 }
 
 .login-card {
     width: min(100%, 430px);
     padding: 2rem;
     border-radius: 1.5rem;
-    background: rgba(255, 255, 255, 0.96);
+    background: var(--surface-strong);
     border: 1px solid var(--line-soft);
     box-shadow: var(--shadow-strong);
 }

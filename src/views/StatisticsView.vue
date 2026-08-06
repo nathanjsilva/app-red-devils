@@ -168,6 +168,65 @@
         </div>
       </section>
 
+      <!-- Presença -->
+      <section class="surface-card stats-section-card">
+        <div class="surface-card-body">
+          <div class="section-toolbar">
+            <div>
+              <p class="stats-section-kicker">Frequência</p>
+              <h2 class="section-title mb-0">Presença por jogador</h2>
+            </div>
+          </div>
+
+          <div v-if="isLoadingPresence" class="state-box">
+            <span class="spinner"></span>
+          </div>
+          <p v-else-if="!presenceRanking || presenceRanking.players.length === 0" class="text-muted mb-0">
+            Sem jogadores elegíveis nesse recorte.
+          </p>
+          <RankingBarChart v-else :players="presenceRanking.players" value-suffix=" peladas" />
+        </div>
+      </section>
+
+      <!-- Destaques por pelada -->
+      <section class="surface-card stats-section-card">
+        <div class="surface-card-body">
+          <div class="section-toolbar">
+            <div>
+              <p class="stats-section-kicker">Destaques por pelada</p>
+              <h2 class="section-title mb-0">Quem mais foi artilheiro da pelada</h2>
+            </div>
+          </div>
+
+          <div v-if="isLoadingTopScorerFrequency" class="state-box">
+            <span class="spinner"></span>
+          </div>
+          <p v-else-if="!topScorerFrequencyRanking || topScorerFrequencyRanking.players.length === 0" class="text-muted mb-0">
+            Sem jogadores elegíveis nesse recorte.
+          </p>
+          <RankingBarChart v-else :players="topScorerFrequencyRanking.players" value-suffix=" vezes" />
+        </div>
+      </section>
+
+      <section class="surface-card stats-section-card">
+        <div class="surface-card-body">
+          <div class="section-toolbar">
+            <div>
+              <p class="stats-section-kicker">Destaques por pelada</p>
+              <h2 class="section-title mb-0">Quem mais foi garçom da pelada</h2>
+            </div>
+          </div>
+
+          <div v-if="isLoadingTopAssisterFrequency" class="state-box">
+            <span class="spinner"></span>
+          </div>
+          <p v-else-if="!topAssisterFrequencyRanking || topAssisterFrequencyRanking.players.length === 0" class="text-muted mb-0">
+            Sem jogadores elegíveis nesse recorte.
+          </p>
+          <RankingBarChart v-else :players="topAssisterFrequencyRanking.players" value-suffix=" vezes" />
+        </div>
+      </section>
+
       <!-- Goleiros -->
       <section class="surface-card stats-section-card">
         <div class="surface-card-body">
@@ -204,7 +263,7 @@
                   @click="openGoalkeeperDetail(goalkeeper.player.id)"
                 >
                   <td data-label="Goleiro">
-                    <div class="fw-bold">{{ goalkeeper.player.nickname || goalkeeper.player.name }}</div>
+                    <div class="fw-bold">{{ goalkeeper.player.name }}</div>
                   </td>
                   <td data-label="Jogos">{{ goalkeeper.matches }}</td>
                   <td data-label="Vitórias">{{ goalkeeper.wins }}</td>
@@ -223,8 +282,7 @@
           <div class="modal-card" role="dialog" aria-modal="true">
             <div class="modal-head">
               <div class="modal-head-text">
-                <h2>{{ goalkeeperDetail.player.nickname || goalkeeperDetail.player.name }}</h2>
-                <p>{{ goalkeeperDetail.player.name }}</p>
+                <h2>{{ goalkeeperDetail.player.name }}</h2>
               </div>
               <button class="modal-close" @click="closeGoalkeeperDetail" aria-label="Fechar">
                 <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -258,7 +316,7 @@
                 </div>
                 <div class="stat-card" v-if="goalkeeperDetail.best_duo">
                   <span class="stat-label">Melhor dupla</span>
-                  <strong class="stat-val">{{ goalkeeperDetail.best_duo.players.map(p => p.nickname || p.name).join(' + ') }}</strong>
+                  <strong class="stat-val">{{ goalkeeperDetail.best_duo.players.map(p => p.name).join(' + ') }}</strong>
                 </div>
               </div>
             </div>
@@ -287,7 +345,7 @@
               />
               <ul v-if="isSearchOpen && filteredPlayers.length > 0" class="stats-compare-suggestions">
                 <li v-for="player in filteredPlayers" :key="player.id" @click="addPlayer(player.id)">
-                  {{ player.name }} <span class="text-muted">({{ player.nickname }})</span>
+                  {{ player.name }}
                 </li>
               </ul>
             </div>
@@ -383,7 +441,6 @@ const rankingCategories = [
   { value: 'goal-participations' as const, label: 'Participações', suffix: '' },
   { value: 'wins' as const, label: 'Vitórias', suffix: '' },
   { value: 'win-rate' as const, label: 'Aproveitamento', suffix: '%' },
-  { value: 'appearances' as const, label: 'Presenças', suffix: '' },
   { value: 'goalkeepers' as const, label: 'Goleiros', suffix: '/jogo' }
 ]
 const rankingType = ref<(typeof rankingCategories)[number]['value']>('goals')
@@ -402,6 +459,53 @@ const fetchRanking = async () => {
     currentRanking.value = null
   } finally {
     isLoadingRanking.value = false
+  }
+}
+
+// --- Presença por jogador ---
+const presenceRanking = ref<Ranking | null>(null)
+const isLoadingPresence = ref(false)
+
+const fetchPresence = async () => {
+  isLoadingPresence.value = true
+  try {
+    presenceRanking.value = await RankingService.getFullRanking('appearances', 8, filters.value)
+  } catch (error) {
+    console.error(error)
+    presenceRanking.value = null
+  } finally {
+    isLoadingPresence.value = false
+  }
+}
+
+// --- Destaques por pelada (artilheiro / garçom) ---
+const topScorerFrequencyRanking = ref<Ranking | null>(null)
+const isLoadingTopScorerFrequency = ref(false)
+
+const fetchTopScorerFrequency = async () => {
+  isLoadingTopScorerFrequency.value = true
+  try {
+    topScorerFrequencyRanking.value = await RankingService.getFullRanking('top-scorer-frequency', 8, filters.value)
+  } catch (error) {
+    console.error(error)
+    topScorerFrequencyRanking.value = null
+  } finally {
+    isLoadingTopScorerFrequency.value = false
+  }
+}
+
+const topAssisterFrequencyRanking = ref<Ranking | null>(null)
+const isLoadingTopAssisterFrequency = ref(false)
+
+const fetchTopAssisterFrequency = async () => {
+  isLoadingTopAssisterFrequency.value = true
+  try {
+    topAssisterFrequencyRanking.value = await RankingService.getFullRanking('top-assister-frequency', 8, filters.value)
+  } catch (error) {
+    console.error(error)
+    topAssisterFrequencyRanking.value = null
+  } finally {
+    isLoadingTopAssisterFrequency.value = false
   }
 }
 
@@ -424,7 +528,7 @@ const filteredPlayers = computed(() => {
 
 const playerLabel = (id: number) => {
   const player = allPlayers.value.find((item) => item.id === id)
-  return player ? (player.nickname || player.name) : `#${id}`
+  return player ? player.name : `Jogador ${id}`
 }
 
 const addPlayer = (id: number) => {
@@ -504,6 +608,9 @@ watch(division, () => {
   fetchEvolution()
   fetchPeladasPerMonth()
   fetchRanking()
+  fetchPresence()
+  fetchTopScorerFrequency()
+  fetchTopAssisterFrequency()
   fetchGoalkeepers()
   fetchCompare()
 })
@@ -520,6 +627,9 @@ onMounted(async () => {
   fetchEvolution()
   fetchPeladasPerMonth()
   fetchRanking()
+  fetchPresence()
+  fetchTopScorerFrequency()
+  fetchTopAssisterFrequency()
   fetchGoalkeepers()
 
   try {

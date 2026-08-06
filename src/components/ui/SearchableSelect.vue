@@ -141,7 +141,7 @@ const selectFirstMatch = () => {
   margin: 0;
   padding: 0.4rem;
   list-style: none;
-  background: #fff;
+  background: var(--surface-strong);
   border: 1px solid var(--line-strong);
   border-radius: 0.95rem;
   box-shadow: var(--shadow-strong);
@@ -157,11 +157,11 @@ const selectFirstMatch = () => {
 }
 
 .searchable-select-suggestions li:hover {
-  background: rgba(185, 28, 28, 0.06);
+  background: rgba(220, 38, 38, 0.14);
 }
 
 .searchable-select-suggestions li.active {
-  background: rgba(185, 28, 28, 0.1);
+  background: rgba(220, 38, 38, 0.22);
 }
 
 .searchable-select-suggestions li.disabled {
@@ -172,7 +172,7 @@ const selectFirstMatch = () => {
 
 .searchable-select-suggestions li.empty {
   cursor: default;
-  color: #6c757d;
+  color: var(--text-muted);
   font-weight: 500;
 }
 

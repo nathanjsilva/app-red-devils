@@ -30,7 +30,7 @@
         <div class="section-toolbar">
           <div>
             <h2 class="section-title mb-0">{{ selectedPelada.location }}</h2>
-            <p class="page-subtitle">Data {{ formatDate(selectedPelada.date) }} · Pelada #{{ selectedPelada.id }}</p>
+            <p class="page-subtitle">Data {{ formatDate(selectedPelada.date) }}</p>
           </div>
           <button class="btn btn-outline-secondary" @click="clearSelection">Trocar pelada</button>
         </div>
@@ -60,8 +60,7 @@
             <tbody>
               <tr v-for="playerStat in playerStats" :key="playerStat.player.id">
                 <td data-label="Jogador">
-                  <div class="fw-bold">{{ playerStat.player.nickname }}</div>
-                  <div class="text-muted small">{{ playerStat.player.name }}</div>
+                  <div class="fw-bold">{{ playerStat.player.name }}</div>
                 </td>
                 <td data-label="Posicao">
                   <span class="pill-badge" :class="playerStat.player.position === 'goleiro' ? 'pill-info' : 'pill-muted'">
@@ -233,8 +232,8 @@ const loadPeladaById = async (peladaId: number) => {
       return {
         player: {
           id: player.id,
-          name: player.name || 'Sem nome',
-          nickname: player.nickname || `Jogador ${player.id}`,
+          name: player.name || `Jogador ${player.id}`,
+          nickname: player.nickname || '',
           position: player.position === 'goleiro' ? 'goleiro' : 'linha',
           is_goalkeeper: isGoalkeeper
         },
@@ -305,7 +304,7 @@ const savePlayerStatistics = async (playerStat: PlayerWithStatistics) => {
     const updated = await AdminService.updatePlayerStatistics(selectedPelada.value.id, playerStat.player.id, statsData)
     playerStat.matchPlayerId = updated.id
     syncWinner(playerStat)
-    toast.success(`Estatisticas de ${playerStat.player.nickname} salvas com sucesso`)
+    toast.success(`Estatisticas de ${playerStat.player.name} salvas com sucesso`)
   } catch (error: any) {
     console.error(error)
     toast.error(`Falha ao salvar estatisticas: ${error?.response?.data?.message || error?.message || 'Erro desconhecido'}`)
@@ -316,13 +315,13 @@ const savePlayerStatistics = async (playerStat: PlayerWithStatistics) => {
 
 const removePlayerStatistics = async (playerStat: PlayerWithStatistics) => {
   if (!playerStat.matchPlayerId) return
-  if (!confirm(`Excluir as estatisticas de ${playerStat.player.nickname} nessa pelada?`)) return
+  if (!confirm(`Excluir as estatisticas de ${playerStat.player.name} nessa pelada?`)) return
 
   isSaving.value = playerStat.player.id
   try {
     await AdminService.deleteMatchPlayer(playerStat.matchPlayerId)
     playerStats.value = playerStats.value.filter((item) => item.player.id !== playerStat.player.id)
-    toast.success(`Estatisticas de ${playerStat.player.nickname} excluidas`)
+    toast.success(`Estatisticas de ${playerStat.player.name} excluidas`)
   } catch (error: any) {
     console.error(error)
     toast.error(`Falha ao excluir estatisticas: ${error?.response?.data?.message || error?.message || 'Erro desconhecido'}`)

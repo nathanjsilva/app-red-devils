@@ -3,8 +3,8 @@
     <div class="page-header">
       <div>
         <button class="btn btn-outline-secondary mb-2" @click="router.back()">Voltar</button>
-        <h1 class="page-title">{{ profile ? (profile.player.nickname || profile.player.name) : 'Jogador' }}</h1>
-        <p v-if="profile" class="page-subtitle">{{ profile.player.name }} · {{ profile.player.position === 'goleiro' ? 'Goleiro' : 'Jogador de linha' }}</p>
+        <h1 class="page-title">{{ profile ? profile.player.name : 'Jogador' }}</h1>
+        <p v-if="profile" class="page-subtitle">{{ profile.player.position === 'goleiro' ? 'Goleiro' : 'Jogador de linha' }}</p>
       </div>
     </div>
 
@@ -69,7 +69,7 @@
           <div v-if="profile.best_duo" class="best-duo mt-3">
             <span class="text-muted small">Melhor dupla</span>
             <p class="mb-0 fw-bold">
-              {{ profile.best_duo.players.map((p) => p.nickname || p.name).join(' + ') }}
+              {{ profile.best_duo.players.map((p) => p.name).join(' + ') }}
               <span class="text-muted fw-normal">— {{ profile.best_duo.matches_together }} jogos juntos, {{ formatDec(profile.best_duo.win_rate_together) }}% de aproveitamento</span>
             </p>
           </div>

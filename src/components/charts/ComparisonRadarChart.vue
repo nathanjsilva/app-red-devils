@@ -34,7 +34,7 @@ const chartData = computed(() => ({
   datasets: props.entries.map((entry, index) => {
     const color = PALETTE[index % PALETTE.length]
     return {
-      label: entry.player.nickname || entry.player.name,
+      label: entry.player.name,
       data: AXES.map((axis) => entry.radar[axis.key] ?? 0),
       borderColor: color,
       backgroundColor: `${color}26`,
@@ -72,8 +72,8 @@ const chartOptions = {
       min: 0,
       max: 100,
       ticks: { display: false, stepSize: 25 },
-      grid: { color: 'rgba(15, 23, 42, 0.08)' },
-      angleLines: { color: 'rgba(15, 23, 42, 0.08)' },
+      grid: { color: 'rgba(255, 255, 255, 0.1)' },
+      angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
       pointLabels: { font: { size: 11, weight: 700 as const } }
     }
   }

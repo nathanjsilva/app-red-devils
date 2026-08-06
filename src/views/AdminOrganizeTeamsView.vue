@@ -53,7 +53,7 @@
           <div class="auto-organize-players">
             <label v-for="player in players" :key="player.id" class="auto-organize-player">
               <input type="checkbox" :value="player.id" v-model="autoOrganizePlayerIds" />
-              <span>#{{ player.id }} · {{ player.nickname }} ({{ player.position }})</span>
+              <span>{{ player.name }} ({{ player.position === 'goleiro' ? 'Goleiro' : 'Linha' }})</span>
             </label>
           </div>
 
@@ -170,7 +170,7 @@ const peladaOptions = computed(() =>
 const playerOptionsFor = (teamNumber: number, slotIndex: number) =>
   players.value.map((player) => ({
     value: player.id,
-    label: `#${player.id} · ${player.nickname} (${player.position})`,
+    label: `${player.name} (${player.position === 'goleiro' ? 'Goleiro' : 'Linha'})`,
     disabled: isPlayerAlreadyChosen(player.id, teamNumber, slotIndex)
   }))
 
@@ -367,15 +367,15 @@ onMounted(loadAllPeladas)
 }
 
 .team-card {
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  border: 1px solid var(--line-soft);
   border-radius: 1.1rem;
   overflow: hidden;
-  background: #fff;
+  background: var(--surface-strong);
 }
 
 .team-card-header {
   padding: 1rem 1rem 0.75rem;
-  background: rgba(185, 28, 28, 0.04);
+  background: rgba(220, 38, 38, 0.12);
 }
 
 .team-card-body {

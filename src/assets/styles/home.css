@@ -23,8 +23,8 @@
     gap: 1rem;
     align-items: stretch;
     background:
-        radial-gradient(circle at top left, rgba(185, 28, 28, 0.16), transparent 28%),
-        linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(249, 250, 252, 0.95) 100%);
+        radial-gradient(circle at top left, rgba(220, 38, 38, 0.2), transparent 28%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
 }
 
 .home-hero-brand {
@@ -80,6 +80,11 @@
     padding: 0.9rem 1.3rem;
     border-radius: 999px;
     font-weight: 700;
+}
+
+.home-division-filter {
+    width: fit-content;
+    margin-top: 1.25rem;
 }
 
 .home-highlight-panel {
@@ -234,7 +239,7 @@
     gap: 1rem;
     height: 100%;
     background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 250, 252, 0.96) 100%);
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
 }
 
 .spotlight-title {
@@ -302,7 +307,7 @@
     border-radius: 1.4rem;
     border: 1px solid var(--line-soft);
     box-shadow: var(--shadow-soft);
-    background: #fff;
+    background: var(--surface-strong);
 }
 
 .ranking-panel-header {
@@ -311,7 +316,7 @@
     justify-content: space-between;
     gap: 1rem;
     padding: 1.2rem 1.2rem 1rem;
-    background: linear-gradient(135deg, rgba(185, 28, 28, 0.08) 0%, rgba(23, 32, 51, 0.02) 100%);
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.14) 0%, rgba(255, 255, 255, 0.02) 100%);
 }
 
 .ranking-title {
@@ -335,7 +340,7 @@
     max-height: 420px;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: rgba(185, 28, 28, 0.45) rgba(15, 23, 42, 0.06);
+    scrollbar-color: rgba(220, 38, 38, 0.45) rgba(255, 255, 255, 0.06);
 }
 
 .ranking-panel-body::-webkit-scrollbar {
@@ -343,7 +348,7 @@
 }
 
 .ranking-panel-body::-webkit-scrollbar-track {
-    background: rgba(15, 23, 42, 0.06);
+    background: rgba(255, 255, 255, 0.06);
     border-radius: 999px;
 }
 
@@ -370,7 +375,7 @@
 }
 
 .ranking-row:hover {
-    background: rgba(15, 23, 42, 0.04);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .ranking-row.featured {
@@ -384,7 +389,7 @@
     border-radius: 16px;
     display: grid;
     place-items: center;
-    background: rgba(15, 23, 42, 0.06);
+    background: rgba(255, 255, 255, 0.08);
     font-weight: 800;
 }
 
@@ -412,15 +417,6 @@
     white-space: nowrap;
 }
 
-.player-nickname {
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.ranking-row.featured .player-nickname,
 .ranking-row.featured .ranking-average,
 .ranking-row.featured .ranking-matches {
     color: rgba(255, 255, 255, 0.82);

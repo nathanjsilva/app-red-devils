@@ -48,7 +48,7 @@
                 v-model="search"
                 type="text"
                 class="search-input"
-                placeholder="Buscar por nome ou apelido"
+                placeholder="Buscar por nome"
               />
               <button v-if="search" class="search-clear" @click="search = ''" aria-label="Limpar busca">
                 <svg viewBox="0 0 16 16" fill="none" width="14" height="14">
@@ -127,7 +127,7 @@
                 <tr>
                   <th class="col-rank">#</th>
                   <th>Nome</th>
-                  <th>Apelido / Posicao</th>
+                  <th>Posicao</th>
                   <th class="col-num">Jogos</th>
                   <th class="col-num">Gols</th>
                   <th class="col-num">Ranking</th>
@@ -152,10 +152,7 @@
                     </div>
                   </td>
                   <td>
-                    <div class="nick-pos">
-                      <span class="nick">{{ entry.player.nickname || '-' }}</span>
-                      <span class="pos-badge" :class="entry.player.position">{{ entry.player.position }}</span>
-                    </div>
+                    <span class="pos-badge" :class="entry.player.position">{{ entry.player.position }}</span>
                   </td>
                   <td class="col-num">{{ entry.statistics.total_matches }}</td>
                   <td class="col-num">{{ entry.statistics.total_goals }}</td>
@@ -211,7 +208,7 @@
             </span>
             <div class="modal-head-text">
               <h2>{{ selectedPlayer.player.name }}</h2>
-              <p>{{ selectedPlayer.player.nickname || 'Sem apelido' }} - {{ selectedPlayer.player.position }}</p>
+              <p>{{ selectedPlayer.player.position === 'goleiro' ? 'Goleiro' : 'Jogador de linha' }}</p>
             </div>
             <button class="modal-close" @click="closeModal" aria-label="Fechar">
               <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>

@@ -24,6 +24,15 @@
                 Gerenciar jogadores
               </button>
             </div>
+
+            <div class="seg-control home-division-filter">
+              <button
+                v-for="opt in divisionOptions"
+                :key="opt.value"
+                :class="['seg-btn', { active: division === opt.value }]"
+                @click="division = opt.value"
+              >{{ opt.label }}</button>
+            </div>
           </div>
 
           <div class="home-highlight-panel">
@@ -93,7 +102,7 @@
       <div class="surface-card-body home-state-card text-center py-5">
         <h2 class="section-title mb-2">Nao foi possivel carregar os rankings</h2>
         <p class="text-muted mb-3">{{ error }}</p>
-        <button class="btn btn-outline-secondary" @click="fetchRankings">Tentar novamente</button>
+        <button class="btn btn-outline-secondary" @click="fetchRankings(filters)">Tentar novamente</button>
       </div>
     </div>
 
@@ -117,7 +126,7 @@
               <div class="spotlight-avatar">{{ leader.player.name.charAt(0).toUpperCase() }}</div>
               <div>
                 <strong class="spotlight-player-name">{{ leader.player.name }}</strong>
-                <p class="spotlight-player-copy">{{ leader.player.nickname || 'Sem apelido' }} - {{ leader.player.matches || 0 }} jogos</p>
+                <p class="spotlight-player-copy">{{ leader.player.matches || 0 }} jogos</p>
                 <span class="spotlight-player-meta">{{ formatSpotlightMeta(leader.type, leader.player.total, leader.player.average) }}</span>
               </div>
             </div>
@@ -149,12 +158,11 @@
               class="ranking-row"
               :class="{ featured: i === 0 }"
             >
-              <div class="ranking-order">#{{ i + 1 }}</div>
+              <div class="ranking-order">{{ i + 1 }}º</div>
               <div class="ranking-player">
                 <div class="player-avatar">{{ player.name.charAt(0).toUpperCase() }}</div>
                 <div class="player-copy">
                   <span class="player-name">{{ player.name }}</span>
-                  <span class="player-nickname">{{ player.nickname || 'Sem apelido' }}</span>
                 </div>
               </div>
               <div class="ranking-stats">
@@ -171,13 +179,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { useRankingsStore } from '../stores/rankings'
 import { useAuthStore } from '../stores/auth'
 import { useSEO } from '../composables/useSEO'
-import { PeladaService } from '../services/peladaService'
+import { StatisticsService } from '../services/statisticsService'
+import type { DashboardOverview, StatisticsFilters } from '../types'
 import logo from '../assets/logo-red-devils.png'
 
 const router = useRouter()
@@ -188,11 +197,20 @@ const { updateSEO } = useSEO()
 const { rankings, isLoading, error } = storeToRefs(rankingsStore)
 const { fetchRankings } = rankingsStore
 
+const division = ref<'all' | 'quinta' | 'sabado'>('all')
+const divisionOptions = [
+  { value: 'all' as const, label: 'Todas' },
+  { value: 'quinta' as const, label: 'Quinta' },
+  { value: 'sabado' as const, label: 'Sábado' }
+]
+const filters = computed<StatisticsFilters>(() => (division.value === 'all' ? {} : { division: division.value }))
+
+const dashboard = ref<DashboardOverview | null>(null)
 const isLoadingPeladaCounts = ref(false)
 const peladaCountByDivision = ref({ quinta: 0, sabado: 0 })
 
 const rankingsList = computed(() => rankings.value || [])
-const totalMatches = computed(() => rankingsStore.getTotalMatches())
+const totalMatches = computed(() => dashboard.value?.total_peladas ?? 0)
 const isAdmin = computed(() => authStore.user?.profile === 'admin')
 
 const featuredLeaders = computed(() => {
@@ -228,31 +246,56 @@ const formatSpotlightMeta = (type: string, total: number, average: number): stri
   return `${total} no total`
 }
 
+const fetchDashboard = async () => {
+  try {
+    dashboard.value = await StatisticsService.getDashboard(filters.value)
+  } catch (fetchError) {
+    console.error('Error fetching dashboard:', fetchError)
+  }
+}
+
+const fetchPeladaCounts = async () => {
+  isLoadingPeladaCounts.value = true
+  try {
+    const [quintaDashboard, sabadoDashboard] = await Promise.all([
+      StatisticsService.getDashboard({ division: 'quinta' }),
+      StatisticsService.getDashboard({ division: 'sabado' })
+    ])
+    peladaCountByDivision.value = {
+      quinta: quintaDashboard.total_peladas,
+      sabado: sabadoDashboard.total_peladas
+    }
+  } catch (fetchError) {
+    console.error('Error fetching pelada counts by division:', fetchError)
+  } finally {
+    isLoadingPeladaCounts.value = false
+  }
+}
+
+watch(division, async () => {
+  fetchDashboard()
+  try {
+    await fetchRankings(filters.value)
+  } catch (fetchError) {
+    console.error('Error fetching rankings:', fetchError)
+  }
+})
+
 onMounted(async () => {
   updateSEO({
     title: 'Dashboard - Red Devils',
     description: 'Visualize rankings e estatisticas publicas dos jogadores da pelada Red Devils.'
   })
 
+  fetchDashboard()
+  fetchPeladaCounts()
+
   if (!isLoading.value && (!rankings.value || rankings.value.length === 0)) {
     try {
-      await fetchRankings()
+      await fetchRankings(filters.value)
     } catch (fetchError) {
       console.error('Error fetching rankings:', fetchError)
     }
-  }
-
-  isLoadingPeladaCounts.value = true
-  try {
-    const peladas = await PeladaService.getAllPeladas()
-    peladaCountByDivision.value = {
-      quinta: peladas.filter((pelada) => pelada.division === 'quinta').length,
-      sabado: peladas.filter((pelada) => pelada.division === 'sabado').length
-    }
-  } catch (fetchError) {
-    console.error('Error fetching peladas for division counts:', fetchError)
-  } finally {
-    isLoadingPeladaCounts.value = false
   }
 })
 
