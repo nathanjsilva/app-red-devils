@@ -133,8 +133,7 @@
 }
 
 .sidebar-logout,
-.sidebar-toggle,
-.sidebar-close {
+.sidebar-toggle {
     border: 0;
     cursor: pointer;
 }
@@ -157,23 +156,6 @@
 .sidebar-logout:focus-visible {
     background: rgba(255, 255, 255, 0.14);
     border-color: rgba(255, 255, 255, 0.18);
-}
-
-.sidebar-close {
-    margin-left: auto;
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.08);
-    color: #fff;
-}
-
-.sidebar-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 1100;
-    background: rgba(15, 23, 42, 0.4);
-    backdrop-filter: blur(3px);
 }
 
 .app-main {
@@ -227,20 +209,6 @@
 @media (max-width: 1024px) {
     .app-layout {
         grid-template-columns: 1fr;
-    }
-
-    .sidebar-panel {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: min(88vw, 320px);
-        transform: translateX(-100%);
-        transition: transform 0.28s ease;
-        z-index: 1201;
-    }
-
-    .sidebar-panel.is-open {
-        transform: translateX(0);
     }
 
     .app-main {

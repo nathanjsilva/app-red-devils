@@ -1,18 +1,12 @@
 ﻿<template>
   <div class="app-layout">
-    <div v-if="!isDesktop && sidebarOpen" class="sidebar-overlay" @click="sidebarOpen = false"></div>
-
-    <aside class="sidebar-panel" :class="{ 'is-mobile': !isDesktop, 'is-open': sidebarOpen }">
+    <aside v-if="isDesktop" class="sidebar-panel">
       <div class="sidebar-header">
         <img :src="logo" alt="Red Devils" class="sidebar-logo" />
         <div class="sidebar-brand-copy">
           <p class="sidebar-eyebrow">Painel publico</p>
           <h1 class="sidebar-brand">Red Devils</h1>
         </div>
-
-        <button v-if="!isDesktop" class="sidebar-close" @click="sidebarOpen = false" aria-label="Fechar navegacao">
-          <i class="bi bi-x-lg"></i>
-        </button>
       </div>
 
       <div class="sidebar-section">
@@ -24,7 +18,6 @@
                 :to="item.path"
                 class="sidebar-link"
                 :class="{ active: $route.path === item.path }"
-                @click="!isDesktop ? sidebarOpen = false : null"
               >
                 <i :class="item.icon"></i>
                 <span>{{ item.name }}</span>
@@ -49,29 +42,43 @@
       </div>
     </aside>
 
-    <nav v-if="!isDesktop" class="bottom-tab-bar" aria-label="Navegacao principal">
-      <router-link to="/home" class="tab-item">
-        <i class="bi bi-house-door"></i>
-        <span>Home</span>
-      </router-link>
-      <router-link to="/players-overview" class="tab-item">
-        <i class="bi bi-bar-chart-line"></i>
-        <span>Jogadores</span>
-      </router-link>
-      <router-link to="/estatisticas" class="tab-item">
-        <i class="bi bi-clipboard-data"></i>
-        <span>Estatisticas</span>
-      </router-link>
-      <button
-        v-if="isAuthenticated"
-        type="button"
-        class="tab-item"
-        :class="{ 'router-link-active': sidebarOpen }"
-        @click="sidebarOpen = true"
-      >
-        <i class="bi bi-grid-3x3-gap"></i>
-        <span>Mais</span>
-      </button>
+    <nav v-else class="bottom-tab-bar" aria-label="Navegacao principal">
+      <template v-if="isAdmin">
+        <router-link to="/admin/peladas" class="tab-item">
+          <i class="bi bi-calendar2-week"></i>
+          <span>Peladas</span>
+        </router-link>
+        <router-link to="/admin/players" class="tab-item">
+          <i class="bi bi-people"></i>
+          <span>Jogadores</span>
+        </router-link>
+        <router-link to="/admin/match-players" class="tab-item">
+          <i class="bi bi-pencil-square"></i>
+          <span>Registrar</span>
+        </router-link>
+        <router-link to="/admin/organize-teams" class="tab-item">
+          <i class="bi bi-diagram-3"></i>
+          <span>Times</span>
+        </router-link>
+        <button type="button" class="tab-item" @click="handleLogout">
+          <i class="bi bi-box-arrow-right"></i>
+          <span>Sair</span>
+        </button>
+      </template>
+      <template v-else>
+        <router-link to="/home" class="tab-item">
+          <i class="bi bi-house-door"></i>
+          <span>Home</span>
+        </router-link>
+        <router-link to="/players-overview" class="tab-item">
+          <i class="bi bi-bar-chart-line"></i>
+          <span>Jogadores</span>
+        </router-link>
+        <router-link to="/estatisticas" class="tab-item">
+          <i class="bi bi-clipboard-data"></i>
+          <span>Estatisticas</span>
+        </router-link>
+      </template>
     </nav>
 
     <main class="app-main" :class="{ 'has-bottom-nav': !isDesktop }">
@@ -81,7 +88,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useAuth } from '../composables/useAuth'
 import { useAuthStore } from '../stores/auth'
 import { ROUTES } from '../utils/constants'
@@ -91,7 +98,6 @@ import type { MenuItem } from '../types'
 
 const { logout } = useAuth()
 const { isDesktop } = useResponsive()
-const sidebarOpen = ref(false)
 const authStore = useAuthStore()
 const isAuthenticated = computed(() => authStore.isAuthenticated)
 const isAdmin = computed(() => authStore.user?.profile === 'admin')
