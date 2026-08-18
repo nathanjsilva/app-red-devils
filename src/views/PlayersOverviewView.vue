@@ -275,7 +275,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import SearchableSelect from '../components/ui/SearchableSelect.vue'
 import { useSEO } from '../composables/useSEO'
@@ -287,6 +287,7 @@ const { updateSEO } = useSEO()
 const router = useRouter()
 
 const goToPlayerDetail = (playerId: number) => {
+  closeModal()
   router.push(`/players/${playerId}`)
 }
 
@@ -406,5 +407,9 @@ const fetchOverview = async () => {
 onMounted(async () => {
   updateSEO({ title: 'Jogadores - Red Devils', description: 'Desempenho dos jogadores do Red Devils.' })
   await fetchOverview()
+})
+
+onUnmounted(() => {
+  document.body.style.overflow = ''
 })
 </script>
