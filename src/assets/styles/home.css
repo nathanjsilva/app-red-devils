@@ -503,4 +503,11 @@
         align-items: flex-start;
         text-align: left;
     }
+
+    /* No mobile a rolagem interna do card (max-height + overflow-y) e dificil
+       de descobrir no toque — deixa a lista inteira fluir com a pagina. */
+    .ranking-panel-body {
+        max-height: none;
+        overflow-y: visible;
+    }
 }
