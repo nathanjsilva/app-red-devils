@@ -16,7 +16,10 @@
     </div>
 
     <div v-else-if="!match" class="surface-card">
-      <div class="surface-card-body text-center py-5 text-muted">Não foi possível carregar as estatísticas dessa pelada.</div>
+      <div class="surface-card-body text-center py-5 text-muted">
+        <p class="mb-3">Não foi possível carregar as estatísticas dessa pelada.</p>
+        <button class="retry-btn" @click="fetchPeladaDetail">Tentar novamente</button>
+      </div>
     </div>
 
     <template v-else>

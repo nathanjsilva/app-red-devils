@@ -22,7 +22,10 @@
     </div>
 
     <div v-else-if="!profile" class="surface-card">
-      <div class="surface-card-body text-center py-5 text-muted">Não foi possível carregar este jogador.</div>
+      <div class="surface-card-body text-center py-5 text-muted">
+        <p class="mb-3">Não foi possível carregar este jogador.</p>
+        <button class="retry-btn" @click="fetchProfile">Tentar novamente</button>
+      </div>
     </div>
 
     <template v-else>

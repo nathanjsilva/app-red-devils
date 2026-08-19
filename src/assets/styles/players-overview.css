@@ -343,7 +343,7 @@
     flex-shrink: 0;
 }
 
-.player-name {
+.player-cell .player-name {
     font-weight: 700;
     color: var(--text-main);
 }

@@ -120,6 +120,9 @@
           <div v-if="isLoadingEvolution" class="state-box">
             <span class="spinner"></span>
           </div>
+          <p v-else-if="evolutionError" class="text-muted mb-0">
+            Não foi possível carregar a evolução. <button class="retry-btn" @click="fetchEvolution">Tentar novamente</button>
+          </p>
           <p v-else-if="evolutionPoints.length === 0" class="text-muted mb-0">Sem dados suficientes para esse período.</p>
           <EvolutionChart v-else :points="evolutionPoints" />
         </div>
@@ -138,6 +141,9 @@
           <div v-if="isLoadingPeladasPerMonth" class="state-box">
             <span class="spinner"></span>
           </div>
+          <p v-else-if="peladasPerMonthError" class="text-muted mb-0">
+            Não foi possível carregar as peladas por mês. <button class="retry-btn" @click="fetchPeladasPerMonth">Tentar novamente</button>
+          </p>
           <p v-else-if="peladasPerMonth.length === 0" class="text-muted mb-0">Sem dados suficientes para esse período.</p>
           <PeladasPerMonthChart v-else :points="peladasPerMonth" />
         </div>
@@ -171,6 +177,9 @@
           <div v-if="isLoadingRanking" class="state-box">
             <span class="spinner"></span>
           </div>
+          <p v-else-if="rankingError" class="text-muted mb-0">
+            Não foi possível carregar o ranking. <button class="retry-btn" @click="fetchRanking">Tentar novamente</button>
+          </p>
           <p v-else-if="!currentRanking || currentRanking.players.length === 0" class="text-muted mb-0">
             Sem jogadores elegíveis nesse recorte.
           </p>
@@ -191,6 +200,9 @@
           <div v-if="isLoadingPresence" class="state-box">
             <span class="spinner"></span>
           </div>
+          <p v-else-if="presenceError" class="text-muted mb-0">
+            Não foi possível carregar a presença. <button class="retry-btn" @click="fetchPresence">Tentar novamente</button>
+          </p>
           <p v-else-if="!presenceRanking || presenceRanking.players.length === 0" class="text-muted mb-0">
             Sem jogadores elegíveis nesse recorte.
           </p>
@@ -211,6 +223,9 @@
           <div v-if="isLoadingTopScorerFrequency" class="state-box">
             <span class="spinner"></span>
           </div>
+          <p v-else-if="topScorerFrequencyError" class="text-muted mb-0">
+            Não foi possível carregar. <button class="retry-btn" @click="fetchTopScorerFrequency">Tentar novamente</button>
+          </p>
           <p v-else-if="!topScorerFrequencyRanking || topScorerFrequencyRanking.players.length === 0" class="text-muted mb-0">
             Sem jogadores elegíveis nesse recorte.
           </p>
@@ -230,6 +245,9 @@
           <div v-if="isLoadingTopAssisterFrequency" class="state-box">
             <span class="spinner"></span>
           </div>
+          <p v-else-if="topAssisterFrequencyError" class="text-muted mb-0">
+            Não foi possível carregar. <button class="retry-btn" @click="fetchTopAssisterFrequency">Tentar novamente</button>
+          </p>
           <p v-else-if="!topAssisterFrequencyRanking || topAssisterFrequencyRanking.players.length === 0" class="text-muted mb-0">
             Sem jogadores elegíveis nesse recorte.
           </p>
@@ -250,6 +268,9 @@
           <div v-if="isLoadingGoalkeepers" class="state-box">
             <span class="spinner"></span>
           </div>
+          <p v-else-if="goalkeepersError" class="text-muted mb-0">
+            Não foi possível carregar os goleiros. <button class="retry-btn" @click="fetchGoalkeepers">Tentar novamente</button>
+          </p>
           <p v-else-if="goalkeepers.length === 0" class="text-muted mb-0">
             Nenhum goleiro elegível nesse recorte.
           </p>
@@ -396,6 +417,9 @@
           <p v-else-if="selectedPlayerIds.length < 2" class="text-muted mb-0">
             Selecione pelo menos 2 jogadores para comparar.
           </p>
+          <p v-else-if="compareError" class="text-muted mb-0">
+            Não foi possível comparar os jogadores. <button class="retry-btn" @click="fetchCompare">Tentar novamente</button>
+          </p>
           <ComparisonRadarChart v-else-if="compareEntries.length > 0" :entries="compareEntries" />
         </div>
       </section>
@@ -453,14 +477,17 @@ const fetchDashboard = async () => {
 // --- Evolução ---
 const evolutionPoints = ref<EvolutionPoint[]>([])
 const isLoadingEvolution = ref(false)
+const evolutionError = ref(false)
 
 const fetchEvolution = async () => {
   isLoadingEvolution.value = true
+  evolutionError.value = false
   try {
     evolutionPoints.value = await StatisticsService.getEvolution('month', filters.value)
   } catch (error) {
     console.error(error)
     evolutionPoints.value = []
+    evolutionError.value = true
   } finally {
     isLoadingEvolution.value = false
   }
@@ -478,17 +505,20 @@ const rankingCategories = [
 const rankingType = ref<(typeof rankingCategories)[number]['value']>('goals')
 const currentRanking = ref<Ranking | null>(null)
 const isLoadingRanking = ref(false)
+const rankingError = ref(false)
 
 const activeRankingLabel = computed(() => currentRanking.value?.type ?? '')
 const activeRankingSuffix = computed(() => rankingCategories.find((cat) => cat.value === rankingType.value)?.suffix ?? '')
 
 const fetchRanking = async () => {
   isLoadingRanking.value = true
+  rankingError.value = false
   try {
     currentRanking.value = await RankingService.getFullRanking(rankingType.value, 8, filters.value)
   } catch (error) {
     console.error(error)
     currentRanking.value = null
+    rankingError.value = true
   } finally {
     isLoadingRanking.value = false
   }
@@ -497,14 +527,17 @@ const fetchRanking = async () => {
 // --- Presença por jogador ---
 const presenceRanking = ref<Ranking | null>(null)
 const isLoadingPresence = ref(false)
+const presenceError = ref(false)
 
 const fetchPresence = async () => {
   isLoadingPresence.value = true
+  presenceError.value = false
   try {
     presenceRanking.value = await RankingService.getFullRanking('appearances', 8, filters.value)
   } catch (error) {
     console.error(error)
     presenceRanking.value = null
+    presenceError.value = true
   } finally {
     isLoadingPresence.value = false
   }
@@ -513,14 +546,17 @@ const fetchPresence = async () => {
 // --- Destaques por pelada (artilheiro / garçom) ---
 const topScorerFrequencyRanking = ref<Ranking | null>(null)
 const isLoadingTopScorerFrequency = ref(false)
+const topScorerFrequencyError = ref(false)
 
 const fetchTopScorerFrequency = async () => {
   isLoadingTopScorerFrequency.value = true
+  topScorerFrequencyError.value = false
   try {
     topScorerFrequencyRanking.value = await RankingService.getFullRanking('top-scorer-frequency', 8, filters.value)
   } catch (error) {
     console.error(error)
     topScorerFrequencyRanking.value = null
+    topScorerFrequencyError.value = true
   } finally {
     isLoadingTopScorerFrequency.value = false
   }
@@ -528,14 +564,17 @@ const fetchTopScorerFrequency = async () => {
 
 const topAssisterFrequencyRanking = ref<Ranking | null>(null)
 const isLoadingTopAssisterFrequency = ref(false)
+const topAssisterFrequencyError = ref(false)
 
 const fetchTopAssisterFrequency = async () => {
   isLoadingTopAssisterFrequency.value = true
+  topAssisterFrequencyError.value = false
   try {
     topAssisterFrequencyRanking.value = await RankingService.getFullRanking('top-assister-frequency', 8, filters.value)
   } catch (error) {
     console.error(error)
     topAssisterFrequencyRanking.value = null
+    topAssisterFrequencyError.value = true
   } finally {
     isLoadingTopAssisterFrequency.value = false
   }
@@ -548,6 +587,7 @@ const isSearchOpen = ref(false)
 const selectedPlayerIds = ref<number[]>([])
 const compareEntries = ref<ComparePlayerEntry[]>([])
 const isLoadingCompare = ref(false)
+const compareError = ref(false)
 
 const filteredPlayers = computed(() => {
   const q = playerSearch.value.trim().toLowerCase()
@@ -580,11 +620,13 @@ const fetchCompare = async () => {
     return
   }
   isLoadingCompare.value = true
+  compareError.value = false
   try {
     compareEntries.value = await StatisticsService.comparePlayers(selectedPlayerIds.value, filters.value)
   } catch (error) {
     console.error(error)
     compareEntries.value = []
+    compareError.value = true
   } finally {
     isLoadingCompare.value = false
   }
@@ -593,14 +635,17 @@ const fetchCompare = async () => {
 // --- Peladas por mês ---
 const peladasPerMonth = ref<PeladasPerMonthPoint[]>([])
 const isLoadingPeladasPerMonth = ref(false)
+const peladasPerMonthError = ref(false)
 
 const fetchPeladasPerMonth = async () => {
   isLoadingPeladasPerMonth.value = true
+  peladasPerMonthError.value = false
   try {
     peladasPerMonth.value = await StatisticsService.getPeladasPerMonth(filters.value)
   } catch (error) {
     console.error(error)
     peladasPerMonth.value = []
+    peladasPerMonthError.value = true
   } finally {
     isLoadingPeladasPerMonth.value = false
   }
@@ -609,15 +654,18 @@ const fetchPeladasPerMonth = async () => {
 // --- Goleiros ---
 const goalkeepers = ref<GoalkeeperRankingItem[]>([])
 const isLoadingGoalkeepers = ref(false)
+const goalkeepersError = ref(false)
 const goalkeeperDetail = ref<GoalkeeperDetail | null>(null)
 
 const fetchGoalkeepers = async () => {
   isLoadingGoalkeepers.value = true
+  goalkeepersError.value = false
   try {
     goalkeepers.value = await StatisticsService.getGoalkeepers(filters.value)
   } catch (error) {
     console.error(error)
     goalkeepers.value = []
+    goalkeepersError.value = true
   } finally {
     isLoadingGoalkeepers.value = false
   }
