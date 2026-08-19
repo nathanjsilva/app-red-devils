@@ -275,7 +275,7 @@ const handleCreate = async () => {
   isLoading.value = true
   try {
     const created = await AdminService.createPelada({ ...form.value, division })
-    toast.success(`Pelada #${created.id} criada`)
+    toast.success(`Pelada criada (${formatDate(created.date)})`)
     await fetchPeladas()
     form.value = {
       date: '',
@@ -297,7 +297,9 @@ const editPelada = (id: number) => {
 }
 
 const removePelada = async (id: number) => {
-  if (!confirm(`Excluir pelada #${id}?`)) return
+  const pelada = peladas.value.find((item) => item.id === id)
+  const label = pelada ? `de ${formatDate(pelada.date)}` : ''
+  if (!confirm(`Excluir pelada ${label}?`)) return
   isLoading.value = true
   try {
     await AdminService.deletePelada(id)
