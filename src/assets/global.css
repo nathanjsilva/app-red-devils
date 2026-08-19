@@ -180,6 +180,7 @@ select:focus-visible {
 }
 
 .metric-card {
+    position: relative;
     padding: 0.65rem 0.75rem;
     border-radius: 0.75rem;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);

@@ -288,15 +288,14 @@ onMounted(async () => {
     description: 'Visualize rankings e estatisticas publicas dos jogadores da pelada Red Devils.'
   })
 
+  division.value = 'quinta'
   fetchDashboard()
   fetchPeladaCounts()
 
-  if (!isLoading.value && (!rankings.value || rankings.value.length === 0)) {
-    try {
-      await fetchRankings(filters.value, 5)
-    } catch (fetchError) {
-      console.error('Error fetching rankings:', fetchError)
-    }
+  try {
+    await fetchRankings(filters.value, 5)
+  } catch (fetchError) {
+    console.error('Error fetching rankings:', fetchError)
   }
 })
 

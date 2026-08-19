@@ -30,7 +30,6 @@ const open = ref(false)
 
 <style scoped>
 .info-tooltip {
-  position: relative;
   display: inline-flex;
   flex-shrink: 0;
 }
@@ -62,10 +61,8 @@ const open = ref(false)
   position: absolute;
   z-index: 30;
   bottom: calc(100% + 0.4rem);
-  left: 50%;
-  transform: translateX(-50%);
-  width: max-content;
-  max-width: 220px;
+  left: 0;
+  right: 0;
   padding: 0.55rem 0.7rem;
   border-radius: 0.6rem;
   background: var(--surface-strong);
@@ -78,13 +75,5 @@ const open = ref(false)
   text-transform: none;
   letter-spacing: normal;
   pointer-events: none;
-}
-
-@media (max-width: 480px) {
-  .info-tooltip-bubble {
-    left: auto;
-    right: -0.5rem;
-    transform: none;
-  }
 }
 </style>
