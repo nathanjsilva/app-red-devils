@@ -174,7 +174,7 @@ select:focus-visible {
 
 .metric-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
     gap: 0.6rem;
     min-width: 0;
 }
@@ -215,6 +215,8 @@ select:focus-visible {
     text-transform: uppercase;
     letter-spacing: 0.05em;
     line-height: 1.25;
+    min-width: 0;
+    overflow-wrap: break-word;
 }
 
 .metric-card-head span {

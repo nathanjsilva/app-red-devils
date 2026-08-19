@@ -206,7 +206,7 @@
     color: var(--red-devils-border);
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
     .app-layout {
         grid-template-columns: 1fr;
     }

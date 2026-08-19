@@ -56,48 +56,61 @@
 
         <div v-if="isLoading" class="text-muted">Carregando...</div>
         <div v-else-if="players.length === 0" class="text-muted">Nenhum jogador encontrado.</div>
-        <div v-else class="table-responsive">
-          <table class="data-table stack-mobile">
-            <thead>
-              <tr>
-                <th class="hide-mobile">ID</th>
-                <th>Nome</th>
-                <th>Posicao</th>
-                <th class="text-end">Acoes</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="player in players" :key="player.id">
-                <td class="hide-mobile" data-label="ID">{{ player.id }}</td>
-                <td class="fw-bold" data-label="Nome">{{ player.name }}</td>
-                <td data-label="Posicao">
-                  <span class="pill-badge" :class="player.position === 'goleiro' ? 'pill-info' : 'pill-muted'">
-                    {{ player.position }}
-                  </span>
-                </td>
-                <td class="text-end" data-label="Acoes">
-                  <div class="d-flex flex-wrap justify-content-end gap-2">
-                    <button class="btn btn-sm btn-outline-primary" @click="editPlayer(player)" :disabled="isLoading">
-                      Editar
-                    </button>
-                    <button class="btn btn-sm btn-outline-danger" @click="removePlayer(player)" :disabled="isLoading">
-                      Excluir
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <template v-else>
+          <div class="table-responsive">
+            <table class="data-table stack-mobile">
+              <thead>
+                <tr>
+                  <th class="hide-mobile">ID</th>
+                  <th>Nome</th>
+                  <th>Posicao</th>
+                  <th class="text-end">Acoes</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="player in paginatedPlayers" :key="player.id">
+                  <td class="hide-mobile" data-label="ID">{{ player.id }}</td>
+                  <td class="fw-bold" data-label="Nome">{{ player.name }}</td>
+                  <td data-label="Posicao">
+                    <span class="pill-badge" :class="player.position === 'goleiro' ? 'pill-info' : 'pill-muted'">
+                      {{ player.position }}
+                    </span>
+                  </td>
+                  <td class="text-end" data-label="Acoes">
+                    <div class="d-flex flex-wrap justify-content-end gap-2">
+                      <button class="btn btn-sm btn-outline-primary" @click="editPlayer(player)" :disabled="isLoading">
+                        Editar
+                      </button>
+                      <button class="btn btn-sm btn-outline-danger" @click="removePlayer(player)" :disabled="isLoading">
+                        Excluir
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <Pagination
+            :current-page="currentPage"
+            :total-pages="totalPages"
+            :total-items="players.length"
+            :page-size="pageSize"
+            :page-size-options="pageSizeOptions"
+            @update:current-page="currentPage = $event"
+            @update:page-size="pageSize = $event"
+          />
+        </template>
       </div>
     </section>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useToast } from 'vue-toastification'
 import SearchableSelect from '../components/ui/SearchableSelect.vue'
+import Pagination from '../components/ui/Pagination.vue'
 import { AdminService } from '../services/adminService'
 import { PlayerService } from '../services/playerService'
 import type { CreatePlayerRequest, Player, UpdatePlayerRequest } from '../types'
@@ -111,6 +124,21 @@ const toast = useToast()
 const players = ref<Player[]>([])
 const isLoading = ref(false)
 const editingPlayer = ref<Player | null>(null)
+
+const currentPage = ref(1)
+const pageSize = ref(10)
+const pageSizeOptions = [
+  { value: 10, label: '10' },
+  { value: 20, label: '20' },
+  { value: 50, label: '50' }
+]
+const totalPages = computed(() => Math.max(1, Math.ceil(players.value.length / pageSize.value)))
+const paginatedPlayers = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  return players.value.slice(start, start + pageSize.value)
+})
+watch(pageSize, () => { currentPage.value = 1 })
+watch(totalPages, (newTotal) => { if (currentPage.value > newTotal) currentPage.value = newTotal })
 
 const form = ref<CreatePlayerRequest>({
   name: '',

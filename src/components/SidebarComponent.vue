@@ -1,6 +1,6 @@
 ﻿<template>
   <div class="app-layout">
-    <aside v-if="isDesktop" class="sidebar-panel">
+    <aside v-if="isDesktop || isTablet" class="sidebar-panel">
       <div class="sidebar-header">
         <img :src="logo" alt="Red Devils" class="sidebar-logo" />
         <div class="sidebar-brand-copy">
@@ -81,7 +81,7 @@
       </template>
     </nav>
 
-    <main class="app-main" :class="{ 'has-bottom-nav': !isDesktop }">
+    <main class="app-main" :class="{ 'has-bottom-nav': !isDesktop && !isTablet }">
       <router-view />
     </main>
   </div>
@@ -97,7 +97,7 @@ import logo from '../assets/logo-red-devils.png'
 import type { MenuItem } from '../types'
 
 const { logout } = useAuth()
-const { isDesktop } = useResponsive()
+const { isDesktop, isTablet } = useResponsive()
 const authStore = useAuthStore()
 const isAuthenticated = computed(() => authStore.isAuthenticated)
 const isAdmin = computed(() => authStore.user?.profile === 'admin')

@@ -72,69 +72,82 @@
         <div v-else-if="peladas.length === 0" class="text-muted">
           {{ isSearchActive ? 'Nenhuma pelada encontrada nessa data.' : 'Nenhuma pelada encontrada.' }}
         </div>
-        <div v-else class="table-responsive">
-          <table class="data-table stack-mobile">
-            <thead>
-              <tr>
-                <th class="hide-mobile">ID</th>
-                <th>Data</th>
-                <th class="hide-mobile">Divisao</th>
-                <th>Local</th>
-                <th class="hide-mobile">Times</th>
-                <th class="hide-mobile">Jogadores/Time</th>
-                <th class="hide-mobile">Goleiros</th>
-                <th>Status</th>
-                <th class="text-end">Acoes</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="pelada in peladas" :key="pelada.id">
-                <td class="hide-mobile" data-label="ID">{{ pelada.id }}</td>
-                <td class="fw-bold" data-label="Data">{{ formatDate(pelada.date) }}</td>
-                <td class="hide-mobile" data-label="Divisao">
-                  <span class="pill-badge pill-info">{{ pelada.division === 'sabado' ? 'Sabado' : 'Quinta' }}</span>
-                </td>
-                <td data-label="Local">{{ pelada.location }}</td>
-                <td class="hide-mobile" data-label="Times">{{ pelada.qtd_times }}</td>
-                <td class="hide-mobile" data-label="Jogadores/Time">{{ pelada.qtd_jogadores_por_time }}</td>
-                <td class="hide-mobile" data-label="Goleiros">{{ pelada.qtd_goleiros }}</td>
-                <td data-label="Status">
-                  <span v-if="pelada.hasStatistics === undefined" class="pill-badge pill-muted">
-                    Verificando
-                  </span>
-                  <span v-else class="pill-badge" :class="pelada.hasStatistics ? 'pill-ok' : 'pill-muted'">
-                    {{ pelada.hasStatistics ? 'Com estatisticas' : 'Sem estatisticas' }}
-                  </span>
-                </td>
-                <td class="text-end" data-label="Acoes">
-                  <div class="d-flex flex-wrap justify-content-end gap-2">
-                    <button class="btn btn-sm btn-outline-secondary" @click="router.push(`/peladas/${pelada.id}`)" :disabled="isLoading">
-                      Ver detalhe
-                    </button>
-                    <button class="btn btn-sm btn-outline-primary" @click="editPelada(pelada.id)" :disabled="isLoading">
-                      Estatisticas
-                    </button>
-                    <button class="btn btn-sm btn-outline-danger" @click="removePelada(pelada.id)" :disabled="isLoading">
-                      Excluir
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <template v-else>
+          <div class="table-responsive">
+            <table class="data-table stack-mobile">
+              <thead>
+                <tr>
+                  <th class="hide-mobile">ID</th>
+                  <th>Data</th>
+                  <th class="hide-mobile">Divisao</th>
+                  <th>Local</th>
+                  <th class="hide-mobile">Times</th>
+                  <th class="hide-mobile">Jogadores/Time</th>
+                  <th class="hide-mobile">Goleiros</th>
+                  <th>Status</th>
+                  <th class="text-end">Acoes</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="pelada in paginatedPeladas" :key="pelada.id">
+                  <td class="hide-mobile" data-label="ID">{{ pelada.id }}</td>
+                  <td class="fw-bold" data-label="Data">{{ formatDate(pelada.date) }}</td>
+                  <td class="hide-mobile" data-label="Divisao">
+                    <span class="pill-badge pill-info">{{ pelada.division === 'sabado' ? 'Sabado' : 'Quinta' }}</span>
+                  </td>
+                  <td data-label="Local">{{ pelada.location }}</td>
+                  <td class="hide-mobile" data-label="Times">{{ pelada.qtd_times }}</td>
+                  <td class="hide-mobile" data-label="Jogadores/Time">{{ pelada.qtd_jogadores_por_time }}</td>
+                  <td class="hide-mobile" data-label="Goleiros">{{ pelada.qtd_goleiros }}</td>
+                  <td data-label="Status">
+                    <span v-if="pelada.hasStatistics === undefined" class="pill-badge pill-muted">
+                      Verificando
+                    </span>
+                    <span v-else class="pill-badge" :class="pelada.hasStatistics ? 'pill-ok' : 'pill-muted'">
+                      {{ pelada.hasStatistics ? 'Com estatisticas' : 'Sem estatisticas' }}
+                    </span>
+                  </td>
+                  <td class="text-end" data-label="Acoes">
+                    <div class="d-flex flex-wrap justify-content-end gap-2">
+                      <button class="btn btn-sm btn-outline-secondary" @click="router.push(`/peladas/${pelada.id}`)" :disabled="isLoading">
+                        Ver detalhe
+                      </button>
+                      <button class="btn btn-sm btn-outline-primary" @click="editPelada(pelada.id)" :disabled="isLoading">
+                        Estatisticas
+                      </button>
+                      <button class="btn btn-sm btn-outline-danger" @click="removePelada(pelada.id)" :disabled="isLoading">
+                        Excluir
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <Pagination
+            :current-page="currentPage"
+            :total-pages="totalPages"
+            :total-items="peladas.length"
+            :page-size="pageSize"
+            :page-size-options="pageSizeOptions"
+            @update:current-page="currentPage = $event"
+            @update:page-size="pageSize = $event"
+          />
+        </template>
       </div>
     </section>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
 import { AdminService } from '../services/adminService'
 import { PeladaService } from '../services/peladaService'
 import { StatisticsService } from '../services/statisticsService'
+import Pagination from '../components/ui/Pagination.vue'
 import type { CreatePeladaRequest, Pelada } from '../types'
 
 interface PeladaWithStats extends Pelada {
@@ -147,6 +160,21 @@ const peladas = ref<PeladaWithStats[]>([])
 const isLoading = ref(false)
 const searchDate = ref('')
 const isSearchActive = ref(false)
+
+const currentPage = ref(1)
+const pageSize = ref(10)
+const pageSizeOptions = [
+  { value: 10, label: '10' },
+  { value: 20, label: '20' },
+  { value: 50, label: '50' }
+]
+const totalPages = computed(() => Math.max(1, Math.ceil(peladas.value.length / pageSize.value)))
+const paginatedPeladas = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  return peladas.value.slice(start, start + pageSize.value)
+})
+watch(pageSize, () => { currentPage.value = 1 })
+watch(totalPages, (newTotal) => { if (currentPage.value > newTotal) currentPage.value = newTotal })
 const form = ref<Omit<CreatePeladaRequest, 'division'>>({
   date: '',
   location: '',
@@ -186,6 +214,7 @@ const formatDate = (dateString: string): string => {
 
 const applyPeladas = (fetchedPeladas: Pelada[]) => {
   peladas.value = fetchedPeladas.map((pelada) => ({ ...pelada, hasStatistics: undefined }))
+  currentPage.value = 1
   isLoading.value = false
 
   fetchedPeladas.forEach(async (pelada) => {
