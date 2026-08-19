@@ -24,22 +24,14 @@
         <div class="surface-card-body">
           <h2 class="section-title">Visão geral</h2>
           <div class="metric-grid">
-            <div class="metric-card">
-              <span>Jogadores</span>
-              <strong>{{ match.total_players }}</strong>
-            </div>
-            <div class="metric-card">
-              <span>Gols</span>
-              <strong>{{ match.total_goals }}</strong>
-            </div>
-            <div class="metric-card">
-              <span>Assistências</span>
-              <strong>{{ match.total_assists }}</strong>
-            </div>
-            <div class="metric-card">
-              <span>Média gols/jogador</span>
-              <strong>{{ formatDec(match.avg_goals_per_player) }}</strong>
-            </div>
+            <StatTile label="Jogadores" :value="match.total_players" />
+            <StatTile label="Gols" :value="match.total_goals" />
+            <StatTile label="Assistências" :value="match.total_assists" />
+            <StatTile
+              label="Média gols/jogador"
+              :value="formatDec(match.avg_goals_per_player)"
+              help="Total de gols da pelada ÷ jogadores participantes."
+            />
           </div>
         </div>
       </section>
@@ -48,21 +40,25 @@
         <div class="surface-card-body">
           <h2 class="section-title">Destaques</h2>
           <div class="metric-grid">
-            <div v-if="match.top_scorer" class="metric-card">
-              <span>Artilheiro</span>
-              <strong>{{ match.top_scorer.player.name }}</strong>
-              <small>{{ match.top_scorer.value }} gols</small>
-            </div>
-            <div v-if="match.top_assister" class="metric-card">
-              <span>Garçom</span>
-              <strong>{{ match.top_assister.player.name }}</strong>
-              <small>{{ match.top_assister.value }} assistências</small>
-            </div>
-            <div v-if="match.top_goal_participation" class="metric-card">
-              <span>Maior participação</span>
-              <strong>{{ match.top_goal_participation.player.name }}</strong>
-              <small>{{ match.top_goal_participation.value }} participações</small>
-            </div>
+            <StatTile
+              v-if="match.top_scorer"
+              label="Artilheiro"
+              :value="match.top_scorer.player.name"
+              :hint="`${match.top_scorer.value} gols`"
+            />
+            <StatTile
+              v-if="match.top_assister"
+              label="Garçom"
+              :value="match.top_assister.player.name"
+              :hint="`${match.top_assister.value} assistências`"
+            />
+            <StatTile
+              v-if="match.top_goal_participation"
+              label="Maior participação em gols"
+              :value="match.top_goal_participation.player.name"
+              :hint="`${match.top_goal_participation.value} participações em gols`"
+              help="Participações em gols = gols + assistências do jogador nessa pelada."
+            />
           </div>
         </div>
       </section>
@@ -103,7 +99,7 @@
                   <th>Jogador</th>
                   <th>Gols</th>
                   <th>Assistências</th>
-                  <th>Participações</th>
+                  <th>Participações em Gols</th>
                   <th>Resultado</th>
                 </tr>
               </thead>
@@ -114,7 +110,7 @@
                   </td>
                   <td data-label="Gols">{{ item.statistics.goals }}</td>
                   <td data-label="Assistências">{{ item.statistics.assists }}</td>
-                  <td data-label="Participações">{{ item.statistics.goal_participation }}</td>
+                  <td data-label="Participações em Gols">{{ item.statistics.goal_participation }}</td>
                   <td data-label="Resultado">
                     <span class="pill-badge" :class="resultPillClass(item.statistics.result)">{{ resultLabel(item.statistics.result) }}</span>
                   </td>
@@ -136,7 +132,7 @@
                   <th>Gols</th>
                   <th>Assistências</th>
                   <th>Gols sofridos</th>
-                  <th>Participações</th>
+                  <th>Participações em Gols</th>
                   <th>Resultado</th>
                 </tr>
               </thead>
@@ -148,7 +144,7 @@
                   <td data-label="Gols">{{ item.statistics.goals }}</td>
                   <td data-label="Assistências">{{ item.statistics.assists }}</td>
                   <td data-label="Gols sofridos">{{ item.statistics.goals_conceded }}</td>
-                  <td data-label="Participações">{{ item.statistics.goal_participation }}</td>
+                  <td data-label="Participações em Gols">{{ item.statistics.goal_participation }}</td>
                   <td data-label="Resultado">
                     <span class="pill-badge" :class="resultPillClass(item.statistics.result)">{{ resultLabel(item.statistics.result) }}</span>
                   </td>
@@ -167,6 +163,7 @@ import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { PeladaService } from '../services/peladaService'
 import { StatisticsService } from '../services/statisticsService'
+import StatTile from '../components/ui/StatTile.vue'
 import type { MatchDetail, Pelada } from '../types'
 
 const route = useRoute()

@@ -20,19 +20,21 @@
           >{{ opt.label }}</button>
         </div>
 
-        <div v-if="overview" class="overview-stat-strip">
-          <div class="overview-stat-card">
-            <span class="overview-stat-label">Peladas no ano</span>
-            <strong class="overview-stat-value">{{ overview.total_peladas_in_year }}</strong>
-          </div>
-          <div class="overview-stat-card">
-            <span class="overview-stat-label">Minimo para ranking</span>
-            <strong class="overview-stat-value">{{ overview.minimum_matches_for_ranking }}</strong>
-          </div>
-          <div class="overview-stat-card">
-            <span class="overview-stat-label">Jogadores filtrados</span>
-            <strong class="overview-stat-value">{{ filteredPlayers.length }}</strong>
-          </div>
+        <div v-if="overview" class="metric-grid overview-hero-stats">
+          <StatTile
+            label="Peladas no ano"
+            :value="overview.total_peladas_in_year"
+            help="Quantidade de peladas registradas no ano corrente, na divisão selecionada (Quinta ou Sábado)."
+          />
+          <StatTile
+            label="Mínimo p/ ranking"
+            :value="overview.minimum_matches_for_ranking"
+            help="Número mínimo de partidas que um jogador precisa disputar nesse recorte para entrar nos rankings: 20% do total de peladas do período."
+          />
+          <StatTile
+            label="Jogadores filtrados"
+            :value="filteredPlayers.length"
+          />
         </div>
       </div>
     </header>
@@ -122,7 +124,7 @@
         </div>
 
         <div class="table-shell">
-          <div class="table-scroll">
+          <div v-if="!isMobile" class="table-scroll">
             <table class="data-table">
               <colgroup>
                 <col style="width:52px" />
@@ -175,35 +177,42 @@
             </table>
           </div>
 
-          <div class="pagination-bar">
-            <span class="pag-info">
-              {{ (currentPage - 1) * pageSize + 1 }}-{{ Math.min(currentPage * pageSize, filteredPlayers.length) }}
-              de {{ filteredPlayers.length }}
-            </span>
+          <ul v-else class="player-list">
+            <li
+              v-for="(entry, idx) in paginatedPlayers"
+              :key="entry.player.id"
+              class="player-list-item"
+              @click="openModal(entry)"
+            >
+              <span class="rank-num player-list-rank">{{ (currentPage - 1) * pageSize + idx + 1 }}</span>
+              <span class="avatar player-list-avatar" :style="{ background: avatarColor(entry.player.name) }">
+                {{ initials(entry.player.name) }}
+              </span>
+              <div class="player-list-body">
+                <div class="player-list-top">
+                  <span class="player-name player-list-name">{{ entry.player.name }}</span>
+                  <span class="elig-badge" :class="entry.statistics.eligible_for_ranking ? 'yes' : 'no'">
+                    {{ entry.statistics.eligible_for_ranking ? 'Elegivel' : 'Nao elegivel' }}
+                  </span>
+                </div>
+                <div class="player-list-stats">
+                  <span class="pos-badge" :class="entry.player.position">{{ entry.player.position }}</span>
+                  <span><strong>{{ entry.statistics.total_matches }}</strong> jogos</span>
+                  <span><strong>{{ entry.statistics.total_goals }}</strong> gols</span>
+                </div>
+              </div>
+            </li>
+          </ul>
 
-            <div class="pag-controls">
-              <button class="pag-btn" :disabled="currentPage === 1" @click="currentPage--" aria-label="Pagina anterior">
-                <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M10 12L6 8l4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </button>
-
-              <button
-                v-for="page in visiblePages"
-                :key="page"
-                :class="['pag-num', { active: page === currentPage, ellipsis: page === '...' }]"
-                :disabled="page === '...'"
-                @click="page !== '...' && (currentPage = Number(page))"
-              >{{ page }}</button>
-
-              <button class="pag-btn" :disabled="currentPage === totalPages" @click="currentPage++" aria-label="Proxima pagina">
-                <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </button>
-            </div>
-
-            <div class="pag-size">
-              <label class="filter-label">por pagina</label>
-              <SearchableSelect v-model="pageSize" :options="pageSizeOptions" input-class="pag-select" @change="currentPage = 1" />
-            </div>
-          </div>
+          <Pagination
+            :current-page="currentPage"
+            :total-pages="totalPages"
+            :total-items="filteredPlayers.length"
+            :page-size="pageSize"
+            :page-size-options="pageSizeOptions"
+            @update:current-page="currentPage = $event"
+            @update:page-size="pageSize = $event"
+          />
         </div>
       </section>
     </main>
@@ -227,50 +236,46 @@
           <div class="modal-section-label">Estatisticas da temporada</div>
 
           <div class="modal-body">
-            <div class="stat-grid">
-              <div class="stat-card highlight">
-                <span class="stat-label">Jogos</span>
-                <strong class="stat-val">{{ selectedPlayer.statistics.total_matches }}</strong>
-              </div>
-              <div class="stat-card highlight">
-                <span class="stat-label">Vitorias</span>
-                <strong class="stat-val">{{ selectedPlayer.statistics.total_wins }}</strong>
-              </div>
-              <div class="stat-card highlight">
-                <span class="stat-label">Gols</span>
-                <strong class="stat-val">{{ selectedPlayer.statistics.total_goals }}</strong>
-              </div>
-              <div class="stat-card highlight">
-                <span class="stat-label">Assistencias</span>
-                <strong class="stat-val">{{ selectedPlayer.statistics.total_assists }}</strong>
-              </div>
+            <div class="metric-grid">
+              <StatTile label="Jogos" :value="selectedPlayer.statistics.total_matches" highlight />
+              <StatTile label="Vitórias" :value="selectedPlayer.statistics.total_wins" highlight />
+              <StatTile label="Gols" :value="selectedPlayer.statistics.total_goals" highlight />
+              <StatTile label="Assistências" :value="selectedPlayer.statistics.total_assists" highlight />
 
-              <div class="stat-card">
-                <span class="stat-label">Aproveitamento</span>
-                <strong class="stat-val">{{ formatWinRate(selectedPlayer.statistics.total_wins, selectedPlayer.statistics.total_matches) }}</strong>
-              </div>
-              <div class="stat-card">
-                <span class="stat-label">Media de gols</span>
-                <strong class="stat-val">{{ formatDec(selectedPlayer.statistics.avg_goals_per_match) }}</strong>
-              </div>
-              <div class="stat-card">
-                <span class="stat-label">Media de assistencias</span>
-                <strong class="stat-val">{{ formatDec(selectedPlayer.statistics.avg_assists_per_match) }}</strong>
-              </div>
-              <div class="stat-card">
-                <span class="stat-label">Participacao</span>
-                <strong class="stat-val">{{ formatDec(selectedPlayer.statistics.avg_goal_participation) }}</strong>
-              </div>
+              <StatTile
+                label="Aproveitamento"
+                :value="formatWinRate(selectedPlayer.statistics.total_wins, selectedPlayer.statistics.total_matches)"
+                help="Vitórias ÷ partidas disputadas × 100."
+              />
+              <StatTile
+                label="Média de gols"
+                :value="formatDec(selectedPlayer.statistics.avg_goals_per_match)"
+                help="Total de gols ÷ partidas disputadas."
+              />
+              <StatTile
+                label="Média de assistências"
+                :value="formatDec(selectedPlayer.statistics.avg_assists_per_match)"
+                help="Total de assistências ÷ partidas disputadas."
+              />
+              <StatTile
+                label="Participações em gols"
+                :value="formatDec(selectedPlayer.statistics.avg_goal_participation)"
+                help="Média de gols + assistências por partida disputada."
+              />
 
-              <div v-if="selectedPlayer.player.position === 'goleiro'" class="stat-card">
-                <span class="stat-label">Gols sofridos</span>
-                <strong class="stat-val">{{ selectedPlayer.statistics.total_goals_conceded ?? '-' }}</strong>
-              </div>
+              <StatTile
+                v-if="selectedPlayer.player.position === 'goleiro'"
+                label="Gols sofridos"
+                :value="selectedPlayer.statistics.total_goals_conceded ?? '-'"
+              />
 
-              <div class="stat-card stat-card--wide" :class="selectedPlayer.statistics.eligible_for_ranking ? 'elig-yes' : 'elig-no'">
-                <span class="stat-label">Status no ranking</span>
-                <strong class="stat-val">{{ selectedPlayer.statistics.eligible_for_ranking ? 'Elegivel' : 'Nao elegivel' }}</strong>
-              </div>
+              <StatTile
+                label="Status no ranking"
+                :value="selectedPlayer.statistics.eligible_for_ranking ? 'Elegível' : 'Não elegível'"
+                :class="selectedPlayer.statistics.eligible_for_ranking ? 'elig-yes' : 'elig-no'"
+                help="Elegível quando o jogador disputou pelo menos 20% do total de peladas do período (mostrado em 'Mínimo p/ ranking' no topo da página)."
+                wide
+              />
             </div>
 
             <button class="btn btn-outline-secondary w-100 mt-3" @click="goToPlayerDetail(selectedPlayer.player.id)">
@@ -287,13 +292,17 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import SearchableSelect from '../components/ui/SearchableSelect.vue'
+import StatTile from '../components/ui/StatTile.vue'
+import Pagination from '../components/ui/Pagination.vue'
 import { useSEO } from '../composables/useSEO'
+import { useResponsive } from '../composables/useResponsive'
 import { StatisticsService } from '../services/statisticsService'
 import type { PlayerOverviewItem, PlayersOverviewResponse, StatisticsFilters } from '../types'
 import logo from '../assets/logo-red-devils.png'
 
 const { updateSEO } = useSEO()
 const router = useRouter()
+const { isMobile } = useResponsive()
 
 const goToPlayerDetail = (playerId: number) => {
   closeModal()
@@ -364,20 +373,11 @@ const paginatedPlayers = computed(() => {
   return filteredPlayers.value.slice(start, start + pageSize.value)
 })
 
-const visiblePages = computed(() => {
-  const total = totalPages.value
-  const cur = currentPage.value
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
-
-  const pages: (number | string)[] = [1]
-  if (cur > 3) pages.push('...')
-  for (let page = Math.max(2, cur - 1); page <= Math.min(total - 1, cur + 1); page++) pages.push(page)
-  if (cur < total - 2) pages.push('...')
-  pages.push(total)
-  return pages
+watch([search, positionFilter, eligibilityFilter], () => {
+  currentPage.value = 1
 })
 
-watch([search, positionFilter, eligibilityFilter], () => {
+watch(pageSize, () => {
   currentPage.value = 1
 })
 

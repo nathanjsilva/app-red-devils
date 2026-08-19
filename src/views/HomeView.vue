@@ -75,16 +75,16 @@
 
         <div v-if="isLoadingPeladaCounts" class="text-muted small">Carregando...</div>
         <div v-else class="metric-grid division-grid">
-          <div class="metric-card">
-            <span>Quinta</span>
-            <strong>{{ peladaCountByDivision.quinta }}</strong>
-            <small>pelada{{ peladaCountByDivision.quinta !== 1 ? 's' : '' }}</small>
-          </div>
-          <div class="metric-card">
-            <span>Sabado</span>
-            <strong>{{ peladaCountByDivision.sabado }}</strong>
-            <small>pelada{{ peladaCountByDivision.sabado !== 1 ? 's' : '' }}</small>
-          </div>
+          <StatTile
+            label="Quinta"
+            :value="peladaCountByDivision.quinta"
+            :hint="`pelada${peladaCountByDivision.quinta !== 1 ? 's' : ''}`"
+          />
+          <StatTile
+            label="Sábado"
+            :value="peladaCountByDivision.sabado"
+            :hint="`pelada${peladaCountByDivision.sabado !== 1 ? 's' : ''}`"
+          />
         </div>
       </div>
     </section>
@@ -102,7 +102,7 @@
       <div class="surface-card-body home-state-card text-center py-5">
         <h2 class="section-title mb-2">Nao foi possivel carregar os rankings</h2>
         <p class="text-muted mb-3">{{ error }}</p>
-        <button class="btn btn-outline-secondary" @click="fetchRankings(filters)">Tentar novamente</button>
+        <button class="btn btn-outline-secondary" @click="fetchRankings(filters, 5)">Tentar novamente</button>
       </div>
     </div>
 
@@ -152,9 +152,10 @@
           </header>
 
           <div class="ranking-panel-body">
-            <div
+            <router-link
               v-for="(player, i) in ranking.players"
               :key="player.id"
+              :to="`/players/${player.id}`"
               class="ranking-row"
               :class="{ featured: i === 0 }"
             >
@@ -163,14 +164,14 @@
                 <div class="player-avatar">{{ player.name.charAt(0).toUpperCase() }}</div>
                 <div class="player-copy">
                   <span class="player-name">{{ player.name }}</span>
+                  <span class="ranking-matches">{{ player.matches || 0 }} jogo{{ player.matches === 1 ? '' : 's' }}</span>
                 </div>
               </div>
               <div class="ranking-stats">
                 <strong class="ranking-total">{{ formatTotal(ranking.type, player.total, player.average) }}</strong>
                 <span class="ranking-average">{{ formatAverage(ranking.type, player.average) }}</span>
-                <span class="ranking-matches">{{ player.matches || 0 }} jogo{{ player.matches === 1 ? '' : 's' }}</span>
               </div>
-            </div>
+            </router-link>
           </div>
         </article>
       </section>
@@ -186,6 +187,7 @@ import { useRankingsStore } from '../stores/rankings'
 import { useAuthStore } from '../stores/auth'
 import { useSEO } from '../composables/useSEO'
 import { StatisticsService } from '../services/statisticsService'
+import StatTile from '../components/ui/StatTile.vue'
 import type { DashboardOverview, StatisticsFilters } from '../types'
 import logo from '../assets/logo-red-devils.png'
 
@@ -274,7 +276,7 @@ const fetchPeladaCounts = async () => {
 watch(division, async () => {
   fetchDashboard()
   try {
-    await fetchRankings(filters.value)
+    await fetchRankings(filters.value, 5)
   } catch (fetchError) {
     console.error('Error fetching rankings:', fetchError)
   }
@@ -291,7 +293,7 @@ onMounted(async () => {
 
   if (!isLoading.value && (!rankings.value || rankings.value.length === 0)) {
     try {
-      await fetchRankings(filters.value)
+      await fetchRankings(filters.value, 5)
     } catch (fetchError) {
       console.error('Error fetching rankings:', fetchError)
     }

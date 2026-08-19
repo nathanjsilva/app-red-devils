@@ -21,19 +21,10 @@
             />
           </div>
           <div class="col-12 col-lg-6">
-            <div v-if="peladaInfo" class="metric-grid compact-grid">
-              <div class="metric-card">
-                <span>Times</span>
-                <strong>{{ peladaInfo.qtd_times }}</strong>
-              </div>
-              <div class="metric-card">
-                <span>Jogadores/Time</span>
-                <strong>{{ peladaInfo.qtd_jogadores_por_time }}</strong>
-              </div>
-              <div class="metric-card">
-                <span>Goleiros</span>
-                <strong>{{ peladaInfo.qtd_goleiros }}</strong>
-              </div>
+            <div v-if="peladaInfo" class="metric-grid">
+              <StatTile label="Times" :value="peladaInfo.qtd_times" />
+              <StatTile label="Jogadores/Time" :value="peladaInfo.qtd_jogadores_por_time" />
+              <StatTile label="Goleiros" :value="peladaInfo.qtd_goleiros" />
             </div>
           </div>
         </div>
@@ -107,6 +98,7 @@
 import { computed, nextTick, onMounted, reactive, ref } from 'vue'
 import { useToast } from 'vue-toastification'
 import SearchableSelect from '../components/ui/SearchableSelect.vue'
+import StatTile from '../components/ui/StatTile.vue'
 import { PeladaService } from '../services/peladaService'
 import { PlayerService } from '../services/playerService'
 import { TeamService } from '../services/teamService'
@@ -362,10 +354,6 @@ onMounted(loadAllPeladas)
   cursor: pointer;
 }
 
-.compact-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
 .team-card {
   border: 1px solid var(--line-soft);
   border-radius: 1.1rem;
@@ -387,9 +375,4 @@ onMounted(loadAllPeladas)
   gap: 0.85rem;
 }
 
-@media (max-width: 767px) {
-  .compact-grid {
-    grid-template-columns: 1fr;
-  }
-}
 </style>

@@ -174,15 +174,33 @@ select:focus-visible {
 
 .metric-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+    gap: 0.6rem;
+    min-width: 0;
 }
 
 .metric-card {
-    padding: 1rem 1.1rem;
-    border-radius: 1rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: 0.75rem;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
     border: 1px solid var(--line-soft);
+    min-width: 0;
+}
+
+.metric-card--highlight {
+    background: linear-gradient(180deg, rgba(220, 38, 38, 0.16) 0%, rgba(220, 38, 38, 0.05) 100%);
+}
+
+.metric-card--wide {
+    grid-column: span 2;
+}
+
+.metric-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.35rem;
+    margin-bottom: 0.2rem;
 }
 
 .metric-card span,
@@ -192,19 +210,30 @@ select:focus-visible {
 }
 
 .metric-card span {
-    font-size: 0.78rem;
-    margin-bottom: 0.3rem;
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    line-height: 1.25;
+}
+
+.metric-card-head span {
+    margin-bottom: 0;
 }
 
 .metric-card strong {
     display: block;
-    font-size: 1.25rem;
+    font-size: 1.05rem;
     font-weight: 800;
-    margin-bottom: 0.25rem;
+    line-height: 1.15;
+    margin-bottom: 0.15rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .metric-card small {
-    font-size: 0.82rem;
+    font-size: 0.72rem;
+    line-height: 1.3;
 }
 
 .pill-badge {
@@ -235,6 +264,57 @@ select:focus-visible {
 .pill-danger {
     background: rgba(220, 38, 38, 0.18);
     color: #f87171;
+}
+
+.pag-btn,
+.pag-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 38px;
+    height: 38px;
+    padding: 0 0.75rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 0.85rem;
+    background: var(--surface-strong);
+    color: var(--text-main);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.pag-btn:hover:not(:disabled),
+.pag-num:hover:not(:disabled),
+.pag-btn:focus-visible,
+.pag-num:focus-visible {
+    border-color: var(--red-devils);
+    color: var(--red-devils);
+    background: rgba(185, 28, 28, 0.05);
+}
+
+.pag-num.active {
+    background: linear-gradient(135deg, var(--red-devils) 0%, #7f1010 100%);
+    border-color: var(--red-devils);
+    color: #fff;
+}
+
+.pag-btn:disabled,
+.pag-num:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.pag-select {
+    height: 46px;
+    padding: 0 2.4rem 0 0.85rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 0.95rem;
+    font-size: 0.95rem;
+    color: var(--text-main);
+    background: var(--surface-strong);
+}
+
+.pag-select:focus {
+    border-color: var(--red-devils);
 }
 
 .modal-shell,
@@ -349,12 +429,6 @@ select:focus-visible {
     }
 }
 
-@media (max-width: 1024px) {
-    .metric-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
 @media (max-width: 991px) {
     .container,
     .container-fluid {
@@ -382,10 +456,6 @@ select:focus-visible {
 
     .surface-card-body {
         padding: 1rem;
-    }
-
-    .metric-grid {
-        grid-template-columns: 1fr;
     }
 
     /* Cara de app nativo: mais próximo da borda da tela, cantos menores,

@@ -5,7 +5,7 @@ const RANKING_LABELS: Record<string, string> = {
   wins: 'Vitórias',
   goals: 'Gols',
   assists: 'Assistências',
-  'goal-participations': 'Participação em Gols',
+  'goal-participations': 'Participações em Gols',
   goalkeepers: 'Goleiros (Gols Sofridos)',
   'win-rate': 'Aproveitamento',
   appearances: 'Presenças',
@@ -35,19 +35,19 @@ export class RankingService {
     }
   }
 
-  static getWinsRanking = (filters: StatisticsFilters = {}) => this.getFullRanking('wins', 10, filters)
-  static getGoalsRanking = (filters: StatisticsFilters = {}) => this.getFullRanking('goals', 10, filters)
-  static getAssistsRanking = (filters: StatisticsFilters = {}) => this.getFullRanking('assists', 10, filters)
-  static getGoalParticipationRanking = (filters: StatisticsFilters = {}) => this.getFullRanking('goal-participations', 10, filters)
-  static getGoalkeepersRanking = (filters: StatisticsFilters = {}) => this.getFullRanking('goalkeepers', 10, filters)
+  static getWinsRanking = (filters: StatisticsFilters = {}, perPage = 10) => this.getFullRanking('wins', perPage, filters)
+  static getGoalsRanking = (filters: StatisticsFilters = {}, perPage = 10) => this.getFullRanking('goals', perPage, filters)
+  static getAssistsRanking = (filters: StatisticsFilters = {}, perPage = 10) => this.getFullRanking('assists', perPage, filters)
+  static getGoalParticipationRanking = (filters: StatisticsFilters = {}, perPage = 10) => this.getFullRanking('goal-participations', perPage, filters)
+  static getGoalkeepersRanking = (filters: StatisticsFilters = {}, perPage = 10) => this.getFullRanking('goalkeepers', perPage, filters)
 
-  static async getAllRankings(filters: StatisticsFilters = {}): Promise<Ranking[]> {
+  static async getAllRankings(filters: StatisticsFilters = {}, perPage = 10): Promise<Ranking[]> {
     const rankingEndpoints = [
-      () => this.getWinsRanking(filters),
-      () => this.getGoalsRanking(filters),
-      () => this.getAssistsRanking(filters),
-      () => this.getGoalParticipationRanking(filters),
-      () => this.getGoalkeepersRanking(filters)
+      () => this.getWinsRanking(filters, perPage),
+      () => this.getGoalsRanking(filters, perPage),
+      () => this.getAssistsRanking(filters, perPage),
+      () => this.getGoalParticipationRanking(filters, perPage),
+      () => this.getGoalkeepersRanking(filters, perPage)
     ]
 
     const results = await Promise.allSettled(rankingEndpoints.map((fn) => fn()))

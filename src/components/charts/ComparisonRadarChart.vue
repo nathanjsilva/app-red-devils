@@ -24,7 +24,7 @@ const formatPct = (value: number) => `${formatDec(value)}%`
 const AXES: Array<{ key: RadarAxisKey; label: string; format: (value: number) => string }> = [
   { key: 'total_goals', label: 'Gols', format: formatInt },
   { key: 'total_assists', label: 'Assistências', format: formatInt },
-  { key: 'total_goal_participations', label: 'Participações', format: formatInt },
+  { key: 'total_goal_participations', label: 'Participações em Gols', format: formatInt },
   { key: 'win_rate', label: 'Aproveitamento', format: formatPct },
   { key: 'avg_goal_participations_per_match', label: 'Média/Partida', format: formatDec }
 ]

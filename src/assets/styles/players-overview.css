@@ -84,34 +84,23 @@
     color: #fff;
 }
 
-.overview-stat-strip {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1rem;
+/* Hero com fundo vermelho escuro: usa o .metric-card padrao (global.css),
+   so clareando texto/fundo pra funcionar sobre o gradiente vermelho. */
+.overview-hero-stats {
+    max-width: 480px;
 }
 
-.overview-stat-card {
-    padding: 1.1rem 1.2rem;
-    border-radius: 1.15rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+.overview-hero-stats .metric-card {
+    border-color: rgba(255, 255, 255, 0.12);
     background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(8px);
 }
 
-.overview-stat-label {
-    display: block;
-    margin-bottom: 0.45rem;
-    font-size: 0.76rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: rgba(255, 255, 255, 0.62);
+.overview-hero-stats .metric-card span {
+    color: rgba(255, 255, 255, 0.68);
 }
 
-.overview-stat-value {
+.overview-hero-stats .metric-card strong {
     color: #fff;
-    font-size: clamp(1.8rem, 3.5vw, 2.5rem);
-    line-height: 1;
-    font-weight: 800;
 }
 
 .overview-main {
@@ -158,8 +147,7 @@
     pointer-events: none;
 }
 
-.search-input,
-.pag-select {
+.search-input {
     width: 100%;
     height: 46px;
     padding: 0 2.75rem 0 2.7rem;
@@ -170,12 +158,7 @@
     background: var(--surface-strong);
 }
 
-.pag-select {
-    padding: 0 2.4rem 0 0.85rem;
-}
-
-.search-input:focus,
-.pag-select:focus {
+.search-input:focus {
     border-color: var(--red-devils);
 }
 
@@ -202,12 +185,14 @@
     gap: 0.75rem;
     flex-wrap: wrap;
     align-items: flex-end;
+    min-width: 0;
 }
 
 .filter-group {
     display: flex;
     flex-direction: column;
     gap: 0.45rem;
+    min-width: 0;
 }
 
 .filter-label {
@@ -394,69 +379,90 @@
     color: #f87171;
 }
 
-.pagination-bar {
+/* Lista compacta usada no mobile no lugar da tabela: mostra jogador,
+   posicao, jogos, gols e status de ranking sem exigir rolagem horizontal. */
+.player-list {
+    list-style: none;
+    margin: 0;
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.player-list-item {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    padding: 1rem 1.25rem;
-    border-top: 1px solid var(--line-soft);
-    background: rgba(255, 255, 255, 0.02);
-}
-
-.pag-info {
-    font-size: 0.84rem;
-    color: var(--text-muted);
-}
-
-.pag-controls {
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-}
-
-.pag-btn,
-.pag-num {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 38px;
-    height: 38px;
-    padding: 0 0.75rem;
-    border: 1px solid var(--line-strong);
+    gap: 0.6rem;
+    padding: 0.6rem 0.7rem;
     border-radius: 0.85rem;
+    border: 1px solid var(--line-soft);
     background: var(--surface-strong);
-    color: var(--text-main);
-    font-weight: 700;
     cursor: pointer;
 }
 
-.pag-btn:hover:not(:disabled),
-.pag-num:hover:not(:disabled),
-.pag-btn:focus-visible,
-.pag-num:focus-visible {
-    border-color: var(--red-devils);
-    color: var(--red-devils);
-    background: rgba(185, 28, 28, 0.05);
+.player-list-item:active {
+    background: rgba(220, 38, 38, 0.1);
 }
 
-.pag-num.active {
-    background: linear-gradient(135deg, var(--red-devils) 0%, #7f1010 100%);
-    border-color: var(--red-devils);
-    color: #fff;
+.player-list-rank {
+    width: 24px;
+    height: 24px;
+    font-size: 0.68rem;
+    flex-shrink: 0;
 }
 
-.pag-btn:disabled,
-.pag-num:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
+.player-list-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 0.66rem;
+    flex-shrink: 0;
 }
 
-.pag-size {
+.player-list-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.player-list-top {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 0.5rem;
+}
+
+.player-list-name {
+    font-size: 0.86rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.player-list-stats {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.player-list-stats strong {
+    color: var(--text-main);
+    font-weight: 800;
+}
+
+.player-list .pos-badge {
+    padding: 0.15rem 0.5rem;
+    font-size: 0.66rem;
+}
+
+.player-list .elig-badge {
+    flex-shrink: 0;
+    font-size: 0.64rem;
+    padding: 0.2rem 0.5rem;
 }
 
 .modal-head {
@@ -513,42 +519,6 @@
     padding: 1.25rem 1.4rem 1.4rem;
 }
 
-.stat-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.85rem;
-}
-
-.stat-card {
-    padding: 1rem;
-    border-radius: 1rem;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--line-soft);
-}
-
-.stat-card.highlight {
-    background: linear-gradient(180deg, rgba(185, 28, 28, 0.12) 0%, rgba(185, 28, 28, 0.04) 100%);
-}
-
-.stat-card--wide {
-    grid-column: span 2;
-}
-
-.stat-label {
-    display: block;
-    margin-bottom: 0.35rem;
-    font-size: 0.76rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-muted);
-}
-
-.stat-val {
-    display: block;
-    font-size: 1.1rem;
-    font-weight: 800;
-}
-
 .modal-fade-enter-active,
 .modal-fade-leave-active {
     transition: opacity 0.2s ease;
@@ -557,13 +527,6 @@
 .modal-fade-enter-from,
 .modal-fade-leave-to {
     opacity: 0;
-}
-
-@media (max-width: 991px) {
-    .overview-stat-strip,
-    .stat-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
 }
 
 @media (max-width: 767px) {
@@ -580,10 +543,8 @@
         height: 60px;
     }
 
-    .overview-stat-strip,
     .toolbar,
-    .filters,
-    .stat-grid {
+    .filters {
         grid-template-columns: 1fr;
     }
 
@@ -595,22 +556,6 @@
         overflow-x: auto;
     }
 
-    .pagination-bar,
-    .pag-size {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .pag-controls {
-        flex-wrap: wrap;
-    }
-
-    .pag-btn,
-    .pag-num {
-        min-width: 44px;
-        height: 44px;
-    }
-
     .modal-head {
         align-items: flex-start;
         flex-wrap: wrap;
@@ -618,9 +563,5 @@
 
     .modal-close {
         margin-left: 0;
-    }
-
-    .stat-card--wide {
-        grid-column: span 1;
     }
 }

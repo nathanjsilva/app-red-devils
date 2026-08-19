@@ -389,6 +389,9 @@ export interface GoalkeeperDetail {
     matches: Array<{ pelada_id: number; date: string; goals: number | null; assists: number | null; result: 'win' | 'loss' | 'draw' }>
     trend: string
   }
+  goals_conceded: number | null
+  best_match_goals_conceded: number | null
+  worst_match_goals_conceded: number | null
 }
 
 export interface PeladasPerMonthPoint {
@@ -451,6 +454,7 @@ export interface PlayerProfile {
     trend: string
   }
   evolution: EvolutionPoint[]
+  goals_conceded: number | null
 }
 
 export interface ComparePlayerEntry {

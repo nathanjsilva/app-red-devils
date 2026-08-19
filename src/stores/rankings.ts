@@ -8,11 +8,11 @@ export const useRankingsStore = defineStore('rankings', () => {
   const isLoading = ref(false)
   const error = ref<string | null>(null)
 
-  const fetchRankings = async (filters: StatisticsFilters = {}) => {
+  const fetchRankings = async (filters: StatisticsFilters = {}, perPage = 10) => {
     isLoading.value = true
     error.value = null
     try {
-      rankings.value = await RankingService.getAllRankings(filters)
+      rankings.value = await RankingService.getAllRankings(filters, perPage)
     } catch (err) {
       console.warn('Erro ao buscar rankings:', err)
       error.value = 'Erro ao carregar rankings'

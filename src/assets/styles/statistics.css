@@ -222,8 +222,8 @@
         align-items: stretch;
     }
 
-    .stats-ranking-toolbar .seg-control {
-        overflow-x: auto;
+    .stats-ranking-select {
+        width: 100%;
     }
 
     .stats-compare-search {

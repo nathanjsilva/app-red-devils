@@ -37,26 +37,29 @@
 
       <template v-else-if="dashboard">
         <section class="metric-grid stats-kpi-grid">
-          <div class="metric-card">
-            <span>Peladas</span>
-            <strong>{{ dashboard.total_peladas }}</strong>
-            <small>{{ dashboard.total_players }} jogadores participantes</small>
-          </div>
-          <div class="metric-card">
-            <span>Gols</span>
-            <strong>{{ dashboard.total_goals }}</strong>
-            <small>Média {{ formatDec(dashboard.avg_goals_per_pelada) }} por pelada</small>
-          </div>
-          <div class="metric-card">
-            <span>Assistências</span>
-            <strong>{{ dashboard.total_assists }}</strong>
-            <small>Média {{ formatDec(dashboard.avg_assists_per_pelada) }} por pelada</small>
-          </div>
-          <div class="metric-card">
-            <span>Participações em gols</span>
-            <strong>{{ dashboard.total_goal_participations }}</strong>
-            <small>Gols + assistências somados</small>
-          </div>
+          <StatTile
+            label="Peladas"
+            :value="dashboard.total_peladas"
+            :hint="`${dashboard.total_players} jogadores participantes`"
+          />
+          <StatTile
+            label="Gols"
+            :value="dashboard.total_goals"
+            :hint="`Média ${formatDec(dashboard.avg_goals_per_pelada)} por pelada`"
+            help="Média de gols por pelada = total de gols ÷ total de peladas do período."
+          />
+          <StatTile
+            label="Assistências"
+            :value="dashboard.total_assists"
+            :hint="`Média ${formatDec(dashboard.avg_assists_per_pelada)} por pelada`"
+            help="Média de assistências por pelada = total de assistências ÷ total de peladas do período."
+          />
+          <StatTile
+            label="Participações em gols"
+            :value="dashboard.total_goal_participations"
+            hint="Gols + assistências somados"
+            help="Participações em gols = total de gols + total de assistências do período."
+          />
         </section>
 
         <section class="home-spotlight-grid stats-spotlight-grid">
@@ -148,7 +151,7 @@
               <p class="stats-section-kicker">Ranking</p>
               <h2 class="section-title mb-0">{{ activeRankingLabel }}</h2>
             </div>
-            <div class="seg-control">
+            <div v-if="!isMobile" class="seg-control">
               <button
                 v-for="cat in rankingCategories"
                 :key="cat.value"
@@ -156,6 +159,13 @@
                 @click="rankingType = cat.value"
               >{{ cat.label }}</button>
             </div>
+            <SearchableSelect
+              v-else
+              :model-value="rankingType"
+              :options="rankingCategories.map((cat) => ({ value: cat.value, label: cat.label }))"
+              class="stats-ranking-select"
+              @update:model-value="(value) => value && (rankingType = value)"
+            />
           </div>
 
           <div v-if="isLoadingRanking" class="state-box">
@@ -296,33 +306,48 @@
             <div class="modal-section-label">Estatísticas da temporada</div>
 
             <div class="modal-body">
-              <div class="stat-grid">
-                <div class="stat-card highlight">
-                  <span class="stat-label">Jogos</span>
-                  <strong class="stat-val">{{ goalkeeperDetail.total_matches }}</strong>
-                </div>
-                <div class="stat-card highlight">
-                  <span class="stat-label">Vitórias</span>
-                  <strong class="stat-val">{{ goalkeeperDetail.total_wins }}</strong>
-                </div>
-                <div class="stat-card highlight">
-                  <span class="stat-label">Aproveitamento</span>
-                  <strong class="stat-val">{{ formatDec(goalkeeperDetail.win_rate) }}%</strong>
-                </div>
-                <div class="stat-card highlight">
-                  <span class="stat-label">Assiduidade</span>
-                  <strong class="stat-val">{{ formatDec(goalkeeperDetail.attendance_rate) }}%</strong>
-                </div>
+              <div class="metric-grid">
+                <StatTile label="Jogos" :value="goalkeeperDetail.total_matches" highlight />
+                <StatTile label="Vitórias" :value="goalkeeperDetail.total_wins" highlight />
+                <StatTile
+                  label="Aproveitamento"
+                  :value="`${formatDec(goalkeeperDetail.win_rate)}%`"
+                  help="Vitórias ÷ partidas disputadas × 100."
+                  highlight
+                />
+                <StatTile
+                  label="Assiduidade"
+                  :value="`${formatDec(goalkeeperDetail.attendance_rate)}%`"
+                  help="Partidas disputadas ÷ peladas realizadas desde a primeira partida dele no período × 100."
+                  highlight
+                />
 
-                <div class="stat-card">
-                  <span class="stat-label">Melhor sequência sem perder</span>
-                  <strong class="stat-val">{{ goalkeeperDetail.best_unbeaten_streak }}</strong>
-                </div>
-                <div class="stat-card" v-if="goalkeeperDetail.best_duo">
-                  <span class="stat-label">Melhor dupla</span>
-                  <strong class="stat-val">{{ goalkeeperDetail.best_duo.players.map(p => p.name).join(' + ') }}</strong>
-                </div>
+                <StatTile label="Gols sofridos" :value="goalkeeperDetail.goals_conceded ?? '-'" />
+                <StatTile label="Gols" :value="goalkeeperDetail.total_goals" />
+                <StatTile label="Assistências" :value="goalkeeperDetail.total_assists" />
+                <StatTile
+                  label="Participações em gols"
+                  :value="goalkeeperDetail.total_goal_participations"
+                  help="Participações em gols = gols + assistências do goleiro no período."
+                />
+
+                <StatTile label="Melhor sequência sem perder" :value="goalkeeperDetail.best_unbeaten_streak" />
+                <StatTile
+                  v-if="goalkeeperDetail.best_duo"
+                  label="Melhor dupla"
+                  :value="goalkeeperDetail.best_duo.players.map(p => p.name).join(' + ')"
+                  help="Dupla com o melhor aproveitamento jogando junta no mesmo time, entre as que atingiram o mínimo de partidas juntas exigido no período."
+                  wide
+                />
               </div>
+
+              <router-link
+                :to="`/players/${goalkeeperDetail.player.id}`"
+                class="btn btn-outline-secondary w-100 mt-3"
+                @click="closeGoalkeeperDetail"
+              >
+                Ver perfil completo
+              </router-link>
             </div>
           </div>
         </div>
@@ -390,8 +415,12 @@ import EvolutionChart from '../components/charts/EvolutionChart.vue'
 import PeladasPerMonthChart from '../components/charts/PeladasPerMonthChart.vue'
 import RankingBarChart from '../components/charts/RankingBarChart.vue'
 import ComparisonRadarChart from '../components/charts/ComparisonRadarChart.vue'
+import StatTile from '../components/ui/StatTile.vue'
+import SearchableSelect from '../components/ui/SearchableSelect.vue'
+import { useResponsive } from '../composables/useResponsive'
 
 const { updateSEO } = useSEO()
+const { isMobile } = useResponsive()
 
 const division = ref<'quinta' | 'sabado'>('quinta')
 const divisionOptions = [
@@ -441,7 +470,7 @@ const fetchEvolution = async () => {
 const rankingCategories = [
   { value: 'goals' as const, label: 'Gols', suffix: '' },
   { value: 'assists' as const, label: 'Assistências', suffix: '' },
-  { value: 'goal-participations' as const, label: 'Participações', suffix: '' },
+  { value: 'goal-participations' as const, label: 'Participações em Gols', suffix: '' },
   { value: 'wins' as const, label: 'Vitórias', suffix: '' },
   { value: 'win-rate' as const, label: 'Aproveitamento', suffix: '%' },
   { value: 'goalkeepers' as const, label: 'Goleiros', suffix: '/jogo' }

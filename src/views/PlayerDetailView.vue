@@ -30,49 +30,79 @@
         <div class="surface-card-body">
           <h2 class="section-title">Visão geral</h2>
           <div class="metric-grid">
-            <div class="metric-card">
-              <span>Jogos</span>
-              <strong>{{ profile.total_matches }}</strong>
-            </div>
-            <div class="metric-card">
-              <span>Gols</span>
-              <strong>{{ profile.total_goals }}</strong>
-              <small>{{ formatDec(profile.avg_goals_per_match) }}/jogo</small>
-            </div>
-            <div class="metric-card">
-              <span>Assistências</span>
-              <strong>{{ profile.total_assists }}</strong>
-              <small>{{ formatDec(profile.avg_assists_per_match) }}/jogo</small>
-            </div>
-            <div class="metric-card">
-              <span>Aproveitamento</span>
-              <strong>{{ formatDec(profile.win_rate) }}%</strong>
-              <small>{{ profile.total_wins }}V {{ profile.total_draws }}E {{ profile.total_losses }}D</small>
-            </div>
+            <StatTile label="Jogos" :value="profile.total_matches" />
+            <StatTile
+              label="Gols"
+              :value="profile.total_goals"
+              :hint="`${formatDec(profile.avg_goals_per_match)}/jogo`"
+              help="Total de gols marcados no período. Média = total de gols ÷ partidas disputadas."
+            />
+            <StatTile
+              label="Assistências"
+              :value="profile.total_assists"
+              :hint="`${formatDec(profile.avg_assists_per_match)}/jogo`"
+              help="Total de assistências no período. Média = total de assistências ÷ partidas disputadas."
+            />
+            <StatTile
+              label="Participações em gols"
+              :value="profile.total_goal_participations"
+              :hint="`${formatDec(profile.avg_goal_participations_per_match)}/jogo`"
+              help="Participações em gols = gols + assistências. Média = participações em gols ÷ partidas disputadas."
+            />
+            <StatTile
+              label="Aproveitamento"
+              :value="`${formatDec(profile.win_rate)}%`"
+              :hint="`${profile.total_wins}V ${profile.total_draws}E ${profile.total_losses}D`"
+              help="Vitórias ÷ partidas disputadas × 100."
+            />
+            <StatTile
+              v-if="profile.player.position === 'goleiro'"
+              label="Gols sofridos"
+              :value="profile.goals_conceded ?? '-'"
+            />
           </div>
         </div>
       </section>
 
       <section class="surface-card mb-4">
         <div class="surface-card-body">
-          <h2 class="section-title">Sequências e assiduidade</h2>
+          <h2 class="section-title">Sequências, assiduidade e regularidade</h2>
           <div class="metric-grid">
-            <div class="metric-card">
-              <span>Assiduidade</span>
-              <strong>{{ formatDec(profile.attendance_rate) }}%</strong>
-            </div>
-            <div class="metric-card">
-              <span>Melhor sequência de gols</span>
-              <strong>{{ profile.best_scoring_streak }}</strong>
-            </div>
-            <div class="metric-card">
-              <span>Melhor sequência de participações</span>
-              <strong>{{ profile.best_participation_streak }}</strong>
-            </div>
-            <div class="metric-card">
-              <span>Melhor invencibilidade</span>
-              <strong>{{ profile.best_unbeaten_streak }}</strong>
-            </div>
+            <StatTile
+              label="Assiduidade"
+              :value="`${formatDec(profile.attendance_rate)}%`"
+              help="Partidas disputadas ÷ peladas realizadas desde a primeira partida do jogador no período × 100."
+            />
+            <StatTile
+              label="Melhor sequência de gols"
+              :value="profile.best_scoring_streak"
+              help="Maior número de peladas seguidas em que o jogador marcou pelo menos 1 gol."
+            />
+            <StatTile
+              label="Melhor sequência de participações em gols"
+              :value="profile.best_participation_streak"
+              help="Maior número de peladas seguidas em que o jogador teve gol ou assistência."
+            />
+            <StatTile
+              label="Melhor invencibilidade"
+              :value="profile.best_unbeaten_streak"
+              help="Maior número de peladas seguidas sem derrota (vitória ou empate)."
+            />
+            <StatTile
+              label="% de jogos marcando"
+              :value="`${formatDec(profile.pct_matches_scoring)}%`"
+              help="Peladas em que marcou pelo menos 1 gol ÷ partidas disputadas × 100."
+            />
+            <StatTile
+              label="% de jogos dando assistência"
+              :value="`${formatDec(profile.pct_matches_assisting)}%`"
+              help="Peladas em que deu pelo menos 1 assistência ÷ partidas disputadas × 100."
+            />
+            <StatTile
+              label="% de jogos participando de gol"
+              :value="`${formatDec(profile.pct_matches_participating)}%`"
+              help="Peladas em que teve gol ou assistência ÷ partidas disputadas × 100."
+            />
           </div>
 
           <div v-if="profile.best_duo" class="best-duo mt-3">
@@ -116,6 +146,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { StatisticsService } from '../services/statisticsService'
 import EvolutionChart from '../components/charts/EvolutionChart.vue'
+import StatTile from '../components/ui/StatTile.vue'
 import type { PlayerProfile, StatisticsFilters } from '../types'
 
 const route = useRoute()
