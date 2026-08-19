@@ -68,9 +68,28 @@ h3,
  * Variantes canônicas de botão usadas em todo o app — não criar classes novas,
  * reaproveitar uma destas:
  *   .btn-red                    -> ação primária (salvar, criar, confirmar)
- *   .btn-outline-secondary      -> cancelar / voltar / recarregar
+ *   .btn-outline-secondary      -> cancelar / voltar / recarregar / ver mais (navegação neutra)
  *   .btn-outline-primary btn-sm -> editar linha de tabela
  *   .btn-outline-danger  btn-sm -> excluir / ação destrutiva
+ *
+ * Componentes reutilizáveis para estatísticas — não recriar um card/paginação
+ * própria numa tela nova, usar estes:
+ *   <StatTile>      (components/ui) -> todo número/estatística em card; usa
+ *                    .metric-card/.metric-grid (grid auto-fit, sem breakpoint
+ *                    manual); prop `help` pluga um <InfoTooltip> ancorado ao
+ *                    card inteiro (não ao ícone) para nunca vazar da borda.
+ *   <Pagination>    (components/ui) -> numeração com reticências no desktop,
+ *                    barra compacta "Página X de Y" no mobile; reaproveitada
+ *                    em toda lista paginada, pública ou admin.
+ *   Listas longas   -> tabela no desktop; no mobile, cards compactos por
+ *                    linha (ver PlayersOverviewView) em vez de tabela com
+ *                    scroll horizontal — decidir por breakpoint (isMobile do
+ *                    composable useResponsive), nunca reduzir a versão
+ *                    desktop.
+ *   Todo fetch assíncrono precisa de 3 estados no template: loading
+ *   (spinner), erro (mensagem distinta + botão .retry-btn) e vazio (mensagem
+ *   própria) — nunca deixar "sem dados" cobrir silenciosamente uma falha de
+ *   rede.
  */
 .btn-red {
     background: linear-gradient(135deg, var(--red-devils) 0%, #7f1010 100%);
