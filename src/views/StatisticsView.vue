@@ -251,6 +251,8 @@
                   <th>Jogos</th>
                   <th>Vitórias</th>
                   <th>Aproveitamento</th>
+                  <th>Gols</th>
+                  <th>Assistências</th>
                   <th>Gols sofridos</th>
                   <th>Média/jogo</th>
                 </tr>
@@ -268,6 +270,8 @@
                   <td data-label="Jogos">{{ goalkeeper.matches }}</td>
                   <td data-label="Vitórias">{{ goalkeeper.wins }}</td>
                   <td data-label="Aproveitamento">{{ formatDec(goalkeeper.win_rate) }}%</td>
+                  <td data-label="Gols">{{ goalkeeper.goals }}</td>
+                  <td data-label="Assistências">{{ goalkeeper.assists }}</td>
                   <td data-label="Gols sofridos">{{ goalkeeper.goals_conceded }}</td>
                   <td data-label="Média/jogo">{{ formatDec(goalkeeper.avg_goals_conceded_per_match) }}</td>
                 </tr>

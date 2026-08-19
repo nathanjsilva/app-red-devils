@@ -6,6 +6,15 @@
         <h1 class="page-title">{{ profile ? profile.player.name : 'Jogador' }}</h1>
         <p v-if="profile" class="page-subtitle">{{ profile.player.position === 'goleiro' ? 'Goleiro' : 'Jogador de linha' }}</p>
       </div>
+
+      <div class="seg-control">
+        <button
+          v-for="opt in divisionOptions"
+          :key="opt.value"
+          :class="['seg-btn', { active: division === opt.value }]"
+          @click="division = opt.value"
+        >{{ opt.label }}</button>
+      </div>
     </div>
 
     <div v-if="isLoading" class="surface-card">
@@ -103,16 +112,24 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { StatisticsService } from '../services/statisticsService'
 import EvolutionChart from '../components/charts/EvolutionChart.vue'
-import type { PlayerProfile } from '../types'
+import type { PlayerProfile, StatisticsFilters } from '../types'
 
 const route = useRoute()
 const router = useRouter()
 const profile = ref<PlayerProfile | null>(null)
 const isLoading = ref(false)
+
+const division = ref<'all' | 'quinta' | 'sabado'>('all')
+const divisionOptions = [
+  { value: 'all' as const, label: 'Todas' },
+  { value: 'quinta' as const, label: 'Quinta' },
+  { value: 'sabado' as const, label: 'Sábado' }
+]
+const filters = computed<StatisticsFilters>(() => (division.value === 'all' ? {} : { division: division.value }))
 
 const formatDec = (value?: number | null) => (value != null ? value.toFixed(2).replace('.', ',') : '-')
 
@@ -134,7 +151,7 @@ const fetchProfile = async () => {
   if (isNaN(id)) return
   isLoading.value = true
   try {
-    profile.value = await StatisticsService.getPlayerProfile(id)
+    profile.value = await StatisticsService.getPlayerProfile(id, filters.value)
   } catch (error) {
     console.error(error)
     profile.value = null
@@ -142,6 +159,8 @@ const fetchProfile = async () => {
     isLoading.value = false
   }
 }
+
+watch(division, fetchProfile)
 
 onMounted(fetchProfile)
 </script>

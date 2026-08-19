@@ -33,8 +33,8 @@ export class StatisticsService {
     return response.data.data
   }
 
-  static async getPlayersOverview(): Promise<PlayersOverviewResponse> {
-    const response = await api.get<PlayersOverviewResponse>('/statistics/players/overview', { params: { per_page: 100 } })
+  static async getPlayersOverview(filters: StatisticsFilters = {}): Promise<PlayersOverviewResponse> {
+    const response = await api.get<PlayersOverviewResponse>('/statistics/players/overview', { params: { per_page: 100, ...filters } })
     return (response as any).data?.data ?? response.data
   }
 

@@ -73,7 +73,6 @@
                     type="number"
                     class="form-control form-control-sm stat-input"
                     min="0"
-                    :disabled="playerStat.player.position === 'goleiro'"
                   />
                 </td>
                 <td data-label="Assistencias">
@@ -82,7 +81,6 @@
                     type="number"
                     class="form-control form-control-sm stat-input"
                     min="0"
-                    :disabled="playerStat.player.position === 'goleiro'"
                   />
                 </td>
                 <td data-label="Gols sofridos">
@@ -238,8 +236,8 @@ const loadPeladaById = async (peladaId: number) => {
           is_goalkeeper: isGoalkeeper
         },
         statistics: {
-          goals: isGoalkeeper ? 0 : (Number(player.statistics?.goals) || 0),
-          assists: isGoalkeeper ? 0 : (Number(player.statistics?.assists) || 0),
+          goals: Number(player.statistics?.goals) || 0,
+          assists: Number(player.statistics?.assists) || 0,
           goals_conceded: isGoalkeeper ? (Number(player.statistics?.goals_conceded) || 0) : undefined,
           result,
           is_winner: result === 'win'
@@ -294,11 +292,11 @@ const savePlayerStatistics = async (playerStat: PlayerWithStatistics) => {
       is_winner: playerStat.statistics.result === 'win'
     }
 
+    statsData.goals = playerStat.statistics.goals || 0
+    statsData.assists = playerStat.statistics.assists || 0
+
     if (playerStat.player.position === 'goleiro') {
       statsData.goals_conceded = playerStat.statistics.goals_conceded || 0
-    } else {
-      statsData.goals = playerStat.statistics.goals || 0
-      statsData.assists = playerStat.statistics.assists || 0
     }
 
     const updated = await AdminService.updatePlayerStatistics(selectedPelada.value.id, playerStat.player.id, statsData)

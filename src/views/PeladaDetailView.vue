@@ -133,6 +133,8 @@
               <thead>
                 <tr>
                   <th>Goleiro</th>
+                  <th>Gols</th>
+                  <th>Assistências</th>
                   <th>Gols sofridos</th>
                   <th>Participações</th>
                   <th>Resultado</th>
@@ -143,6 +145,8 @@
                   <td data-label="Goleiro">
                     <router-link :to="`/players/${item.player.id}`" class="fw-bold">{{ item.player.name }}</router-link>
                   </td>
+                  <td data-label="Gols">{{ item.statistics.goals }}</td>
+                  <td data-label="Assistências">{{ item.statistics.assists }}</td>
                   <td data-label="Gols sofridos">{{ item.statistics.goals_conceded }}</td>
                   <td data-label="Participações">{{ item.statistics.goal_participation }}</td>
                   <td data-label="Resultado">

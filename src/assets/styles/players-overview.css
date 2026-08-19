@@ -64,6 +64,26 @@
     max-width: 64ch;
 }
 
+.overview-division-filter {
+    width: fit-content;
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.14);
+}
+
+.overview-division-filter .seg-btn {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.overview-division-filter .seg-btn:not(:last-child) {
+    border-right-color: rgba(255, 255, 255, 0.1);
+}
+
+.overview-division-filter .seg-btn:hover,
+.overview-division-filter .seg-btn:focus-visible {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
 .overview-stat-strip {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));

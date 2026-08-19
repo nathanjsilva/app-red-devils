@@ -11,6 +11,15 @@
           </div>
         </div>
 
+        <div class="seg-control overview-division-filter">
+          <button
+            v-for="opt in divisionOptions"
+            :key="opt.value"
+            :class="['seg-btn', { active: division === opt.value }]"
+            @click="division = opt.value"
+          >{{ opt.label }}</button>
+        </div>
+
         <div v-if="overview" class="overview-stat-strip">
           <div class="overview-stat-card">
             <span class="overview-stat-label">Peladas no ano</span>
@@ -280,7 +289,7 @@ import { useRouter } from 'vue-router'
 import SearchableSelect from '../components/ui/SearchableSelect.vue'
 import { useSEO } from '../composables/useSEO'
 import { StatisticsService } from '../services/statisticsService'
-import type { PlayerOverviewItem, PlayersOverviewResponse } from '../types'
+import type { PlayerOverviewItem, PlayersOverviewResponse, StatisticsFilters } from '../types'
 import logo from '../assets/logo-red-devils.png'
 
 const { updateSEO } = useSEO()
@@ -290,6 +299,14 @@ const goToPlayerDetail = (playerId: number) => {
   closeModal()
   router.push(`/players/${playerId}`)
 }
+
+const division = ref<'all' | 'quinta' | 'sabado'>('all')
+const divisionOptions = [
+  { value: 'all' as const, label: 'Todas' },
+  { value: 'quinta' as const, label: 'Quinta' },
+  { value: 'sabado' as const, label: 'Sábado' }
+]
+const filters = computed<StatisticsFilters>(() => (division.value === 'all' ? {} : { division: division.value }))
 
 const overview = ref<PlayersOverviewResponse | null>(null)
 const isLoading = ref(false)
@@ -395,7 +412,7 @@ const fetchOverview = async () => {
   isLoading.value = true
   error.value = ''
   try {
-    overview.value = await StatisticsService.getPlayersOverview()
+    overview.value = await StatisticsService.getPlayersOverview(filters.value)
   } catch (err: any) {
     console.error(err)
     error.value = err?.response?.data?.message || 'Falha ao carregar os dados.'
@@ -403,6 +420,11 @@ const fetchOverview = async () => {
     isLoading.value = false
   }
 }
+
+watch(division, () => {
+  currentPage.value = 1
+  fetchOverview()
+})
 
 onMounted(async () => {
   updateSEO({ title: 'Jogadores - Red Devils', description: 'Desempenho dos jogadores do Red Devils.' })
