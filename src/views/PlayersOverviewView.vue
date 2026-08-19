@@ -300,13 +300,12 @@ const goToPlayerDetail = (playerId: number) => {
   router.push(`/players/${playerId}`)
 }
 
-const division = ref<'all' | 'quinta' | 'sabado'>('all')
+const division = ref<'quinta' | 'sabado'>('quinta')
 const divisionOptions = [
-  { value: 'all' as const, label: 'Todas' },
   { value: 'quinta' as const, label: 'Quinta' },
   { value: 'sabado' as const, label: 'Sábado' }
 ]
-const filters = computed<StatisticsFilters>(() => (division.value === 'all' ? {} : { division: division.value }))
+const filters = computed<StatisticsFilters>(() => ({ division: division.value }))
 
 const overview = ref<PlayersOverviewResponse | null>(null)
 const isLoading = ref(false)

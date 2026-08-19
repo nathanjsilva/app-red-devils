@@ -197,13 +197,12 @@ const { updateSEO } = useSEO()
 const { rankings, isLoading, error } = storeToRefs(rankingsStore)
 const { fetchRankings } = rankingsStore
 
-const division = ref<'all' | 'quinta' | 'sabado'>('all')
+const division = ref<'quinta' | 'sabado'>('quinta')
 const divisionOptions = [
-  { value: 'all' as const, label: 'Todas' },
   { value: 'quinta' as const, label: 'Quinta' },
   { value: 'sabado' as const, label: 'Sábado' }
 ]
-const filters = computed<StatisticsFilters>(() => (division.value === 'all' ? {} : { division: division.value }))
+const filters = computed<StatisticsFilters>(() => ({ division: division.value }))
 
 const dashboard = ref<DashboardOverview | null>(null)
 const isLoadingPeladaCounts = ref(false)

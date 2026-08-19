@@ -393,13 +393,12 @@ import ComparisonRadarChart from '../components/charts/ComparisonRadarChart.vue'
 
 const { updateSEO } = useSEO()
 
-const division = ref<'all' | 'quinta' | 'sabado'>('all')
+const division = ref<'quinta' | 'sabado'>('quinta')
 const divisionOptions = [
-  { value: 'all' as const, label: 'Todas' },
   { value: 'quinta' as const, label: 'Quinta' },
   { value: 'sabado' as const, label: 'Sábado' }
 ]
-const filters = computed<StatisticsFilters>(() => (division.value === 'all' ? {} : { division: division.value }))
+const filters = computed<StatisticsFilters>(() => ({ division: division.value }))
 
 const formatDec = (value?: number | null) => (value != null ? value.toFixed(2).replace('.', ',') : '-')
 const initials = (name: string) => name.split(' ').slice(0, 2).map((word) => word[0]).join('').toUpperCase()
