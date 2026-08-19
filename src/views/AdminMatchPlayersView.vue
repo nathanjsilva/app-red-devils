@@ -219,8 +219,20 @@ const loadPeladaById = async (peladaId: number) => {
 
     form.value.pelada_id = peladaId
 
+    // Goleiros vinculados a uma posição de gol (não a um time de linha, caso qtd_goleiros < qtd_times)
+    // não aparecem em teamsResponse.teams[].players — precisam ser incluídos à parte.
+    const goalPositionPlayers = (teamsResponse.goal_positions || [])
+      .filter((goalPosition) => goalPosition.id)
+      .map((goalPosition) => ({
+        id: goalPosition.id,
+        name: goalPosition.name,
+        nickname: goalPosition.nickname,
+        position: goalPosition.position,
+        statistics: goalPosition.statistics
+      }))
+
     const sourcePlayers = teamsResponse.teams.length > 0
-      ? teamsResponse.teams.flatMap((team) => team.players)
+      ? [...teamsResponse.teams.flatMap((team) => team.players), ...goalPositionPlayers]
       : (teamsResponse.players || [])
 
     playerStats.value = sourcePlayers.map((player: any) => {

@@ -23,7 +23,7 @@
           <div class="col-12 col-lg-6">
             <div v-if="peladaInfo" class="metric-grid">
               <StatTile label="Times" :value="peladaInfo.qtd_times" />
-              <StatTile label="Jogadores/Time" :value="peladaInfo.qtd_jogadores_por_time" />
+              <StatTile label="Linha/Time" :value="peladaInfo.qtd_jogadores_por_time" help="Jogadores de linha por time — não inclui goleiro." />
               <StatTile label="Goleiros" :value="peladaInfo.qtd_goleiros" />
             </div>
           </div>
@@ -37,7 +37,11 @@
           <div class="section-toolbar">
             <div>
               <h2 class="section-title mb-0">Organização automática</h2>
-              <p class="page-subtitle mb-0">Selecione quem vai jogar e deixe o sistema distribuir os times (apaga a organização atual).</p>
+              <p class="page-subtitle mb-0">
+                Selecione quem vai jogar e deixe o sistema distribuir os times (apaga a organização atual). Goleiros
+                são distribuídos automaticamente: um fixo por time quando há goleiros suficientes, ou em posições de
+                gol independentes dos times quando há menos goleiros do que times.
+              </p>
             </div>
           </div>
 
@@ -57,6 +61,40 @@
           </button>
         </div>
 
+        <div v-if="teamFields.length && peladaInfo" class="goalkeeper-card mt-4">
+          <div class="team-card-header">
+            <h2 class="section-title mb-0">Goleiros</h2>
+          </div>
+          <div class="team-card-body">
+            <p class="page-subtitle mb-3">
+              <template v-if="goalkeeperMode === 'team'">
+                Defina o goleiro fixo de cada time.
+              </template>
+              <template v-else>
+                Defina o goleiro de cada posição de gol. Os times de linha se revezam nessas posições durante a
+                pelada — o goleiro permanece o mesmo, independente de qual time estiver jogando ali.
+              </template>
+            </p>
+            <div class="slot-list">
+              <div v-for="slot in goalkeeperSlotCount" :key="`goleiro-${slot}`">
+                <label class="form-label small text-muted">
+                  {{ goalkeeperMode === 'team' ? `Goleiro do Time ${slot}` : `Goleiro — Gol ${slot}` }}
+                </label>
+                <SearchableSelect
+                  :model-value="goalkeeperAssignments[slot] ?? null"
+                  :options="goalkeeperOptionsFor(slot)"
+                  placeholder="Selecione o goleiro"
+                  @update:model-value="(value) => onChangeGoalkeeperAssignment(slot, value)"
+                />
+              </div>
+            </div>
+            <p v-if="goalkeeperReserveCount > 0" class="text-muted small mt-3 mb-0">
+              {{ goalkeeperReserveCount }} goleiro(s) além da configuração de {{ peladaInfo.qtd_times }} times ficam de
+              reserva.
+            </p>
+          </div>
+        </div>
+
         <div v-if="teamFields.length && peladaInfo" class="row g-3 mt-1">
           <div v-for="field in teamFields" :key="field.team_number" class="col-12 col-xl-6">
             <div class="team-card">
@@ -66,7 +104,7 @@
               <div class="team-card-body">
                 <div class="slot-list">
                   <div v-for="slotIndex in peladaInfo.qtd_jogadores_por_time" :key="`${field.team_number}-${slotIndex}`">
-                    <label class="form-label small text-muted">Jogador {{ slotIndex }}</label>
+                    <label class="form-label small text-muted">Linha {{ slotIndex }}</label>
                     <SearchableSelect
                       :model-value="teamAssignmentsMap[field.team_number]?.[slotIndex - 1] ?? null"
                       :options="playerOptionsFor(field.team_number, slotIndex - 1)"
@@ -102,7 +140,14 @@ import StatTile from '../components/ui/StatTile.vue'
 import { PeladaService } from '../services/peladaService'
 import { PlayerService } from '../services/playerService'
 import { TeamService } from '../services/teamService'
-import type { OrganizedPeladaTeamsResponse, OrganizePeladaTeamsRequest, Pelada, Player, TeamField } from '../types'
+import type {
+  GoalkeeperAssignmentEntry,
+  OrganizedPeladaTeamsResponse,
+  OrganizePeladaTeamsRequest,
+  Pelada,
+  Player,
+  TeamField
+} from '../types'
 
 const toast = useToast()
 const isLoading = ref(false)
@@ -112,11 +157,32 @@ const peladaInfo = ref<Pelada | null>(null)
 const teamFields = ref<TeamField[]>([])
 const players = ref<Player[]>([])
 const teamAssignmentsMap = reactive<Record<number, number[]>>({})
+const goalkeeperAssignments = reactive<Record<number, number | null>>({})
 const result = ref<OrganizedPeladaTeamsResponse | null>(null)
 const isLoadingPeladas = ref(false)
 const isLoadingTeams = ref(false)
 const autoOrganizePlayerIds = ref<number[]>([])
 const isAutoOrganizing = ref(false)
+
+const linePlayers = computed(() => players.value.filter((player) => player.position === 'linha'))
+const goalkeeperPlayers = computed(() => players.value.filter((player) => player.position === 'goleiro'))
+
+/**
+ * `qtd_goleiros >= qtd_times`: goleiro fixo por time (slot = team_number).
+ * `qtd_goleiros < qtd_times`: goleiro vinculado a uma posição de gol independente
+ * do time — os times de linha se revezam nessas posições durante a pelada.
+ */
+const goalkeeperMode = computed<'team' | 'position'>(() =>
+  peladaInfo.value && peladaInfo.value.qtd_goleiros >= peladaInfo.value.qtd_times ? 'team' : 'position'
+)
+
+const goalkeeperSlotCount = computed(() =>
+  peladaInfo.value ? Math.min(peladaInfo.value.qtd_goleiros, peladaInfo.value.qtd_times) : 0
+)
+
+const goalkeeperReserveCount = computed(() =>
+  peladaInfo.value ? Math.max(0, peladaInfo.value.qtd_goleiros - peladaInfo.value.qtd_times) : 0
+)
 
 const formatDate = (dateString: string): string => {
   if (!dateString) return ''
@@ -160,9 +226,9 @@ const peladaOptions = computed(() =>
 )
 
 const playerOptionsFor = (teamNumber: number, slotIndex: number) =>
-  players.value.map((player) => ({
+  linePlayers.value.map((player) => ({
     value: player.id,
-    label: `${player.name} (${player.position === 'goleiro' ? 'Goleiro' : 'Linha'})`,
+    label: player.name,
     disabled: isPlayerAlreadyChosen(player.id, teamNumber, slotIndex)
   }))
 
@@ -176,6 +242,38 @@ const isPlayerAlreadyChosen = (playerId: number, currentTeam: number, currentSlo
     }
   }
   return false
+}
+
+const goalkeeperOptionsFor = (position: number) =>
+  goalkeeperPlayers.value.map((player) => ({
+    value: player.id,
+    label: player.name,
+    disabled: isGoalkeeperAlreadyChosen(player.id, position)
+  }))
+
+const isGoalkeeperAlreadyChosen = (playerId: number, currentPosition: number) => {
+  for (const [positionKeyStr, assignedId] of Object.entries(goalkeeperAssignments)) {
+    if (parseInt(positionKeyStr, 10) === currentPosition) continue
+    if (assignedId === playerId) return true
+  }
+  return false
+}
+
+const onChangeGoalkeeperAssignment = (position: number, value: number | string | null) => {
+  if (value === null || value === undefined) {
+    goalkeeperAssignments[position] = null
+    return
+  }
+
+  const playerId = typeof value === 'number' ? value : parseInt(value, 10)
+  if (isNaN(playerId)) return
+
+  if (isGoalkeeperAlreadyChosen(playerId, position)) {
+    toast.error('Este goleiro ja esta em outra posicao.')
+    return
+  }
+
+  goalkeeperAssignments[position] = playerId
 }
 
 const loadAllPeladas = async () => {
@@ -203,6 +301,7 @@ const loadTeamContext = async () => {
     peladaInfo.value = null
     autoOrganizePlayerIds.value = []
     Object.keys(teamAssignmentsMap).forEach((key) => delete (teamAssignmentsMap as any)[key])
+    Object.keys(goalkeeperAssignments).forEach((key) => delete (goalkeeperAssignments as any)[key])
 
     const fieldsRes = await TeamService.getTeamFields(peladaId.value)
     const peladaData = fieldsRes.pelada || fieldsRes
@@ -242,10 +341,29 @@ const loadTeamContext = async () => {
         teamsWithStats.teams.forEach((team: any, index: number) => {
           const teamNumber = index + 1
           if (Array.isArray(team.players) && teamAssignmentsMap[teamNumber]) {
-            const playerIds = team.players.map((player: any) => player.id).filter(Boolean)
-            teamAssignmentsMap[teamNumber].splice(0, teamAssignmentsMap[teamNumber].length, ...playerIds)
+            const linePlayerIds = team.players
+              .filter((player: any) => player.position !== 'goleiro')
+              .map((player: any) => player.id)
+              .filter(Boolean)
+            teamAssignmentsMap[teamNumber].splice(0, teamAssignmentsMap[teamNumber].length, ...linePlayerIds)
+
+            // Caso goleiro fixo por time (qtd_goleiros >= qtd_times): ele vem dentro de team.players.
+            const teamGoalkeeper = team.players.find((player: any) => player.position === 'goleiro')
+            if (teamGoalkeeper) {
+              goalkeeperAssignments[teamNumber] = teamGoalkeeper.id
+            }
           }
         })
+
+        // Caso posição de gol independente do time (qtd_goleiros < qtd_times).
+        if (Array.isArray(teamsWithStats.goal_positions)) {
+          teamsWithStats.goal_positions.forEach((goalPosition: any) => {
+            if (goalPosition.id) {
+              goalkeeperAssignments[goalPosition.numero] = goalPosition.id
+            }
+          })
+        }
+
         await nextTick()
       }
     }
@@ -310,7 +428,11 @@ const handleOrganize = async () => {
     return
   }
 
-  const request: OrganizePeladaTeamsRequest = { team_assignments }
+  const goalkeeper_assignments: GoalkeeperAssignmentEntry[] = Object.entries(goalkeeperAssignments)
+    .filter(([, playerId]) => typeof playerId === 'number' && !isNaN(playerId))
+    .map(([position, playerId]) => ({ position: parseInt(position, 10), player_id: playerId as number }))
+
+  const request: OrganizePeladaTeamsRequest = { team_assignments, goalkeeper_assignments }
 
   isLoading.value = true
   try {
@@ -354,7 +476,8 @@ onMounted(loadAllPeladas)
   cursor: pointer;
 }
 
-.team-card {
+.team-card,
+.goalkeeper-card {
   border: 1px solid var(--line-soft);
   border-radius: 1.1rem;
   overflow: hidden;

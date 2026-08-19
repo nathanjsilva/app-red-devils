@@ -133,8 +133,25 @@ export interface TeamAssignmentEntry {
   player_ids: number[]
 }
 
+/**
+ * `position` significa coisas diferentes conforme a config da pelada:
+ * - `qtd_goleiros >= qtd_times`: `position` é o `team_number` (goleiro fixo daquele time).
+ * - `qtd_goleiros < qtd_times`: `position` é o número da posição de gol (1..qtd_goleiros),
+ *   independente do time de linha que estiver ocupando essa posição durante o revezamento.
+ */
+export interface GoalkeeperAssignmentEntry {
+  position: number
+  player_id: number
+}
+
 export interface OrganizePeladaTeamsRequest {
   team_assignments: TeamAssignmentEntry[]
+  goalkeeper_assignments?: GoalkeeperAssignmentEntry[]
+}
+
+export interface GoalPositionEntry {
+  numero: number
+  goleiro: Pick<Player, 'id' | 'name' | 'nickname' | 'position'> | null
 }
 
 export interface OrganizedPeladaTeamsResponse {
@@ -145,6 +162,7 @@ export interface OrganizedPeladaTeamsResponse {
     team_number?: number
     players: Array<Pick<Player, 'id' | 'name' | 'nickname' | 'position'>>
   }>
+  goal_positions?: GoalPositionEntry[]
 }
 
 export interface PeladaStatisticsResponse {
@@ -198,6 +216,26 @@ export interface TeamsWithStatisticsResponse {
         goal_participation: number
       } | null
     }>
+  }>
+  /**
+   * Goleiros vinculados a uma posição de gol (não a um time de linha) — presente
+   * apenas quando `qtd_goleiros < qtd_times`, cenário em que os times de linha se
+   * revezam nas mesmas posições/goleiros ao longo da pelada.
+   */
+  goal_positions?: Array<{
+    numero: number
+    id: number | null
+    name: string | null
+    nickname: string | null
+    position: 'goleiro' | null
+    statistics: {
+      goals: number | null
+      assists: number | null
+      goals_conceded: number | null
+      is_winner: boolean | number
+      result: 'win' | 'loss' | 'draw'
+      goal_participation: number
+    } | null
   }>
   players?: Array<{
     id: number
