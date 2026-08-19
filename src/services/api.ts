@@ -33,6 +33,10 @@ api.interceptors.response.use(
 
       switch (status) {
         case 401:
+          if (error.config?.url?.includes('/login')) {
+            toast.error(data?.message || 'Usuario ou senha incorretos.')
+            break
+          }
           localStorage.removeItem(STORAGE_KEYS.TOKEN)
           localStorage.removeItem(STORAGE_KEYS.USER)
           toast.error('Sessao expirada. Faca login novamente.')
