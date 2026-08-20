@@ -113,7 +113,13 @@
           <div class="section-toolbar">
             <div>
               <p class="stats-section-kicker">Evolução</p>
-              <h2 class="section-title mb-0">Gols e assistências por mês</h2>
+              <div class="section-title-with-info">
+                <h2 class="section-title mb-0">Gols e assistências por mês</h2>
+                <InfoTooltip
+                  text="Soma de gols e assistências de todos os jogadores, agrupada por mês das peladas dentro do período filtrado."
+                  label="Gols e assistências por mês"
+                />
+              </div>
             </div>
           </div>
 
@@ -134,7 +140,13 @@
           <div class="section-toolbar">
             <div>
               <p class="stats-section-kicker">Frequência</p>
-              <h2 class="section-title mb-0">Peladas por mês</h2>
+              <div class="section-title-with-info">
+                <h2 class="section-title mb-0">Peladas por mês</h2>
+                <InfoTooltip
+                  text="Quantidade de peladas realizadas em cada mês, dentro do período filtrado."
+                  label="Peladas por mês"
+                />
+              </div>
             </div>
           </div>
 
@@ -155,7 +167,10 @@
           <div class="section-toolbar stats-ranking-toolbar">
             <div>
               <p class="stats-section-kicker">Ranking</p>
-              <h2 class="section-title mb-0">{{ activeRankingLabel }}</h2>
+              <div class="section-title-with-info">
+                <h2 class="section-title mb-0">{{ activeRankingLabel }}</h2>
+                <InfoTooltip :text="activeRankingHelp" :label="activeRankingLabel" />
+              </div>
             </div>
             <div v-if="!isMobile" class="seg-control">
               <button
@@ -193,7 +208,13 @@
           <div class="section-toolbar">
             <div>
               <p class="stats-section-kicker">Frequência</p>
-              <h2 class="section-title mb-0">Presença por jogador</h2>
+              <div class="section-title-with-info">
+                <h2 class="section-title mb-0">Presença por jogador</h2>
+                <InfoTooltip
+                  text="Quantidade de peladas em que cada jogador participou no período. Sem mínimo de partidas — é a própria contagem de presença."
+                  label="Presença por jogador"
+                />
+              </div>
             </div>
           </div>
 
@@ -216,7 +237,13 @@
           <div class="section-toolbar">
             <div>
               <p class="stats-section-kicker">Destaques por pelada</p>
-              <h2 class="section-title mb-0">Quem mais foi artilheiro da pelada</h2>
+              <div class="section-title-with-info">
+                <h2 class="section-title mb-0">Quem mais foi artilheiro da pelada</h2>
+                <InfoTooltip
+                  text="Conta quantas vezes o jogador teve o maior número de gols de uma pelada específica. Se dois ou mais jogadores empatam no maior número de gols de uma pelada, todos contam como artilheiro daquele dia."
+                  label="Quem mais foi artilheiro da pelada"
+                />
+              </div>
             </div>
           </div>
 
@@ -238,7 +265,13 @@
           <div class="section-toolbar">
             <div>
               <p class="stats-section-kicker">Destaques por pelada</p>
-              <h2 class="section-title mb-0">Quem mais foi garçom da pelada</h2>
+              <div class="section-title-with-info">
+                <h2 class="section-title mb-0">Quem mais foi garçom da pelada</h2>
+                <InfoTooltip
+                  text="Conta quantas vezes o jogador teve o maior número de assistências de uma pelada específica. Se dois ou mais jogadores empatam no maior número de assistências de uma pelada, todos contam como garçom daquele dia."
+                  label="Quem mais foi garçom da pelada"
+                />
+              </div>
             </div>
           </div>
 
@@ -380,7 +413,13 @@
           <div class="section-toolbar">
             <div>
               <p class="stats-section-kicker">Comparativo</p>
-              <h2 class="section-title mb-0">Compare jogadores</h2>
+              <div class="section-title-with-info">
+                <h2 class="section-title mb-0">Compare jogadores</h2>
+                <InfoTooltip
+                  text="Cada eixo é normalizado de 0 a 100% em relação ao maior valor entre os jogadores selecionados nesta comparação — não é uma escala absoluta, serve pra comparar métricas de grandezas diferentes (gols, assistências, aproveitamento etc.) no mesmo gráfico."
+                  label="Compare jogadores"
+                />
+              </div>
             </div>
           </div>
 
@@ -441,6 +480,7 @@ import RankingBarChart from '../components/charts/RankingBarChart.vue'
 import ComparisonRadarChart from '../components/charts/ComparisonRadarChart.vue'
 import StatTile from '../components/ui/StatTile.vue'
 import SearchableSelect from '../components/ui/SearchableSelect.vue'
+import InfoTooltip from '../components/ui/InfoTooltip.vue'
 import { useResponsive } from '../composables/useResponsive'
 
 const { updateSEO } = useSEO()
@@ -495,12 +535,42 @@ const fetchEvolution = async () => {
 
 // --- Rankings ---
 const rankingCategories = [
-  { value: 'goals' as const, label: 'Gols', suffix: '' },
-  { value: 'assists' as const, label: 'Assistências', suffix: '' },
-  { value: 'goal-participations' as const, label: 'Participações em Gols', suffix: '' },
-  { value: 'wins' as const, label: 'Vitórias', suffix: '' },
-  { value: 'win-rate' as const, label: 'Aproveitamento', suffix: '%' },
-  { value: 'goalkeepers' as const, label: 'Goleiros', suffix: '/jogo' }
+  {
+    value: 'goals' as const,
+    label: 'Gols',
+    suffix: '',
+    help: 'Total de gols marcados no período, somado por jogador. Só entram jogadores que atingiram o mínimo de partidas do período.'
+  },
+  {
+    value: 'assists' as const,
+    label: 'Assistências',
+    suffix: '',
+    help: 'Total de assistências no período, somado por jogador. Só entram jogadores que atingiram o mínimo de partidas do período.'
+  },
+  {
+    value: 'goal-participations' as const,
+    label: 'Participações em Gols',
+    suffix: '',
+    help: 'Gols + assistências de cada jogador no período. Só entram jogadores que atingiram o mínimo de partidas do período.'
+  },
+  {
+    value: 'wins' as const,
+    label: 'Vitórias',
+    suffix: '',
+    help: 'Total de vitórias no período. Só entram jogadores que atingiram o mínimo de partidas do período.'
+  },
+  {
+    value: 'win-rate' as const,
+    label: 'Aproveitamento',
+    suffix: '%',
+    help: 'Vitórias ÷ partidas disputadas × 100. Só entram jogadores que atingiram o mínimo de partidas do período.'
+  },
+  {
+    value: 'goalkeepers' as const,
+    label: 'Goleiros',
+    suffix: '/jogo',
+    help: 'Média de gols sofridos por partida (quanto menor, melhor). Só entram goleiros que atingiram o mínimo de partidas do período.'
+  }
 ]
 const rankingType = ref<(typeof rankingCategories)[number]['value']>('goals')
 const currentRanking = ref<Ranking | null>(null)
@@ -509,6 +579,7 @@ const rankingError = ref(false)
 
 const activeRankingLabel = computed(() => currentRanking.value?.type ?? '')
 const activeRankingSuffix = computed(() => rankingCategories.find((cat) => cat.value === rankingType.value)?.suffix ?? '')
+const activeRankingHelp = computed(() => rankingCategories.find((cat) => cat.value === rankingType.value)?.help ?? '')
 
 const fetchRanking = async () => {
   isLoadingRanking.value = true

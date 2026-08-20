@@ -136,8 +136,14 @@
 
       <section class="surface-card mb-4">
         <div class="surface-card-body">
-          <h2 class="section-title">Desempenho por pelada</h2>
-          <p class="page-subtitle mb-2">Clique numa pelada para ver os números de todos naquele dia.</p>
+          <div class="section-title-with-info">
+            <h2 class="section-title mb-0">Desempenho por pelada</h2>
+            <InfoTooltip
+              text="Cada linha é uma pelada em que o jogador participou. Os selos de artilheiro/garçom do dia aparecem quando ele teve o maior número de gols/assistências daquela pelada — se houver empate no maior número, todos os empatados recebem o selo."
+              label="Desempenho por pelada"
+            />
+          </div>
+          <p class="page-subtitle mb-2 mt-2">Clique numa pelada para ver os números de todos naquele dia.</p>
           <div class="table-responsive pelada-history-scroll">
             <table class="data-table stack-mobile">
               <thead>
@@ -183,7 +189,15 @@
 
       <section class="surface-card">
         <div class="surface-card-body">
-          <h2 class="section-title">Evolução</h2>
+          <div class="section-title-with-info">
+            <h2 class="section-title">Evolução</h2>
+            <InfoTooltip
+              :text="profile.player.position === 'goleiro'
+                ? 'Soma de gols, assistências e gols sofridos do jogador, agrupada por pelada dentro do período filtrado.'
+                : 'Soma de gols e assistências do jogador, agrupada por pelada dentro do período filtrado.'"
+              label="Evolução"
+            />
+          </div>
           <EvolutionChart :points="profile.evolution" :show-goals-conceded="profile.player.position === 'goleiro'" />
         </div>
       </section>
@@ -197,6 +211,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { StatisticsService } from '../services/statisticsService'
 import EvolutionChart from '../components/charts/EvolutionChart.vue'
 import StatTile from '../components/ui/StatTile.vue'
+import InfoTooltip from '../components/ui/InfoTooltip.vue'
 import type { PlayerProfile, StatisticsFilters } from '../types'
 
 const route = useRoute()

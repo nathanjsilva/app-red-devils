@@ -183,6 +183,18 @@ select:focus-visible {
     letter-spacing: -0.02em;
 }
 
+.section-title-with-info {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0 0 1rem;
+}
+
+.section-title-with-info .section-title {
+    margin: 0;
+}
+
 .section-toolbar {
     display: flex;
     align-items: center;
