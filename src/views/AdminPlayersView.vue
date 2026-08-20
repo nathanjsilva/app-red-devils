@@ -77,7 +77,7 @@
                     </span>
                   </td>
                   <td class="text-end" data-label="Acoes">
-                    <div class="d-flex flex-wrap justify-content-end gap-2">
+                    <div class="d-flex flex-wrap flex-sm-nowrap justify-content-end gap-2">
                       <button class="btn btn-sm btn-outline-primary" @click="editPlayer(player)" :disabled="isLoading">
                         Editar
                       </button>

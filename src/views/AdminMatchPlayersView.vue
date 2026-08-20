@@ -102,7 +102,7 @@
                   />
                 </td>
                 <td class="text-end" data-label="Acoes">
-                  <div class="d-flex flex-wrap justify-content-end gap-2">
+                  <div class="d-flex flex-wrap flex-sm-nowrap justify-content-end gap-2">
                     <button class="btn btn-sm btn-red" @click="savePlayerStatistics(playerStat)" :disabled="isSaving === playerStat.player.id">
                       {{ isSaving === playerStat.player.id ? 'Salvando...' : 'Salvar' }}
                     </button>
