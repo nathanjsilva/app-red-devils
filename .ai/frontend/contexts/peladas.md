@@ -7,7 +7,8 @@ CRUD das "peladas" — o evento/jogo em si (data, local, quantidade de times, jo
 ## Arquivos envolvidos
 
 - `src/views/AdminPeladasView.vue` — tela admin de CRUD.
-- `src/services/peladaService.ts` — CRUD focado em pelada (`getAllPeladas`, `getPeladasByDate`, `getPelada`, `updatePelada`, `deletePelada`, `createPelada`).
+- `src/views/PeladasListView.vue` (a partir de 2026-08-20) — equivalente **público** e somente leitura de `AdminPeladasView.vue`: mesma listagem/busca por data/paginação, sem form de criação nem coluna de ações; clicar numa linha navega pra `/peladas/:id` (`PeladaDetailView.vue`, já pública). Rota `/peladas` (sem `meta.requiresAuth`), listada no menu público (`SidebarComponent.vue`) e na barra inferior mobile.
+- `src/services/peladaService.ts` — CRUD focado em pelada (`getAllPeladas`, `getPeladasByDate`, `getPelada`, `updatePelada`, `deletePelada`, `createPelada`). `getAllPeladas`/`getPeladasByDate` batem em rotas públicas (`/peladas`, `/peladas/date/{date}`) — por isso `PeladasListView.vue` reaproveita exatamente os mesmos métodos que `AdminPeladasView.vue` usa pra listar, sem precisar de endpoint novo.
 - `src/services/adminService.ts` — também expõe `createPelada`/`updatePelada`/`deletePelada` (duplicado com `peladaService.ts` — ver "Pontos de atenção").
 - `src/types/index.ts` — `Pelada`, `CreatePeladaRequest`.
 

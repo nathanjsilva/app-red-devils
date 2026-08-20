@@ -32,6 +32,11 @@ const routes = [
     component: () => import('../views/PlayerDetailView.vue')
   },
   {
+    path: '/peladas',
+    name: 'PeladasList',
+    component: () => import('../views/PeladasListView.vue')
+  },
+  {
     path: '/peladas/:id',
     name: 'PeladaDetail',
     component: () => import('../views/PeladaDetailView.vue')

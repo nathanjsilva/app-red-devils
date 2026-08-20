@@ -10,6 +10,7 @@ export const ROUTES = {
   HOME: '/home',
   PLAYERS_OVERVIEW: '/players-overview',
   STATISTICS: '/estatisticas',
+  PELADAS: '/peladas',
   ADMIN_PLAYERS: '/admin/players',
   ADMIN_PELADAS: '/admin/peladas',
   ADMIN_MATCH_PLAYERS: '/admin/match-players',

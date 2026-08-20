@@ -137,7 +137,8 @@
       <section class="surface-card mb-4">
         <div class="surface-card-body">
           <h2 class="section-title">Desempenho por pelada</h2>
-          <div class="table-responsive">
+          <p class="page-subtitle mb-2">Clique numa pelada para ver os números de todos naquele dia.</p>
+          <div class="table-responsive pelada-history-scroll">
             <table class="data-table stack-mobile">
               <thead>
                 <tr>
@@ -151,7 +152,12 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="entry in profile.pelada_history" :key="entry.pelada_id">
+                <tr
+                  v-for="entry in profile.pelada_history"
+                  :key="entry.pelada_id"
+                  class="clickable-row"
+                  @click="router.push(`/peladas/${entry.pelada_id}`)"
+                >
                   <td data-label="Data">{{ formatDate(entry.date) }}</td>
                   <td data-label="Local">{{ entry.location }}</td>
                   <td data-label="Resultado">
@@ -281,5 +287,14 @@ onMounted(fetchProfile)
 
 .highlight-assister {
   color: #0891b2;
+}
+
+.pelada-history-scroll {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.clickable-row {
+  cursor: pointer;
 }
 </style>

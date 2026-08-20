@@ -78,6 +78,10 @@
           <i class="bi bi-clipboard-data"></i>
           <span>Estatisticas</span>
         </router-link>
+        <router-link to="/peladas" class="tab-item">
+          <i class="bi bi-calendar2-week"></i>
+          <span>Peladas</span>
+        </router-link>
       </template>
     </nav>
 
@@ -107,6 +111,7 @@ const menu = computed<MenuItem[]>(() => {
     { name: 'Home', path: ROUTES.HOME, icon: 'bi bi-house-door' },
     { name: 'Jogadores', path: ROUTES.PLAYERS_OVERVIEW, icon: 'bi bi-bar-chart-line' },
     { name: 'Estatisticas', path: ROUTES.STATISTICS, icon: 'bi bi-clipboard-data' },
+    { name: 'Peladas', path: ROUTES.PELADAS, icon: 'bi bi-calendar2-week' },
   ]
 
   if (isAdmin.value) {
