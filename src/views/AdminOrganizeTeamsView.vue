@@ -480,13 +480,13 @@ onMounted(loadAllPeladas)
 .goalkeeper-card {
   border: 1px solid var(--line-soft);
   border-radius: 1.1rem;
-  overflow: hidden;
   background: var(--surface-strong);
 }
 
 .team-card-header {
   padding: 1rem 1rem 0.75rem;
   background: rgba(220, 38, 38, 0.12);
+  border-radius: 1.1rem 1.1rem 0 0;
 }
 
 .team-card-body {
