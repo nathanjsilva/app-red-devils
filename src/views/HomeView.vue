@@ -276,7 +276,7 @@ const fetchPeladaCounts = async () => {
 watch(division, async () => {
   fetchDashboard()
   try {
-    await fetchRankings(filters.value, 5)
+    await fetchRankings(filters.value, 20)
   } catch (fetchError) {
     console.error('Error fetching rankings:', fetchError)
   }
@@ -293,7 +293,7 @@ onMounted(async () => {
   fetchPeladaCounts()
 
   try {
-    await fetchRankings(filters.value, 5)
+    await fetchRankings(filters.value, 20)
   } catch (fetchError) {
     console.error('Error fetching rankings:', fetchError)
   }

@@ -62,7 +62,8 @@ const open = ref(false)
   z-index: 30;
   bottom: calc(100% + 0.4rem);
   left: 0;
-  right: 0;
+  width: max-content;
+  max-width: min(260px, 80vw);
   padding: 0.55rem 0.7rem;
   border-radius: 0.6rem;
   background: var(--surface-strong);

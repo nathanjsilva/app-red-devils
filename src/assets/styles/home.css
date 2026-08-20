@@ -353,6 +353,8 @@
 
 .ranking-panel-body {
     padding: 0.35rem;
+    max-height: 265px;
+    overflow-y: auto;
 }
 
 .ranking-row {
