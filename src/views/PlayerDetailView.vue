@@ -134,10 +134,51 @@
         </div>
       </section>
 
+      <section class="surface-card mb-4">
+        <div class="surface-card-body">
+          <h2 class="section-title">Desempenho por pelada</h2>
+          <div class="table-responsive">
+            <table class="data-table stack-mobile">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Local</th>
+                  <th>Resultado</th>
+                  <th>Gols</th>
+                  <th>Assistências</th>
+                  <th v-if="profile.player.position === 'goleiro'">Gols sofridos</th>
+                  <th>Destaques</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="entry in profile.pelada_history" :key="entry.pelada_id">
+                  <td data-label="Data">{{ formatDate(entry.date) }}</td>
+                  <td data-label="Local">{{ entry.location }}</td>
+                  <td data-label="Resultado">
+                    <span class="pill-badge" :class="resultPillClass(entry.result)">{{ resultLabel(entry.result) }}</span>
+                  </td>
+                  <td data-label="Gols">{{ entry.goals ?? 0 }}</td>
+                  <td data-label="Assistências">{{ entry.assists ?? 0 }}</td>
+                  <td v-if="profile.player.position === 'goleiro'" data-label="Gols sofridos">{{ entry.goals_conceded ?? '-' }}</td>
+                  <td data-label="Destaques">
+                    <span class="highlight-icons">
+                      <i v-if="entry.is_top_scorer" class="bi bi-trophy-fill highlight-icon highlight-scorer" title="Artilheiro do dia"></i>
+                      <i v-if="entry.is_top_assister" class="bi bi-cup-hot-fill highlight-icon highlight-assister" title="Garçom do dia"></i>
+                      <span v-if="!entry.is_top_scorer && !entry.is_top_assister" class="text-muted">—</span>
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p v-if="profile.pelada_history.length === 0" class="text-muted mb-0">Nenhuma pelada registrada no período.</p>
+        </div>
+      </section>
+
       <section class="surface-card">
         <div class="surface-card-body">
           <h2 class="section-title">Evolução</h2>
-          <EvolutionChart :points="profile.evolution" />
+          <EvolutionChart :points="profile.evolution" :show-goals-conceded="profile.player.position === 'goleiro'" />
         </div>
       </section>
     </template>
@@ -222,5 +263,23 @@ onMounted(fetchProfile)
 .recent-form-stats {
   margin-left: auto;
   font-weight: 700;
+}
+
+.highlight-icons {
+  display: inline-flex;
+  gap: 0.5rem;
+  font-size: 1.05rem;
+}
+
+.highlight-icon {
+  cursor: default;
+}
+
+.highlight-scorer {
+  color: #d4a017;
+}
+
+.highlight-assister {
+  color: #0891b2;
 }
 </style>

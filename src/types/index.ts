@@ -377,9 +377,23 @@ export interface EvolutionPoint {
   total_goals: number
   total_assists: number
   total_goal_participations: number
+  total_goals_conceded: number
   avg_goals: number
   avg_assists: number
   total_players: number
+}
+
+export interface PeladaHistoryEntry {
+  pelada_id: number
+  date: string
+  location: string
+  division: 'quinta' | 'sabado'
+  result: 'win' | 'loss' | 'draw'
+  goals: number | null
+  assists: number | null
+  is_top_scorer: boolean
+  is_top_assister: boolean
+  goals_conceded: number | null
 }
 
 export interface GoalkeeperRankingItem {
@@ -493,6 +507,7 @@ export interface PlayerProfile {
   }
   evolution: EvolutionPoint[]
   goals_conceded: number | null
+  pelada_history: PeladaHistoryEntry[]
 }
 
 export interface ComparePlayerEntry {

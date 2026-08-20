@@ -7,7 +7,7 @@ Página pública com visão "site de estatísticas esportivas" da temporada: KPI
 ## Arquivos envolvidos
 
 - `src/views/StatisticsView.vue` — a página (hero com filtro de divisão, KPIs, spotlights, evolução, rankings em abas, comparador).
-- `src/components/charts/EvolutionChart.vue`, `RankingBarChart.vue`, `ComparisonRadarChart.vue` — wrappers `vue-chartjs` (`Line`, `Bar` horizontal, `Radar`). Recebem dados já prontos via props — não fazem fetch.
+- `src/components/charts/EvolutionChart.vue`, `RankingBarChart.vue`, `ComparisonRadarChart.vue` — wrappers `vue-chartjs` (`Line`, `Bar` horizontal, `Radar`). Recebem dados já prontos via props — não fazem fetch. `EvolutionChart` também é reaproveitado em `PlayerDetailView.vue` (perfil individual do jogador, fora desta página) — tem uma prop opcional `showGoalsConceded` (a partir de 2026-08-20) que adiciona a série "Gols sofridos" (`EvolutionPoint.total_goals_conceded`), usada só quando o jogador é goleiro.
 - `src/utils/chartSetup.ts` — `Chart.register(...)` dos componentes do Chart.js necessários (escalas, elementos, tooltip, legend). Importado **uma vez** em `main.js`; não registrar de novo dentro de cada componente de gráfico.
 - `src/services/statisticsService.ts` — `getDashboard`, `getEvolution`, `comparePlayers` (além dos métodos antigos, ver `.ai/frontend/contexts/match-players.md`).
 - `src/services/rankingService.ts` — `getFullRanking(type, perPage, filters)` reaproveitado aqui pro gráfico de barras (ver `.ai/frontend/contexts/rankings.md`).

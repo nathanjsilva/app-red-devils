@@ -11,6 +11,7 @@ import type { EvolutionPoint } from '../../types'
 
 const props = defineProps<{
   points: EvolutionPoint[]
+  showGoalsConceded?: boolean
 }>()
 
 const formatPeriodLabel = (period: string): string => {
@@ -53,7 +54,24 @@ const chartData = computed(() => ({
       borderWidth: 3,
       tension: 0.35,
       fill: true
-    }
+    },
+    ...(props.showGoalsConceded
+      ? [
+          {
+            label: 'Gols sofridos',
+            data: props.points.map((point) => point.total_goals_conceded),
+            borderColor: '#64748b',
+            backgroundColor: 'rgba(100, 116, 139, 0.14)',
+            pointBackgroundColor: '#64748b',
+            pointBorderColor: '#fff',
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            borderWidth: 3,
+            tension: 0.35,
+            fill: true
+          }
+        ]
+      : [])
   ]
 }))
 
