@@ -46,21 +46,21 @@
             <StatTile
               v-if="match.top_scorer"
               label="Artilheiro"
-              :value="match.top_scorer.player.name"
+              :value="joinPlayerNames(match.top_scorer.players)"
               :hint="`${match.top_scorer.value} gols`"
             />
             <StatTile
               v-if="match.top_assister"
               label="Garçom"
-              :value="match.top_assister.player.name"
+              :value="joinPlayerNames(match.top_assister.players)"
               :hint="`${match.top_assister.value} assistências`"
             />
             <StatTile
               v-if="match.top_goal_participation"
               label="Maior participação em gols"
-              :value="match.top_goal_participation.player.name"
+              :value="joinPlayerNames(match.top_goal_participation.players)"
               :hint="`${match.top_goal_participation.value} participações em gols`"
-              help="Participações em gols = gols + assistências do jogador nessa pelada."
+              help="Participações em gols = gols + assistências do jogador nessa pelada. Empate: todos os jogadores no valor mais alto aparecem juntos."
             />
           </div>
         </div>
@@ -167,7 +167,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { PeladaService } from '../services/peladaService'
 import { StatisticsService } from '../services/statisticsService'
 import StatTile from '../components/ui/StatTile.vue'
-import type { MatchDetail, Pelada } from '../types'
+import type { MatchDetail, Pelada, Player } from '../types'
 
 const route = useRoute()
 const router = useRouter()
@@ -176,6 +176,8 @@ const match = ref<MatchDetail | null>(null)
 const isLoading = ref(false)
 
 const formatDec = (value?: number | null) => (value != null ? value.toFixed(2).replace('.', ',') : '-')
+
+const joinPlayerNames = (players: Array<Pick<Player, 'name'>>) => players.map((player) => player.name).join(' e ')
 
 const formatDate = (dateString: string): string => {
   try {

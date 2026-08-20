@@ -466,9 +466,9 @@ export interface MatchDetail {
   winners_count: number
   draws_count: number
   avg_goals_per_player: number
-  top_scorer: { player: Pick<Player, 'id' | 'name' | 'nickname'>; value: number } | null
-  top_assister: { player: Pick<Player, 'id' | 'name' | 'nickname'>; value: number } | null
-  top_goal_participation: { player: Pick<Player, 'id' | 'name' | 'nickname'>; value: number } | null
+  top_scorer: { players: Array<Pick<Player, 'id' | 'name' | 'nickname'>>; value: number } | null
+  top_assister: { players: Array<Pick<Player, 'id' | 'name' | 'nickname'>>; value: number } | null
+  top_goal_participation: { players: Array<Pick<Player, 'id' | 'name' | 'nickname'>>; value: number } | null
   team_results: Array<{ team_id: number; name: string; total_goals: number; result: 'win' | 'loss' | 'draw' }>
   goal_difference: number
 }
