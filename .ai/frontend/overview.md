@@ -22,8 +22,9 @@ src/
 ## Roteamento (`router/index.js`)
 
 - `/` redireciona para `/home`.
-- `/login`, `/players-overview`, `/home`, `/estatisticas` — acesso público.
+- `/login`, `/players-overview`, `/home`, `/estatisticas`, `/campeonatos` — acesso público.
 - `/admin/players`, `/admin/peladas`, `/admin/match-players`, `/admin/organize-teams` — `meta: { requiresAuth: true, requiresAdmin: true }`.
+- `/admin/championships` — `meta: { requiresAuth: true, requiresAdmin: true }`.
 - Guard global (`router.beforeEach`) lê token/usuário do `localStorage` (via `STORAGE_KEYS`), valida `user.profile === 'admin'` para rotas admin.
 - **Atenção**: o guard funciona pelo estado salvo em `localStorage`, não pela store Pinia diretamente — se alterar o formato salvo em `stores/auth.ts`, o guard também deve ser atualizado.
 
@@ -39,6 +40,8 @@ src/
 | `AdminPeladasView.vue` | `/admin/peladas` | CRUD de peladas/jogos (admin) |
 | `AdminMatchPlayersView.vue` | `/admin/match-players` | Registro de estatísticas por jogador/pelada (admin) |
 | `AdminOrganizeTeamsView.vue` | `/admin/organize-teams` | Organização de times por pelada (admin) |
+| `ChampionshipView.vue` | `/campeonatos` | Visão pública de classificação, partidas, odds, chaveamento, estatísticas, rankings e premiações |
+| `AdminChampionshipView.vue` | `/admin/championships` | Configuração de participantes, equipes, sorteio, partidas, eventos, odds, desempates e votação |
 
 ## Stores (Pinia, Composition API style — `defineStore(id, () => {...})`)
 

@@ -41,6 +41,9 @@ Todas as respostas passam por `(response as any).data?.data ?? response.data` �
 | CRUD match-players (estatísticas) | `POST/PUT/DELETE /admin/match-players[/:id]`, `PUT /admin/peladas/:peladaId/players/:playerId/statistics` | `adminService.ts` |
 | Ler times por pelada (**público**) | `GET /teams/pelada/:id/fields`, `/players`, `/organized`, `/players-with-statistics` | `teamService.ts` |
 | Organizar times (admin) | `POST /admin/teams/pelada/:id/organize` | `teamService.ts` |
+| Campeonatos (público) | `GET /championships`, `GET /championships/:id`, `/awards`, `/statistics`, `/rankings` | `championshipService.ts` |
+| Campeonato (votação pública) | `POST /championship-awards/:category/votes` | `championshipService.ts` |
+| Campeonato (admin) | `POST /admin/championships`, inscrições, formação, confrontos, playoffs, goleiros, times, eventos, participação, odds e premiações | `championshipService.ts` |
 | Rankings completos | `GET /statistics/rankings/{wins,goals,assists,goal-participations,win-rate,appearances,goalkeepers}` (envelope `{data,meta}` enriquecido) | `rankingService.ts` |
 | Visão geral da temporada | `GET /statistics/dashboard` | `statisticsService.ts` |
 | Evolução (série temporal) | `GET /statistics/evolution?group_by=month` | `statisticsService.ts` |

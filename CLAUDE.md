@@ -44,6 +44,7 @@ Este repositório contém **apenas o frontend** (Vue 3 + TypeScript). O backend 
 │   ├── coding-standards.md
 │   └── contexts/
 │       ├── auth.md
+│       ├── championships.md
 │       ├── players.md
 │       ├── peladas.md
 │       ├── match-players.md

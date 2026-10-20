@@ -9,6 +9,7 @@ Use esta tabela para descobrir qual context ler em `.ai/frontend/contexts/` ante
 | Gestão de peladas (jogos) | `AdminPeladasView.vue` | `services/peladaService.ts`, `services/adminService.ts` | `.ai/frontend/contexts/peladas.md` |
 | Registro de estatísticas por partida | `AdminMatchPlayersView.vue` | `services/adminService.ts` (match-players) | `.ai/frontend/contexts/match-players.md` |
 | Organização de times | `AdminOrganizeTeamsView.vue` | `services/teamService.ts` | `.ai/frontend/contexts/teams.md` |
+| Campeonato | `ChampionshipView.vue`, `AdminChampionshipView.vue` | `services/championshipService.ts` | `.ai/frontend/contexts/championships.md` |
 | Rankings e dashboard | `HomeView.vue`, `PlayersOverviewView.vue` | `services/rankingService.ts`, `services/statisticsService.ts`, `stores/rankings.ts` | `.ai/frontend/contexts/rankings.md` |
 | Estatísticas com gráficos (público) | `StatisticsView.vue` | `services/statisticsService.ts`, `services/rankingService.ts`, `components/charts/*` | `.ai/frontend/contexts/statistics.md` |
 | Layout/navegação | `App.vue`, `components/SidebarComponent.vue` | `composables/useResponsive.ts` | `.ai/frontend/overview.md` |

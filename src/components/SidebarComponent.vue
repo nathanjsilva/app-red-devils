@@ -1,6 +1,6 @@
 ﻿<template>
   <div class="app-layout">
-    <aside v-if="isDesktop || isTablet" class="sidebar-panel">
+    <aside v-if="isDesktop" class="sidebar-panel">
       <div class="sidebar-header">
         <img :src="logo" alt="Red Devils" class="sidebar-logo" />
         <div class="sidebar-brand-copy">
@@ -48,6 +48,10 @@
           <i class="bi bi-calendar2-week"></i>
           <span>Peladas</span>
         </router-link>
+        <router-link to="/admin/championships" class="tab-item">
+          <i class="bi bi-trophy"></i>
+          <span>Torneio</span>
+        </router-link>
         <router-link to="/admin/players" class="tab-item">
           <i class="bi bi-people"></i>
           <span>Jogadores</span>
@@ -82,10 +86,14 @@
           <i class="bi bi-calendar2-week"></i>
           <span>Peladas</span>
         </router-link>
+        <router-link to="/campeonatos" class="tab-item">
+          <i class="bi bi-trophy"></i>
+          <span>Torneio</span>
+        </router-link>
       </template>
     </nav>
 
-    <main class="app-main" :class="{ 'has-bottom-nav': !isDesktop && !isTablet }">
+    <main class="app-main" :class="{ 'has-bottom-nav': !isDesktop }">
       <router-view />
     </main>
   </div>
@@ -101,7 +109,7 @@ import logo from '../assets/logo-red-devils.png'
 import type { MenuItem } from '../types'
 
 const { logout } = useAuth()
-const { isDesktop, isTablet } = useResponsive()
+const { isDesktop } = useResponsive()
 const authStore = useAuthStore()
 const isAuthenticated = computed(() => authStore.isAuthenticated)
 const isAdmin = computed(() => authStore.user?.profile === 'admin')
@@ -112,6 +120,7 @@ const menu = computed<MenuItem[]>(() => {
     { name: 'Jogadores', path: ROUTES.PLAYERS_OVERVIEW, icon: 'bi bi-bar-chart-line' },
     { name: 'Estatisticas', path: ROUTES.STATISTICS, icon: 'bi bi-clipboard-data' },
     { name: 'Peladas', path: ROUTES.PELADAS, icon: 'bi bi-calendar2-week' },
+    { name: 'Campeonato', path: '/campeonatos', icon: 'bi bi-trophy' },
   ]
 
   if (isAdmin.value) {
@@ -120,6 +129,7 @@ const menu = computed<MenuItem[]>(() => {
       { name: 'Peladas', path: ROUTES.ADMIN_PELADAS, icon: 'bi bi-calendar2-week' },
       { name: 'Registrar estatisticas', path: ROUTES.ADMIN_MATCH_PLAYERS, icon: 'bi bi-pencil-square' },
       { name: 'Organizar times', path: ROUTES.ADMIN_ORGANIZE_TEAMS, icon: 'bi bi-diagram-3' },
+      { name: 'Campeonatos', path: '/admin/championships', icon: 'bi bi-trophy' },
     )
   }
 

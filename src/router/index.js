@@ -27,6 +27,11 @@ const routes = [
     component: () => import('../views/StatisticsView.vue')
   },
   {
+    path: '/campeonatos',
+    name: 'Championships',
+    component: () => import('../views/ChampionshipView.vue')
+  },
+  {
     path: '/players/:id',
     name: 'PlayerDetail',
     component: () => import('../views/PlayerDetailView.vue')
@@ -63,6 +68,12 @@ const routes = [
     path: '/admin/organize-teams',
     name: 'AdminOrganizeTeams',
     component: () => import('../views/AdminOrganizeTeamsView.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/admin/championships',
+    name: 'AdminChampionships',
+    component: () => import('../views/AdminChampionshipView.vue'),
     meta: { requiresAuth: true, requiresAdmin: true }
   }
 ]
