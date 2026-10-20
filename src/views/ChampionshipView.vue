@@ -179,6 +179,7 @@
           <div class="section-toolbar"><div><span class="eyebrow">Reconhecimento</span><h2 class="section-title mb-0">Premiações</h2></div></div>
           <div v-for="award in awards" :key="award.id" class="award-block">
             <div class="ranking-row"><strong>{{ award.name }}</strong><span class="pill-badge" :class="award.type === 'vote' ? 'pill-info' : 'pill-muted'">{{ award.type === 'vote' ? 'Votação' : 'Automática' }}</span></div>
+            <p v-if="award.description" class="award-description">{{ award.description }}</p>
             <div v-if="award.published" class="award-results"><div v-for="result in award.results" :key="result.id" class="ranking-row"><span>{{ result.winner?.player?.name || 'Resultado automático' }}</span><strong>{{ result.votes }} votos · {{ result.percentage }}%</strong></div></div>
             <div v-else-if="award.type === 'vote' && award.voting_open && isAuthenticated" class="candidate-list"><button v-for="candidate in award.candidates" :key="candidate.id" type="button" class="candidate-button" @click="vote(award.id, candidate.id)">{{ candidate.player?.name }}<i class="bi bi-check2" aria-hidden="true"></i></button></div>
             <p v-else-if="award.type === 'vote' && award.voting_open" class="award-status">Faça login com uma conta vinculada a um participante para votar.</p>
@@ -354,6 +355,7 @@ onMounted(async () => {
 .ranking-row { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .7rem 0; border-bottom: 1px solid var(--line-soft); }
 .ranking-position { display: inline-grid; place-items: center; width: 1.5rem; height: 1.5rem; margin-right: .45rem; border-radius: .45rem; background: var(--red-devils-soft); color: var(--red-devils-hover); font-size: .75rem; }
 .award-block { padding: .2rem 0 .75rem; border-bottom: 1px solid var(--line-soft); }
+.award-description { margin: .45rem 0 0; color: var(--text-muted); font-size: .8rem; line-height: 1.45; }
 .award-status { margin: .55rem 0 0; color: var(--text-muted); font-size: .78rem; }
 .candidate-list { display: grid; gap: .45rem; margin-top: .5rem; }
 .candidate-button { display: flex; align-items: center; justify-content: space-between; min-height: 42px; padding: .55rem .7rem; border: 1px solid var(--line-soft); border-radius: .65rem; background: transparent; color: var(--text-main); text-align: left; cursor: pointer; }
