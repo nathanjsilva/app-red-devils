@@ -20,7 +20,7 @@ O módulo de campeonato é independente das peladas existentes. Ele administra u
 4. Gerar os dez confrontos da primeira fase e validar/iniciar a competição.
 5. Marcar os participantes de cada partida, escolher o MVP, registrar gols, assistências e gols contra. O placar é recalculado pela API a partir dos eventos.
 6. Calcular odds informativas, registrar desempates quando necessário e finalizar partidas. Eliminatórias empatadas exigem placares de pênaltis.
-7. Gerar os playoffs após os dez jogos da fase de grupos, abrir/encerrar votações e publicar os resultados após a Grande Final.
+7. Gerar os playoffs após os dez jogos da fase de grupos, manter as categorias disponíveis para votação, encerrar todas as votações em uma única ação administrativa e publicar os resultados após a Grande Final.
 
 ## Regras de negócio
 
@@ -33,12 +33,12 @@ O módulo de campeonato é independente das peladas existentes. Ele administra u
 - Assistências devem ser dadas por outro participante da mesma equipe do autor do gol. Apenas participantes da partida podem receber eventos ou MVP.
 - Estatísticas consideram somente partidas finalizadas e válidas.
 - Existem quinze premiações. Artilheiro e Garçom são automáticos; as outras categorias são votadas.
-- Votação exige conta autenticada vinculada a jogador inscrito, permite um voto por categoria, impede auto-voto e respeita a elegibilidade de goleiros/defensores. Resultados ficam ocultos até publicação.
+- Votação fica disponível até o administrador encerrar todas as categorias, exige conta autenticada vinculada a jogador inscrito, permite um voto por categoria, impede auto-voto e respeita a elegibilidade de goleiros/defensores. Resultados ficam ocultos até publicação.
 - Odds são apenas informação esportiva e usam o modelo Poisson persistido pela API; não há apostas financeiras.
 
 ## Endpoints específicos
 
-As rotas públicas começam em `/championships`. As operações administrativas começam em `/admin` e exigem usuário administrador. A votação usa `POST /championship-awards/:category/votes` e exige autenticação.
+As rotas públicas começam em `/championships`. As operações administrativas começam em `/admin` e exigem usuário administrador. A votação usa `POST /championship-awards/:category/votes` e exige autenticação; o encerramento global usa `PUT /admin/championships/:championship/awards/voting-state`.
 
 Não criar ou editar backend neste repositório. Se o contrato da API mudar, confirmar a mudança antes de alterar os serviços do frontend.
 

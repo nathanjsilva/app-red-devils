@@ -229,8 +229,8 @@ export class ChampionshipService {
     return payload(await api.post(`/admin/championships/${id}/start`))
   }
 
-  static async setVotingState(categoryId: number, votingOpen: boolean): Promise<ChampionshipAward> {
-    return payload(await api.put(`/admin/championship-awards/${categoryId}/voting-state`, { voting_open: votingOpen }))
+  static async endVoting(id: number): Promise<ChampionshipAward[]> {
+    return payload(await api.put(`/admin/championships/${id}/awards/voting-state`))
   }
 
   static async publishAwards(id: number): Promise<ChampionshipAward[]> {
