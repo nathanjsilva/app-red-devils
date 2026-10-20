@@ -119,17 +119,17 @@ const menu = computed<MenuItem[]>(() => {
     { name: 'Home', path: ROUTES.HOME, icon: 'bi bi-house-door' },
     { name: 'Jogadores', path: ROUTES.PLAYERS_OVERVIEW, icon: 'bi bi-bar-chart-line' },
     { name: 'Estatisticas', path: ROUTES.STATISTICS, icon: 'bi bi-clipboard-data' },
-    { name: 'Peladas', path: ROUTES.PELADAS, icon: 'bi bi-calendar2-week' },
+    { name: 'Consultar peladas', path: ROUTES.PELADAS, icon: 'bi bi-calendar2-week' },
     { name: 'Campeonato', path: '/campeonatos', icon: 'bi bi-trophy' },
   ]
 
   if (isAdmin.value) {
     items.push(
       { name: 'Cadastro de jogadores', path: ROUTES.ADMIN_PLAYERS, icon: 'bi bi-people' },
-      { name: 'Peladas', path: ROUTES.ADMIN_PELADAS, icon: 'bi bi-calendar2-week' },
+      { name: 'Gerenciar peladas', path: ROUTES.ADMIN_PELADAS, icon: 'bi bi-calendar2-plus' },
       { name: 'Registrar estatisticas', path: ROUTES.ADMIN_MATCH_PLAYERS, icon: 'bi bi-pencil-square' },
       { name: 'Organizar times', path: ROUTES.ADMIN_ORGANIZE_TEAMS, icon: 'bi bi-diagram-3' },
-      { name: 'Campeonatos', path: '/admin/championships', icon: 'bi bi-trophy' },
+      { name: 'Gerenciar campeonatos', path: '/admin/championships', icon: 'bi bi-trophy-fill' },
     )
   }
 
