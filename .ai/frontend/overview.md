@@ -5,7 +5,7 @@
 ```
 src/
 ├── components/
-│   ├── SidebarComponent.vue  # Sidebar (desktop) + barra de abas fixa (mobile/tablet)
+│   ├── SidebarComponent.vue  # Sidebar (desktop) + drawer lateral (mobile/tablet)
 │   └── charts/                # Wrappers vue-chartjs: EvolutionChart, RankingBarChart, ComparisonRadarChart
 ├── views/            # Páginas roteadas (uma por rota em router/index.js)
 ├── stores/           # Pinia: auth.ts, rankings.ts
@@ -63,6 +63,6 @@ Classes estáticas, um método por chamada de API, sempre via instância `api` (
 
 `App.vue` monta `SidebarComponent.vue` e `<router-view>`. O menu é um array de `MenuItem` (computed em `SidebarComponent.vue`), com itens extras adicionados quando `user.profile === 'admin'` — confirmar ali antes de adicionar itens de menu novos.
 
-**Navegação responsiva (mobile-first)**: `useResponsive().isDesktop` (breakpoint 1024px) decide o padrão:
+**Navegação responsiva (mobile-first)**: `useResponsive().isDesktop` (breakpoint 1100px) decide o padrão:
 - **Desktop**: sidebar fixa lateral, sempre visível, com o menu completo + botão de logout.
-- **Mobile/tablet**: sidebar vira um drawer (overlay, fora da tela por padrão) e a navegação principal passa a ser uma **barra de abas fixa no rodapé** (`.bottom-tab-bar`): Home, Jogadores, Estatísticas, e um 4º botão que é "Mais" (abre o drawer com o menu completo + logout, se autenticado) ou "Entrar" (link pra `/login`, se visitante). `app-main` ganha padding inferior (`--bottom-nav-height`) pra não ficar atrás da barra.
+- **Mobile/tablet**: sidebar vira um drawer lateral rolável, fechado por padrão e aberto pelo botão `Menu`, com overlay para fechar e todos os itens disponíveis para usuários comuns e administradores. `app-main` ganha padding superior para não ficar atrás do botão do menu.

@@ -1,12 +1,26 @@
 ﻿<template>
   <div class="app-layout">
-    <aside v-if="isDesktop" class="sidebar-panel">
+    <aside
+      id="mobile-sidebar"
+      class="sidebar-panel"
+      :class="{ 'sidebar-panel-mobile': !isDesktop, 'is-open': isMobileMenuOpen }"
+      :aria-hidden="!isDesktop && !isMobileMenuOpen"
+    >
       <div class="sidebar-header">
         <img :src="logo" alt="Red Devils" class="sidebar-logo" />
         <div class="sidebar-brand-copy">
           <p class="sidebar-eyebrow">Painel publico</p>
           <h1 class="sidebar-brand">Red Devils</h1>
         </div>
+        <button
+          v-if="!isDesktop"
+          type="button"
+          class="mobile-sidebar-close"
+          aria-label="Fechar menu"
+          @click="closeMobileMenu"
+        >
+          <i class="bi bi-x-lg"></i>
+        </button>
       </div>
 
       <div class="sidebar-section">
@@ -18,6 +32,7 @@
                 :to="item.path"
                 class="sidebar-link"
                 :class="{ active: $route.path === item.path }"
+                @click="closeMobileMenu"
               >
                 <i :class="item.icon"></i>
                 <span>{{ item.name }}</span>
@@ -42,65 +57,34 @@
       </div>
     </aside>
 
-    <nav v-else class="bottom-tab-bar" aria-label="Navegacao principal">
-      <template v-if="isAdmin">
-        <router-link to="/admin/peladas" class="tab-item">
-          <i class="bi bi-calendar2-week"></i>
-          <span>Peladas</span>
-        </router-link>
-        <router-link to="/admin/championships" class="tab-item">
-          <i class="bi bi-trophy"></i>
-          <span>Torneio</span>
-        </router-link>
-        <router-link to="/admin/players" class="tab-item">
-          <i class="bi bi-people"></i>
-          <span>Jogadores</span>
-        </router-link>
-        <router-link to="/admin/match-players" class="tab-item">
-          <i class="bi bi-pencil-square"></i>
-          <span>Registrar</span>
-        </router-link>
-        <router-link to="/admin/organize-teams" class="tab-item">
-          <i class="bi bi-diagram-3"></i>
-          <span>Times</span>
-        </router-link>
-        <button type="button" class="tab-item" @click="handleLogout">
-          <i class="bi bi-box-arrow-right"></i>
-          <span>Sair</span>
-        </button>
-      </template>
-      <template v-else>
-        <router-link to="/home" class="tab-item">
-          <i class="bi bi-house-door"></i>
-          <span>Home</span>
-        </router-link>
-        <router-link to="/players-overview" class="tab-item">
-          <i class="bi bi-bar-chart-line"></i>
-          <span>Jogadores</span>
-        </router-link>
-        <router-link to="/estatisticas" class="tab-item">
-          <i class="bi bi-clipboard-data"></i>
-          <span>Estatisticas</span>
-        </router-link>
-        <router-link to="/peladas" class="tab-item">
-          <i class="bi bi-calendar2-week"></i>
-          <span>Peladas</span>
-        </router-link>
-        <router-link to="/campeonatos" class="tab-item">
-          <i class="bi bi-trophy"></i>
-          <span>Torneio</span>
-        </router-link>
-      </template>
-    </nav>
+    <div
+      v-if="!isDesktop && isMobileMenuOpen"
+      class="mobile-sidebar-backdrop"
+      aria-hidden="true"
+      @click="closeMobileMenu"
+    ></div>
 
-    <main class="app-main" :class="{ 'has-bottom-nav': !isDesktop }">
+    <button
+      v-if="!isDesktop"
+      type="button"
+      class="mobile-menu-toggle"
+      :aria-expanded="isMobileMenuOpen"
+      aria-controls="mobile-sidebar"
+      @click="toggleMobileMenu"
+    >
+      <i class="bi bi-list"></i>
+      <span>Menu</span>
+    </button>
+
+    <main class="app-main">
       <router-view />
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
 import { useAuthStore } from '../stores/auth'
 import { ROUTES } from '../utils/constants'
@@ -110,9 +94,19 @@ import type { MenuItem } from '../types'
 
 const { logout } = useAuth()
 const { isDesktop } = useResponsive()
+const route = useRoute()
 const authStore = useAuthStore()
 const isAuthenticated = computed(() => authStore.isAuthenticated)
 const isAdmin = computed(() => authStore.user?.profile === 'admin')
+const isMobileMenuOpen = ref(false)
+
+const toggleMobileMenu = () => {
+  isMobileMenuOpen.value = !isMobileMenuOpen.value
+}
+
+const closeMobileMenu = () => {
+  isMobileMenuOpen.value = false
+}
 
 const menu = computed<MenuItem[]>(() => {
   const items: MenuItem[] = [
@@ -137,6 +131,10 @@ const menu = computed<MenuItem[]>(() => {
 })
 
 const handleLogout = async () => {
+  closeMobileMenu()
   await logout()
 }
+
+watch(() => route.path, closeMobileMenu)
+watch(isDesktop, closeMobileMenu)
 </script>

@@ -18,7 +18,6 @@
     --radius-sm: 0.875rem;
     --radius-md: 1.25rem;
     --radius-lg: 1.75rem;
-    --bottom-nav-height: 64px;
 }
 
 body {
@@ -36,7 +35,6 @@ body {
 
 a,
 button,
-.tab-item,
 .sidebar-link {
     -webkit-tap-highlight-color: transparent;
 }
