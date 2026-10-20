@@ -44,7 +44,7 @@ Todas as respostas passam por `(response as any).data?.data ?? response.data` �
 | Campeonatos (público) | `GET /championships`, `GET /championships/:id`, `/awards`, `/statistics`, `/rankings` | `championshipService.ts` |
 | Campeonato (votação pública) | `POST /championship-awards/:category/votes` | `championshipService.ts` |
 | Encerrar votação do campeonato (admin) | `PUT /admin/championships/:championship/awards/voting-state` | `championshipService.ts` |
-| Campeonato (admin) | `POST /admin/championships`, inscrições, formação, confrontos, playoffs, goleiros, times, eventos, participação, odds e premiações | `championshipService.ts` |
+| Campeonato (admin) | `POST /admin/championships`, inscrições (com vínculo de goleiro a uma única equipe), formação, confrontos, playoffs, times, eventos, participação, odds e premiações | `championshipService.ts` |
 | Rankings completos | `GET /statistics/rankings/{wins,goals,assists,goal-participations,win-rate,appearances,goalkeepers}` (envelope `{data,meta}` enriquecido) | `rankingService.ts` |
 | Visão geral da temporada | `GET /statistics/dashboard` | `statisticsService.ts` |
 | Evolução (série temporal) | `GET /statistics/evolution?group_by=month` | `statisticsService.ts` |

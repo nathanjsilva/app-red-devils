@@ -41,7 +41,7 @@ src/
 | `AdminMatchPlayersView.vue` | `/admin/match-players` | Registro de estatísticas por jogador/pelada (admin) |
 | `AdminOrganizeTeamsView.vue` | `/admin/organize-teams` | Organização de times por pelada (admin) |
 | `ChampionshipView.vue` | `/campeonatos` | Visão pública de classificação, partidas, odds, chaveamento, estatísticas, rankings e premiações |
-| `AdminChampionshipView.vue` | `/admin/championships` | Configuração de participantes, equipes, sorteio, partidas, eventos, odds, desempates e votação |
+| `AdminChampionshipView.vue` | `/admin/championships` | Configuração de participantes, equipes, partidas, eventos, odds, desempates e votação |
 
 ## Stores (Pinia, Composition API style — `defineStore(id, () => {...})`)
 

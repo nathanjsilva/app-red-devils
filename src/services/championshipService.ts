@@ -76,7 +76,6 @@ export interface ChampionshipDetails {
     phase: string
     teams: ChampionshipTeam[]
     players?: ChampionshipPlayer[]
-    goalkeeper_draws?: Array<Record<string, unknown>>
   }
   standings: ChampionshipStanding[]
   matches: ChampionshipMatch[]
@@ -160,6 +159,7 @@ export class ChampionshipService {
     player_type: ChampionshipPlayerType
     stone_group: number
     stone_level: number | null
+    team_id?: number | null
   }): Promise<ChampionshipPlayer> {
     return payload(await api.post(`/admin/championships/${id}/players`, payloadData))
   }
@@ -209,10 +209,6 @@ export class ChampionshipService {
 
   static async vote(categoryId: number, candidateId: number): Promise<Record<string, unknown>> {
     return payload(await api.post(`/championship-awards/${categoryId}/votes`, { candidate_id: candidateId }))
-  }
-
-  static async drawGoalkeepers(id: number, confirmed = false): Promise<Array<Record<string, unknown>>> {
-    return payload(await api.post(`/admin/championships/${id}/goalkeepers/draw`, { confirmed }))
   }
 
   static async uploadCrest(teamId: number, file: File): Promise<ChampionshipTeam> {

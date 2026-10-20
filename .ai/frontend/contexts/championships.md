@@ -15,8 +15,8 @@ O módulo de campeonato é independente das peladas existentes. Ele administra u
 ## Fluxo administrativo
 
 1. Criar o campeonato; a API cria as cinco equipes padrão e as quinze categorias de premiação.
-2. Inscrever 25 jogadores de linha e cinco goleiros vindos do cadastro global. Cada jogador só pode ser inscrito uma vez.
-3. Definir uma Pedra de cada grupo em cada equipe, editar nomes e brasões e sortear os goleiros.
+2. Inscrever 25 jogadores de linha e cinco goleiros vindos do cadastro global. Cada jogador só pode ser inscrito uma vez; cada goleiro é vinculado a uma única equipe no cadastro.
+3. Definir uma Pedra de cada grupo em cada equipe e editar nomes e brasões.
 4. Gerar os dez confrontos da primeira fase e validar/iniciar a competição.
 5. Marcar os participantes de cada partida, escolher o MVP, registrar gols, assistências e gols contra. O placar é recalculado pela API a partir dos eventos.
 6. Calcular odds informativas, registrar desempates quando necessário e finalizar partidas. Eliminatórias empatadas exigem placares de pênaltis.
@@ -44,6 +44,6 @@ Não criar ou editar backend neste repositório. Se o contrato da API mudar, con
 
 ## Pontos de atenção
 
-- O Laravel serializa relacionamentos em snake_case, por exemplo `home_team`, `away_team` e `goalkeeper_draws`.
+- O Laravel serializa relacionamentos em snake_case, por exemplo `home_team` e `away_team`.
 - `home_score` e `away_score` devem refletir os eventos registrados; os inputs administrativos exibem o placar calculado e só permitem informar pênaltis quando a eliminatória termina empatada.
 - O serviço usa `response.data` e aceita também o envelope `{ data: ... }`, pois as respostas do backend do campeonato são mistas.
