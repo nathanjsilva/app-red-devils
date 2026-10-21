@@ -877,4 +877,701 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
     min-height: 160px;
   }
 }
+
+/* O painel administrativo fica mais próximo de um app esportivo no mobile:
+   navegação em uma faixa única, cards densos e formulários sem desperdício. */
+@media (max-width: 767px) {
+  .championship-admin {
+    width: 100%;
+    padding: .35rem 0 1.25rem;
+  }
+
+  .championship-admin .page-header {
+    gap: .55rem;
+    margin-bottom: .7rem;
+  }
+
+  .championship-admin .page-title {
+    font-size: 1.45rem;
+    line-height: 1.15;
+  }
+
+  .championship-admin .page-subtitle {
+    max-width: 34rem;
+    font-size: .74rem;
+    line-height: 1.35;
+  }
+
+  .championship-admin .surface-card {
+    border-radius: .9rem;
+  }
+
+  .create-card {
+    display: grid;
+    gap: .65rem;
+    margin-bottom: .65rem;
+    padding: .75rem;
+  }
+
+  .create-card h2,
+  .admin-card h2 {
+    margin: .15rem 0;
+    font-size: .96rem;
+    line-height: 1.2;
+  }
+
+  .create-card p,
+  .admin-card .card-description {
+    font-size: .7rem;
+    line-height: 1.4;
+  }
+
+  .create-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: .4rem;
+    max-width: none;
+  }
+
+  .create-form input,
+  .championship-admin input,
+  .championship-admin select {
+    min-height: 40px;
+    padding: .5rem .6rem;
+    border-radius: .6rem;
+    font-size: .78rem;
+  }
+
+  .create-form .btn {
+    width: auto;
+    min-height: 40px;
+    height: 40px;
+    padding: .45rem .65rem;
+    font-size: .7rem;
+    white-space: nowrap;
+  }
+
+  .championship-selector {
+    gap: .3rem;
+    margin-bottom: .65rem;
+    padding-bottom: .15rem;
+    scrollbar-width: thin;
+  }
+
+  .selector-button {
+    flex: 0 0 auto;
+    min-width: 112px;
+    min-height: 44px;
+    padding: .5rem .6rem;
+    border-radius: .65rem;
+  }
+
+  .selector-button span {
+    font-size: .74rem;
+  }
+
+  .selector-button small {
+    margin-top: .1rem;
+    font-size: .6rem;
+  }
+
+  .module-tabs {
+    display: flex;
+    gap: .25rem;
+    margin: 0 -.15rem .7rem;
+    padding: .25rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    border-radius: .75rem;
+    scrollbar-width: thin;
+  }
+
+  .module-tab {
+    display: grid;
+    flex: 0 0 108px;
+    grid-template-columns: auto minmax(0, 1fr);
+    min-width: 108px;
+    min-height: 46px;
+    padding: .4rem .45rem;
+    border-radius: .55rem;
+    gap: .1rem .3rem;
+  }
+
+  .module-tab i {
+    font-size: .88rem;
+  }
+
+  .module-tab span {
+    font-size: .7rem;
+    line-height: 1.1;
+  }
+
+  .module-tab small {
+    display: none;
+  }
+
+  .overview-grid {
+    gap: .4rem;
+    margin-bottom: .65rem;
+  }
+
+  .overview-main,
+  .metric-card {
+    min-height: 78px;
+    padding: .65rem;
+  }
+
+  .overview-main h2 {
+    margin: .12rem 0 .35rem;
+    font-size: .9rem;
+  }
+
+  .overview-icon {
+    font-size: 1.35rem;
+  }
+
+  .metric-card > span {
+    font-size: .6rem;
+  }
+
+  .metric-card strong {
+    margin-top: .18rem;
+    font-size: 1.25rem;
+  }
+
+  .progress-track {
+    height: 3px;
+    margin-top: .45rem;
+  }
+
+  .admin-card {
+    margin-bottom: .65rem;
+    padding: .75rem;
+  }
+
+  .card-heading {
+    align-items: flex-start;
+    gap: .45rem;
+    margin-bottom: .45rem;
+  }
+
+  .card-heading > i {
+    font-size: 1rem;
+  }
+
+  .form-row {
+    gap: .4rem;
+  }
+
+  .championship-admin .admin-card label {
+    margin: .55rem 0 .25rem;
+    font-size: .68rem;
+  }
+
+  .tie-breaker-card {
+    gap: .1rem;
+  }
+
+  .tie-breaker-card .btn {
+    width: 100%;
+    margin-top: .25rem;
+  }
+
+  .admin-grid {
+    gap: .65rem;
+  }
+
+  .registration-type-switch {
+    gap: .3rem;
+    margin: .6rem 0;
+  }
+
+  .registration-type-switch button {
+    height: 40px;
+    min-height: 40px;
+    padding: .35rem .4rem;
+    font-size: .68rem;
+  }
+
+  .full {
+    margin-top: .7rem;
+  }
+
+  .helper-text {
+    font-size: .66rem;
+    line-height: 1.4;
+  }
+
+  .user-link-row {
+    grid-template-columns: minmax(0, 1fr) minmax(110px, .75fr);
+    gap: .45rem;
+    padding: .55rem 0;
+  }
+
+  .user-link-row strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: .75rem;
+  }
+
+  .user-link-row small {
+    font-size: .63rem;
+  }
+
+  .player-filters {
+    gap: .4rem;
+    margin: .7rem 0;
+    padding: .6rem;
+  }
+
+  .player-filters label {
+    margin: 0 !important;
+  }
+
+  .player-filters input,
+  .player-filters select {
+    margin-top: .2rem;
+  }
+
+  .enrolled-list {
+    gap: .15rem;
+  }
+
+  .enrolled-player {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: .35rem .45rem;
+    padding: .55rem .15rem;
+  }
+
+  .player-mark {
+    width: 30px;
+    height: 30px;
+    border-radius: .55rem;
+    font-size: .75rem;
+  }
+
+  .player-main strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: .74rem;
+  }
+
+  .player-main small,
+  .stone-badge {
+    font-size: .62rem;
+  }
+
+  .enrolled-player .stone-badge {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
+  }
+
+  .enrolled-player .pill-badge {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    justify-self: end;
+    padding: .25rem .45rem;
+    font-size: .58rem;
+  }
+
+  .goalkeeper-roster {
+    gap: .35rem;
+  }
+
+  .goalkeeper-row {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: .4rem;
+    padding: .55rem;
+  }
+
+  .goalkeeper-row strong {
+    font-size: .72rem;
+  }
+
+  .goalkeeper-row small,
+  .goalkeeper-row .pill-badge {
+    font-size: .6rem;
+  }
+
+  .team-list {
+    gap: .5rem;
+    margin-top: .7rem;
+  }
+
+  .team-assignment-card {
+    padding: .65rem;
+    border-radius: .75rem;
+  }
+
+  .team-assignment-header {
+    gap: .55rem;
+    margin-bottom: .65rem;
+  }
+
+  .team-identity {
+    gap: .5rem;
+  }
+
+  .team-crest {
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
+    border-radius: .6rem;
+  }
+
+  .team-identity span {
+    font-size: .64rem;
+  }
+
+  .team-name-input {
+    min-height: 34px !important;
+    padding: .35rem .45rem !important;
+    font-size: .74rem !important;
+  }
+
+  .team-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .3rem;
+  }
+
+  .team-actions .btn,
+  .team-actions .crest-upload {
+    width: 100%;
+    min-height: 38px;
+    height: 38px;
+    padding: .35rem .4rem;
+    font-size: .64rem;
+  }
+
+  .team-actions .btn:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .stone-slots {
+    gap: .35rem;
+  }
+
+  .stone-slot span {
+    margin-bottom: .2rem;
+    font-size: .62rem;
+  }
+
+  .stone-slot select {
+    min-height: 38px;
+    padding: .4rem .45rem;
+    font-size: .68rem;
+  }
+
+  .goalkeeper-slot {
+    gap: .4rem;
+    margin-top: .55rem;
+    padding: .55rem;
+  }
+
+  .goalkeeper-slot strong {
+    font-size: .72rem;
+  }
+
+  .goalkeeper-slot > i {
+    font-size: 1rem;
+  }
+
+  .form-actions,
+  .match-meta,
+  .match-tools {
+    gap: .45rem;
+    margin-top: .7rem;
+  }
+
+  .form-actions .btn,
+  .match-meta .btn,
+  .match-tools .btn {
+    width: 100%;
+  }
+
+  .action-grid {
+    gap: .4rem;
+  }
+
+  .workflow-action {
+    min-height: 58px;
+    gap: .5rem;
+    padding: .6rem;
+    border-radius: .7rem;
+  }
+
+  .workflow-action strong {
+    font-size: .74rem;
+  }
+
+  .workflow-action small {
+    font-size: .63rem;
+  }
+
+  .match-operations-card .card-heading {
+    align-items: flex-start;
+  }
+
+  .admin-match-list {
+    gap: .35rem;
+    max-height: 480px;
+  }
+
+  .admin-match-summary {
+    min-height: 62px;
+    gap: .4rem;
+    padding: .6rem .65rem;
+    border-radius: .7rem;
+  }
+
+  .admin-match-summary-main small,
+  .admin-match-summary-meta small {
+    font-size: .6rem;
+  }
+
+  .admin-match-summary-main strong {
+    font-size: .72rem;
+    line-height: 1.3;
+  }
+
+  .admin-match-summary-meta .pill-badge {
+    padding: .25rem .45rem;
+    font-size: .58rem;
+  }
+
+  .button-row {
+    gap: .35rem;
+  }
+
+  .awards-card .button-row {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .awards-card .button-row .btn:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .award-row {
+    gap: .45rem;
+    padding: .6rem 0;
+  }
+
+  .award-row > div {
+    min-width: 0;
+  }
+
+  .award-row strong {
+    font-size: .76rem;
+  }
+
+  .award-row small,
+  .award-description {
+    font-size: .64rem;
+  }
+
+  .championship-admin-modal-backdrop {
+    padding: .35rem;
+  }
+
+  .championship-admin-modal {
+    width: 100%;
+    max-height: calc(100dvh - .7rem);
+    padding: .7rem;
+    border-radius: .9rem .9rem .7rem .7rem;
+  }
+
+  .admin-modal-header {
+    gap: .5rem;
+    margin-bottom: .6rem;
+  }
+
+  .admin-modal-header h2 {
+    font-size: .98rem;
+  }
+
+  .admin-modal-header .card-description {
+    font-size: .68rem;
+  }
+
+  .admin-modal-close {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    flex-basis: 38px !important;
+  }
+
+  .admin-match-hero {
+    gap: .3rem;
+    padding: .65rem;
+  }
+
+  .admin-match-hero strong {
+    font-size: .74rem;
+    line-height: 1.25;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-match-hero small,
+  .admin-match-hero-score span {
+    font-size: .6rem;
+  }
+
+  .admin-match-hero-score strong {
+    font-size: 1.25rem;
+  }
+
+  .admin-match-editor-grid {
+    gap: .55rem;
+    margin-top: .55rem;
+  }
+
+  .admin-match-editor-section {
+    padding: .65rem;
+    border-radius: .7rem;
+  }
+
+  .admin-match-editor-section .form-section-heading {
+    gap: .35rem;
+    margin-bottom: .4rem;
+  }
+
+  .admin-match-editor-section .form-section-heading strong {
+    font-size: .8rem;
+  }
+
+  .admin-match-editor-section .form-section-heading small {
+    font-size: .62rem;
+  }
+
+  .admin-participant-list {
+    max-height: 220px;
+    padding: .15rem .25rem;
+  }
+
+  .admin-participant-option {
+    min-height: 39px;
+    padding: .4rem .25rem;
+    font-size: .7rem;
+  }
+
+  .admin-participant-option small {
+    font-size: .58rem;
+  }
+
+  .admin-match-editor-actions {
+    gap: .45rem;
+    margin-top: .55rem;
+  }
+
+  .admin-match-editor-actions .mvp-select > span {
+    font-size: .64rem;
+  }
+
+  .admin-match-editor-actions .mvp-select select {
+    min-height: 40px;
+    font-size: .72rem;
+  }
+
+  .admin-match-editor-actions .btn {
+    width: 100%;
+    min-height: 40px;
+    font-size: .7rem;
+  }
+
+  .admin-event-form {
+    gap: .4rem;
+    padding: .6rem;
+  }
+
+  .admin-event-field > span {
+    font-size: .64rem;
+  }
+
+  .admin-event-field select,
+  .admin-event-field input,
+  .admin-event-form .own-goal-option {
+    min-height: 40px;
+  }
+
+  .admin-event-form .btn {
+    min-height: 40px;
+    font-size: .7rem;
+  }
+
+  .admin-event-empty {
+    min-height: 140px;
+    padding: .9rem;
+  }
+
+  .admin-event-empty span,
+  .admin-event-empty small {
+    font-size: .64rem;
+  }
+
+  .admin-match-editor-footer {
+    gap: .55rem;
+    margin-top: .6rem;
+    padding-top: .65rem;
+  }
+
+  .admin-match-editor-footer > div:first-child strong {
+    font-size: .72rem;
+  }
+
+  .admin-match-editor-footer > div:first-child small {
+    font-size: .62rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .create-form {
+    grid-template-columns: minmax(0, 1fr) 42px;
+  }
+
+  .create-form .btn {
+    width: 42px;
+    padding: 0;
+    font-size: 0;
+  }
+
+  .create-form .btn i {
+    margin: 0;
+    font-size: .9rem;
+  }
+
+  .selector-button {
+    min-width: 104px;
+  }
+
+  .module-tab {
+    flex-basis: 101px;
+    min-width: 101px;
+  }
+
+  .overview-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .overview-main {
+    grid-column: 1 / -1;
+  }
+
+  .form-row,
+  .stone-slots {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .team-actions .btn,
+  .team-actions .crest-upload {
+    font-size: .6rem;
+  }
+}
 </style>

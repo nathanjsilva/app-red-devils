@@ -634,4 +634,613 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleChampionshipKe
 @container championship-page (max-width: 680px) { .championship-page { padding-top: .4rem; } .championship-header { align-items: stretch; } .championship-picker { width: 100%; } .championship-tabs { grid-template-columns: repeat(4, minmax(150px, 1fr)); margin-right: -.75rem; padding-right: .75rem; border-right: 0; border-radius: .85rem 0 0 .85rem; } .championship-team-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .champion-banner { align-items: flex-start; } .section-context { max-width: 150px; text-align: right; } .ranking-columns, .awards-grid { grid-template-columns: 1fr; } .stats-table-wrap { max-height: 270px; } .championship-player-metrics, .championship-team-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .championship-team-player-list, .championship-team-match-list, .championship-ranking-list { max-height: 220px; } .championship-lineups { grid-template-columns: 1fr; } .championship-detail-stat-grid, .championship-match-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .match-summary-card { order: -1; } }
 @container championship-page (max-width: 420px) { .title-row { align-items: flex-start; flex-direction: column; gap: .35rem; } .championship-team-grid { gap: .45rem; } .team-card { padding: .6rem; } .team-crest { width: 36px; height: 36px; flex-basis: 36px; } .team-crest--winner { width: 46px; height: 46px; flex-basis: 46px; } .champion-banner { padding: .85rem; } .champion-icon { font-size: 1.2rem; } .section-context { display: none; } .panel-card { padding: .8rem; } .match-row { gap: .35rem; } .match-score-box { min-width: 80px; } .odds-inline { align-items: flex-start; flex-direction: column; gap: .2rem; } .table-legend { gap: .5rem; } }
 @media (max-width: 767px) { .championship-modal-backdrop { align-items: flex-end; padding: .5rem; } .championship-modal { max-height: 92vh; padding: .8rem; border-radius: 1rem 1rem .75rem .75rem; } .championship-team-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .championship-team-player-list { max-height: 220px; } }
+
+/* Experiência compacta para telefones: mantém a densidade de um app esportivo
+   sem criar overflow na página principal. As tabelas continuam rolando dentro
+   do próprio card quando a quantidade de colunas exigir isso. */
+@media (max-width: 767px) {
+  .championship-page {
+    width: 100%;
+    padding: .35rem 0 1rem;
+  }
+
+  .championship-page .page-header {
+    display: grid;
+    gap: .6rem;
+    margin-bottom: .7rem;
+  }
+
+  .championship-page .page-title {
+    font-size: 1.45rem;
+    line-height: 1.15;
+  }
+
+  .championship-page .page-subtitle {
+    font-size: .74rem;
+    line-height: 1.35;
+  }
+
+  .championship-phase {
+    gap: .35rem;
+    flex-wrap: wrap;
+  }
+
+  .championship-picker {
+    width: 100%;
+    font-size: .62rem;
+  }
+
+  .championship-picker .form-select {
+    min-height: 40px;
+    margin-top: .25rem;
+    padding: .45rem .65rem;
+    font-size: .8rem;
+  }
+
+  .championship-tabs {
+    display: flex;
+    gap: .25rem;
+    margin: 0 -.15rem .7rem;
+    padding: .25rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    border-radius: .75rem;
+    scrollbar-width: thin;
+  }
+
+  .championship-tab {
+    display: grid;
+    flex: 0 0 118px;
+    grid-template-columns: auto minmax(0, 1fr);
+    min-width: 118px;
+    min-height: 46px;
+    padding: .45rem .5rem;
+    border-radius: .55rem;
+    gap: .1rem .35rem;
+  }
+
+  .championship-tab i {
+    font-size: .9rem;
+  }
+
+  .championship-tab span {
+    font-size: .72rem;
+    line-height: 1.1;
+  }
+
+  .championship-tab small {
+    display: none;
+  }
+
+  .championship-section {
+    gap: .65rem;
+  }
+
+  .championship-page .surface-card {
+    border-radius: .9rem;
+  }
+
+  .championship-page .panel-card {
+    padding: .72rem;
+  }
+
+  .section-toolbar {
+    align-items: flex-start;
+    gap: .45rem;
+    margin-bottom: .6rem;
+  }
+
+  .section-title {
+    font-size: .98rem;
+    line-height: 1.2;
+  }
+
+  .eyebrow {
+    font-size: .6rem;
+  }
+
+  .champion-banner {
+    gap: .65rem;
+    padding: .7rem;
+  }
+
+  .team-crest--winner {
+    width: 44px;
+    height: 44px;
+    flex-basis: 44px;
+  }
+
+  .champion-copy h2 {
+    margin: .1rem 0;
+    font-size: .95rem;
+  }
+
+  .champion-copy p,
+  .champion-copy small {
+    font-size: .67rem;
+    line-height: 1.35;
+  }
+
+  .champion-icon {
+    font-size: 1.15rem;
+  }
+
+  .championship-team-grid {
+    gap: .4rem;
+  }
+
+  .team-card {
+    gap: .45rem;
+    padding: .55rem;
+    border-radius: .7rem;
+  }
+
+  .team-crest,
+  .team-crest--table {
+    width: 32px;
+    height: 32px;
+    flex-basis: 32px;
+    border-radius: .55rem;
+  }
+
+  .team-card strong {
+    font-size: .72rem;
+  }
+
+  .team-card-copy span {
+    margin-top: .1rem;
+    font-size: .61rem;
+  }
+
+  .team-card-arrow {
+    font-size: .7rem;
+  }
+
+  .standings-table-wrap,
+  .stats-table-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+
+  .standings-table {
+    min-width: 700px;
+    font-size: .7rem;
+  }
+
+  .standings-table thead th,
+  .standings-table tbody td {
+    padding: .55rem .45rem;
+  }
+
+  .standings-table .sticky-team {
+    min-width: 142px;
+  }
+
+  .standings-table .points-col {
+    left: 184px;
+  }
+
+  .standing-team {
+    gap: .35rem;
+  }
+
+  .standing-team strong {
+    max-width: 92px;
+    font-size: .7rem;
+  }
+
+  .table-legend {
+    gap: .35rem .55rem;
+    margin-top: .55rem;
+    font-size: .64rem;
+  }
+
+  .table-note {
+    margin-top: .5rem;
+    font-size: .64rem;
+    line-height: 1.4;
+  }
+
+  .match-row {
+    gap: .35rem;
+    padding: .6rem 0;
+  }
+
+  .match-team {
+    font-size: .72rem;
+    line-height: 1.25;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .match-score-box {
+    min-width: 68px;
+  }
+
+  .match-score {
+    font-size: .9rem;
+  }
+
+  .match-score-box small {
+    font-size: .58rem;
+  }
+
+  .odds-inline {
+    align-items: flex-start;
+    gap: .15rem;
+    padding-top: .35rem;
+    flex-direction: column;
+    font-size: .6rem;
+  }
+
+  .odds-inline strong {
+    font-size: .62rem;
+  }
+
+  .phase-summary-list {
+    gap: .35rem;
+  }
+
+  .phase-summary-list div {
+    padding: .55rem .6rem;
+  }
+
+  .phase-summary-list span {
+    font-size: .7rem;
+  }
+
+  .phase-summary-list strong {
+    font-size: .95rem;
+  }
+
+  .summary-note {
+    margin-top: .6rem;
+    font-size: .67rem;
+  }
+
+  .bracket-grid {
+    display: flex;
+    gap: .5rem;
+    max-width: 100%;
+    overflow-x: auto;
+    padding-bottom: .2rem;
+    overscroll-behavior-x: contain;
+  }
+
+  .bracket-stage {
+    flex: 0 0 214px;
+    padding: .6rem;
+  }
+
+  .bracket-stage h3 {
+    margin-bottom: .4rem;
+    font-size: .66rem;
+  }
+
+  .bracket-match {
+    padding: .5rem 0;
+    font-size: .7rem;
+  }
+
+  .ranking-columns,
+  .awards-grid {
+    grid-template-columns: 1fr;
+    gap: .5rem;
+  }
+
+  .ranking-block,
+  .award-block {
+    padding: .6rem;
+    border-radius: .7rem;
+  }
+
+  .ranking-block h3,
+  .award-heading h3 {
+    font-size: .78rem;
+  }
+
+  .championship-ranking-list {
+    max-height: 260px;
+    overflow-y: auto;
+    scrollbar-color: var(--red-devils) var(--surface-strong);
+  }
+
+  .championship-ranking-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+    width: 100%;
+    min-height: 38px;
+    padding: .4rem 0;
+    border: 0;
+    border-bottom: 1px solid var(--line-soft);
+    background: transparent;
+    color: var(--text-main);
+    font: inherit;
+    text-align: left;
+  }
+
+  .championship-ranking-player {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    min-width: 0;
+  }
+
+  .championship-ranking-position {
+    display: grid;
+    flex: 0 0 20px;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--red-devils-soft);
+    color: var(--red-devils-hover);
+    font-size: .63rem;
+  }
+
+  .championship-ranking-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: .72rem;
+  }
+
+  .championship-ranking-value {
+    flex: 0 0 auto;
+    color: var(--text-muted);
+    font-size: .65rem;
+  }
+
+  .compact-select {
+    width: min(100%, 180px);
+    min-height: 38px;
+    padding: .4rem .55rem;
+    font-size: .7rem;
+  }
+
+  .stats-table-wrap {
+    max-height: 300px;
+  }
+
+  .stats-table {
+    min-width: 560px;
+    font-size: .68rem;
+  }
+
+  .compact-table th,
+  .compact-table td {
+    padding: .5rem .4rem;
+  }
+
+  .championship-player-link strong {
+    max-width: 118px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: .7rem;
+  }
+
+  .table-subline {
+    font-size: .58rem;
+  }
+
+  .award-heading,
+  .award-result {
+    gap: .5rem;
+  }
+
+  .award-heading p,
+  .award-result,
+  .award-status {
+    font-size: .67rem;
+  }
+
+  .candidate-button {
+    min-height: 38px;
+    padding: .45rem .55rem;
+    font-size: .72rem;
+  }
+
+  .championship-modal-backdrop {
+    align-items: flex-end;
+    padding: .4rem;
+    overflow: hidden;
+  }
+
+  .championship-modal {
+    width: 100%;
+    max-height: calc(100dvh - .8rem);
+    padding: .7rem;
+    border-radius: .9rem .9rem .7rem .7rem;
+  }
+
+  .championship-modal .section-toolbar {
+    gap: .45rem;
+    margin-bottom: .55rem;
+  }
+
+  .championship-modal .section-title {
+    font-size: .92rem;
+  }
+
+  .championship-detail-close {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+  }
+
+  .championship-team-hero,
+  .championship-player-hero {
+    gap: .55rem;
+  }
+
+  .championship-player-context,
+  .championship-player-period {
+    font-size: .66rem;
+  }
+
+  .championship-team-metrics,
+  .championship-player-metrics,
+  .championship-detail-stat-grid,
+  .championship-match-metrics {
+    gap: .4rem;
+    margin-top: .6rem;
+  }
+
+  .championship-team-metrics > div,
+  .championship-player-metric,
+  .championship-detail-stat-grid > div,
+  .championship-match-metrics > div {
+    padding: .5rem .55rem;
+  }
+
+  .championship-team-metrics span,
+  .championship-player-metric span,
+  .championship-player-metric small,
+  .championship-detail-stat-grid span,
+  .championship-match-metrics span {
+    font-size: .6rem;
+  }
+
+  .championship-team-metrics strong,
+  .championship-player-metric strong,
+  .championship-detail-stat-grid strong,
+  .championship-match-metrics strong {
+    font-size: .92rem;
+  }
+
+  .championship-detail-tabs {
+    gap: .25rem;
+    margin-top: .7rem;
+    padding-bottom: .3rem;
+  }
+
+  .championship-detail-tabs button {
+    min-height: 36px;
+    padding: .35rem .6rem;
+    font-size: .68rem;
+  }
+
+  .championship-detail-overview,
+  .championship-team-roster,
+  .championship-team-matches {
+    margin-top: .65rem;
+  }
+
+  .championship-form-panel,
+  .championship-detail-stat-grid > div,
+  .championship-event-panel,
+  .championship-lineups > div {
+    padding: .6rem;
+    border-radius: .65rem;
+  }
+
+  .championship-lineups {
+    gap: .5rem;
+  }
+
+  .championship-lineups h3 {
+    font-size: .75rem;
+  }
+
+  .championship-lineup-player,
+  .championship-team-player,
+  .championship-team-match {
+    min-height: 40px;
+    padding: .4rem .1rem;
+  }
+
+  .championship-lineup-player span,
+  .championship-team-player strong,
+  .championship-team-match strong {
+    font-size: .7rem;
+  }
+
+  .championship-lineup-player small,
+  .championship-team-player small,
+  .championship-team-match span > small {
+    font-size: .6rem;
+  }
+
+  .championship-match-hero {
+    grid-template-columns: minmax(0, 1fr) 66px minmax(0, 1fr);
+    gap: .3rem;
+  }
+
+  .championship-match-team {
+    gap: .3rem;
+    padding: .35rem;
+  }
+
+  .championship-match-team strong {
+    max-width: 100px;
+    font-size: .7rem;
+    line-height: 1.25;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .championship-match-score strong {
+    font-size: 1.35rem;
+  }
+
+  .championship-match-score span,
+  .championship-match-score small {
+    font-size: .6rem;
+  }
+
+  .championship-event-panel {
+    margin-top: .6rem;
+  }
+
+  .championship-event {
+    grid-template-columns: 30px minmax(0, 1fr);
+    gap: .4rem;
+    padding: .45rem 0;
+    font-size: .7rem;
+  }
+
+  .championship-event small {
+    font-size: .6rem;
+  }
+
+  .championship-data-note,
+  .empty-inline {
+    font-size: .68rem;
+    line-height: 1.4;
+  }
+}
+
+@media (max-width: 420px) {
+  .championship-tab {
+    flex-basis: 108px;
+    min-width: 108px;
+  }
+
+  .championship-team-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .championship-team-grid .team-card {
+    min-height: 52px;
+  }
+
+  .championship-page .panel-card {
+    padding: .62rem;
+  }
+
+  .championship-team-metrics,
+  .championship-player-metrics,
+  .championship-detail-stat-grid,
+  .championship-match-metrics {
+    gap: .3rem;
+  }
+
+  .compact-select {
+    width: 150px;
+  }
+}
 </style>
