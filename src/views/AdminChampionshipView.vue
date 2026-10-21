@@ -115,8 +115,8 @@
           </header>
           <div class="admin-match-hero"><div><strong>{{ selectedMatch.home_team.name }}</strong><small>Casa</small></div><div class="admin-match-hero-score"><strong>{{ score(selectedMatch) }}</strong><span>{{ selectedMatch.status === 'finished' ? 'Finalizada' : selectedMatch.status === 'cancelled' ? 'Cancelada' : 'Pendente' }}</span><small>{{ phaseLabel(selectedMatch.phase) }} · rodada {{ selectedMatch.round || '—' }}</small></div><div><strong>{{ selectedMatch.away_team.name }}</strong><small>Fora</small></div></div>
           <div class="admin-match-editor-grid">
-            <section class="admin-match-editor-section"><div class="form-section-heading"><div><strong>1. Participantes</strong><small>Marque quem jogou. Só eles podem receber eventos e MVP.</small></div><span class="pill-badge pill-muted">{{ participationCount(selectedMatch) }} selecionados</span></div><div class="admin-participant-list"><label v-for="player in matchPlayers(selectedMatch)" :key="player.id" class="admin-participant-option"><input v-model="matchParticipation[selectedMatch.id]" type="checkbox" :value="player.id"><span><strong>{{ player.player?.name || 'Jogador' }}</strong><small>{{ playerTeamName(selectedMatch, player) }}</small></span></label></div><div class="admin-match-editor-actions"><label class="mvp-select"><span>MVP da partida</span><select v-model.number="matchMvp[selectedMatch.id]"><option :value="0">Nenhum selecionado</option><option v-for="player in selectedMatchPlayers(selectedMatch)" :key="player.id" :value="player.id">{{ player.player?.name }}</option></select></label><button type="button" class="btn btn-outline-secondary btn-sm" :disabled="busy" @click="saveParticipation(selectedMatch)"><i class="bi bi-check2"></i> Salvar participantes</button></div></section>
-            <section class="admin-match-editor-section"><div class="form-section-heading"><div><strong>2. Eventos</strong><small>Registre gols, assistências e gols contra.</small></div><span class="pill-badge pill-info">{{ eventCount(selectedMatch) }} eventos</span></div><div class="admin-event-form"><label class="admin-event-field"><span>Equipe do lance</span><select v-model.number="eventForm[selectedMatch.id].team_id" :disabled="selectedMatch.status === 'finished' || !participationCount(selectedMatch)"><option :value="0">Selecione a equipe</option><option :value="selectedMatch.home_team.id">{{ selectedMatch.home_team.name }}</option><option :value="selectedMatch.away_team.id">{{ selectedMatch.away_team.name }}</option></select></label><label class="admin-event-field"><span>Autor do gol</span><select v-model.number="eventForm[selectedMatch.id].scorer_id" :disabled="selectedMatch.status === 'finished' || !participationCount(selectedMatch)"><option :value="0">Selecione o jogador</option><option v-for="player in eventPlayers(selectedMatch)" :key="player.id" :value="player.id">{{ player.player?.name }}</option></select></label><label class="admin-event-field"><span>Assistência <small>(opcional)</small></span><select v-model.number="eventForm[selectedMatch.id].assist_id" :disabled="selectedMatch.status === 'finished' || eventForm[selectedMatch.id].own_goal || !participationCount(selectedMatch)"><option :value="0">Sem assistência</option><option v-for="player in assistPlayers(selectedMatch)" :key="player.id" :value="player.id">{{ player.player?.name }}</option></select></label><label class="admin-event-field admin-event-field--minute"><span>Minuto</span><input v-model.number="eventForm[selectedMatch.id].minute" type="number" min="0" max="150" placeholder="Ex.: 42" :disabled="selectedMatch.status === 'finished' || !participationCount(selectedMatch)"></label><label class="own-goal-option"><input v-model="eventForm[selectedMatch.id].own_goal" type="checkbox" :disabled="selectedMatch.status === 'finished' || !participationCount(selectedMatch)"><span>Gol contra</span></label><button type="button" class="btn btn-red btn-sm" :disabled="busy || selectedMatch.status === 'finished' || !participationCount(selectedMatch)" @click="addEvent(selectedMatch)"><i class="bi bi-plus-lg"></i> Adicionar gol</button></div><div v-if="eventCount(selectedMatch)" class="admin-event-list"><div v-for="event in eventsForMatch(selectedMatch)" :key="event.id" class="admin-event-row"><div><strong>{{ event.minute ?? '—' }}' · {{ event.own_goal ? 'Gol contra' : eventPlayerName(selectedMatch, event, 'scorer') }}</strong><small v-if="!event.own_goal && event.assist_id">Assistência: {{ eventPlayerName(selectedMatch, event, 'assist') }}</small></div><div class="admin-event-row-actions"><label>Min<input v-model.number="eventDraft(event).minute" type="number" min="0" max="150" :disabled="selectedMatch.status === 'finished'"></label><label class="own-goal-option"><input v-model="eventDraft(event).own_goal" type="checkbox" :disabled="selectedMatch.status === 'finished'"><span>GC</span></label><button type="button" class="btn btn-outline-secondary btn-sm" :disabled="busy || selectedMatch.status === 'finished'" @click="updateEvent(selectedMatch, event)"><i class="bi bi-check2"></i></button><button type="button" class="btn btn-outline-danger btn-sm" :disabled="busy || selectedMatch.status === 'finished'" @click="removeEvent(selectedMatch, event)"><i class="bi bi-trash"></i></button></div></div></div><div v-else class="admin-event-empty"><i class="bi bi-bullseye" aria-hidden="true"></i><strong>Nenhum gol registrado</strong><span>Selecione os participantes para liberar o cadastro dos lances.</span><small>Partidas sem gols podem ser finalizadas como 0 × 0.</small></div></section>
+            <section class="admin-match-editor-section"><div class="form-section-heading"><div><strong>1. Participantes</strong><small>Elenco fixo: todos os jogadores dos dois times participam automaticamente.</small></div><span class="pill-badge pill-ok">{{ participationCount(selectedMatch) }} participantes</span></div><div class="admin-participant-list"><div v-for="player in matchPlayers(selectedMatch)" :key="player.id" class="admin-participant-option"><span class="admin-participant-check" aria-hidden="true"><i class="bi bi-check2"></i></span><span><strong>{{ player.player?.name || 'Jogador' }}</strong><small>{{ playerTeamName(selectedMatch, player) }}</small></span></div></div><div class="admin-match-editor-actions"><label class="mvp-select"><span>MVP da partida <small>opcional</small></span><select v-model.number="matchMvp[selectedMatch.id]" :disabled="busy || selectedMatch.status === 'finished'"><option :value="0">Selecione o MVP</option><optgroup :label="selectedMatch.home_team.name"><option v-for="player in selectedMatch.home_team.players || []" :key="`mvp-home-${player.id}`" :value="player.id">{{ player.player?.name || 'Jogador' }}</option></optgroup><optgroup :label="selectedMatch.away_team.name"><option v-for="player in selectedMatch.away_team.players || []" :key="`mvp-away-${player.id}`" :value="player.id">{{ player.player?.name || 'Jogador' }}</option></optgroup></select></label><button type="button" class="btn btn-outline-secondary btn-sm" :disabled="busy || selectedMatch.status === 'finished'" @click="saveParticipation(selectedMatch)"><i class="bi bi-check2"></i> Salvar MVP</button></div></section>
+            <section class="admin-match-editor-section"><div class="form-section-heading"><div><strong>2. Eventos</strong><small>Registre gols, assistências e gols contra.</small></div><span class="pill-badge pill-info">{{ eventCount(selectedMatch) }} eventos</span></div><div class="admin-event-form"><label class="admin-event-field"><span>Equipe do lance</span><select v-model.number="eventForm[selectedMatch.id].team_id" :disabled="selectedMatch.status === 'finished'"><option :value="0">Selecione a equipe</option><option :value="selectedMatch.home_team.id">{{ selectedMatch.home_team.name }}</option><option :value="selectedMatch.away_team.id">{{ selectedMatch.away_team.name }}</option></select></label><label class="admin-event-field"><span>Autor do gol</span><select v-model.number="eventForm[selectedMatch.id].scorer_id" :disabled="selectedMatch.status === 'finished'"><option :value="0">Selecione o jogador</option><option v-for="player in eventPlayers(selectedMatch)" :key="player.id" :value="player.id">{{ player.player?.name }}</option></select></label><label class="admin-event-field"><span>Assistência <small>(opcional)</small></span><select v-model.number="eventForm[selectedMatch.id].assist_id" :disabled="selectedMatch.status === 'finished' || eventForm[selectedMatch.id].own_goal"><option :value="0">Sem assistência</option><option v-for="player in assistPlayers(selectedMatch)" :key="player.id" :value="player.id">{{ player.player?.name }}</option></select></label><label class="admin-event-field admin-event-field--minute"><span>Minuto</span><input v-model.number="eventForm[selectedMatch.id].minute" type="number" min="0" max="150" placeholder="Ex.: 42" :disabled="selectedMatch.status === 'finished'"></label><label class="own-goal-option"><input v-model="eventForm[selectedMatch.id].own_goal" type="checkbox" :disabled="selectedMatch.status === 'finished'"><span>Gol contra</span></label><button type="button" class="btn btn-red btn-sm" :disabled="busy || selectedMatch.status === 'finished'" @click="addEvent(selectedMatch)"><i class="bi bi-plus-lg"></i> Adicionar gol</button></div><div v-if="eventCount(selectedMatch)" class="admin-event-list"><div v-for="event in eventsForMatch(selectedMatch)" :key="event.id" class="admin-event-row"><div><strong>{{ event.minute ?? '—' }}' · {{ event.own_goal ? 'Gol contra' : eventPlayerName(selectedMatch, event, 'scorer') }}</strong><small v-if="!event.own_goal && event.assist_id">Assistência: {{ eventPlayerName(selectedMatch, event, 'assist') }}</small></div><div class="admin-event-row-actions"><label>Min<input v-model.number="eventDraft(event).minute" type="number" min="0" max="150" :disabled="selectedMatch.status === 'finished'"></label><label class="own-goal-option"><input v-model="eventDraft(event).own_goal" type="checkbox" :disabled="selectedMatch.status === 'finished'"><span>GC</span></label><button type="button" class="btn btn-outline-secondary btn-sm" :disabled="busy || selectedMatch.status === 'finished'" @click="updateEvent(selectedMatch, event)"><i class="bi bi-check2"></i></button><button type="button" class="btn btn-outline-danger btn-sm" :disabled="busy || selectedMatch.status === 'finished'" @click="removeEvent(selectedMatch, event)"><i class="bi bi-trash"></i></button></div></div></div><div v-else class="admin-event-empty"><i class="bi bi-bullseye" aria-hidden="true"></i><strong>Nenhum gol registrado</strong><span>Partida sem gols? Basta finalizar como 0 × 0.</span><small>Os jogadores já estão todos registrados como participantes.</small></div></section>
           </div>
           <div class="admin-match-editor-footer"><div><span class="section-kicker">Conferência</span><strong>{{ participationCount(selectedMatch) }} participantes · {{ eventCount(selectedMatch) }} eventos</strong><small v-if="selectedMatch.odds">Odds: Casa {{ formatOdd(selectedMatch.odds.home_odd) }} · Empate {{ formatOdd(selectedMatch.odds.draw_odd) }} · Fora {{ formatOdd(selectedMatch.odds.away_odd) }}</small></div><div class="button-row"><button type="button" class="btn btn-outline-secondary btn-sm" :disabled="busy" @click="calculateOdds(selectedMatch)"><i class="bi bi-graph-up-arrow"></i> {{ selectedMatch.odds ? 'Recalcular odds' : 'Calcular odds' }}</button><button v-if="selectedMatch.status !== 'finished'" type="button" class="btn btn-red" :disabled="busy" @click="finishMatch(selectedMatch)"><i class="bi bi-check2-circle"></i> Finalizar partida</button></div></div>
           <div v-if="selectedMatch.status !== 'finished' && selectedMatch.phase !== 'group' && selectedMatch.home_score !== null && selectedMatch.away_score !== null && selectedMatch.home_score === selectedMatch.away_score" class="penalty-editor"><span>Empate na eliminatória: informe os pênaltis antes de finalizar.</span><label>Casa<input v-model.number="selectedMatch.home_penalty_score" type="number" min="0"></label><label>Fora<input v-model.number="selectedMatch.away_penalty_score" type="number" min="0"></label></div>
@@ -202,8 +202,8 @@ const eventPlayerName = (match: ChampionshipMatch, event: ChampionshipMatchEvent
   const relation = type === 'scorer' ? event.scorer : event.assist
   return relation?.name || matchPlayers(match).find((player) => player.id === playerId)?.player?.name || 'Jogador'
 }
-const selectedMatchPlayers = (match: ChampionshipMatch) => matchPlayers(match).filter((player) => (matchParticipation[match.id] || []).includes(player.id))
-const eventPlayers = (match: ChampionshipMatch) => { const form = eventForm[match.id]; const selected = new Set(matchParticipation[match.id] || []); const teamId = Number(form?.team_id || 0); if (!teamId) return matchPlayers(match).filter((player) => selected.has(player.id)); const team = match.home_team.id === teamId ? match.home_team : match.away_team; return (team.players || []).filter((player) => selected.has(player.id)) }
+const selectedMatchPlayers = (match: ChampionshipMatch) => matchPlayers(match)
+const eventPlayers = (match: ChampionshipMatch) => { const form = eventForm[match.id]; const teamId = Number(form?.team_id || 0); if (!teamId) return matchPlayers(match); const team = match.home_team.id === teamId ? match.home_team : match.away_team; return team.players || [] }
 const assistPlayers = (match: ChampionshipMatch) => eventPlayers(match).filter((player) => player.id !== eventForm[match.id].scorer_id)
 const eventDraft = (event: ChampionshipMatchEvent) => {
   if (!eventEditForm[event.id]) eventEditForm[event.id] = { minute: event.minute ?? null, own_goal: Boolean(event.own_goal) }
@@ -214,7 +214,7 @@ const playersByGroup = (group: number, teamId: number) => (details.value?.champi
 
 const initializeMatchState = (match: ChampionshipMatch) => {
   if (!(match.id in eventForm)) eventForm[match.id] = { scorer_id: 0, assist_id: 0, team_id: 0, own_goal: false, minute: null }
-  if (!(match.id in matchParticipation)) matchParticipation[match.id] = match.participations?.map((item) => item.championship_player_id) || []
+  matchParticipation[match.id] = matchPlayers(match).map((player) => player.id)
   if (!(match.id in matchMvp)) matchMvp[match.id] = match.participations?.find((item) => item.mvp)?.championship_player_id || 0
   if (!(match.id in matchEvents)) matchEvents[match.id] = [...(match.events || [])]
   matchEvents[match.id].forEach((event) => eventDraft(event))
@@ -251,8 +251,8 @@ const startChampionship = async () => { busy.value = true; try { await Champions
 const resolveTie = async () => { if (!tieBreakForm.team_a_id || !tieBreakForm.team_b_id || tieBreakForm.team_a_id === tieBreakForm.team_b_id || !tieBreakForm.winner_id) return toast.error('Selecione duas equipes diferentes e a vencedora do sorteio'); busy.value = true; try { await ChampionshipService.resolveTie(selectedId.value!, tieBreakForm); tieBreakForm.team_a_id = 0; tieBreakForm.team_b_id = 0; tieBreakForm.winner_id = 0; await loadDetails(); toast.success('Desempate registrado') } finally { busy.value = false } }
 const generatePlayoffs = async () => { busy.value = true; try { await ChampionshipService.generatePlayoffs(selectedId.value!); await loadDetails(); toast.success('Eliminatórias geradas') } finally { busy.value = false } }
 const persistParticipation = async (match: ChampionshipMatch) => {
-  const players = matchParticipation[match.id] || []
-  if (!players.length) { toast.error('Selecione ao menos um participante'); return false }
+  const players = matchPlayers(match).map((player) => player.id)
+  matchParticipation[match.id] = players
   if (matchMvp[match.id] && !players.includes(matchMvp[match.id])) { toast.error('O MVP precisa participar da partida'); return false }
   await ChampionshipService.setParticipation(match.id, players, matchMvp[match.id])
   match.participations = players.map((id) => ({ championship_player_id: id, mvp: id === matchMvp[match.id] }))
@@ -590,6 +590,20 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
   background: rgba(220, 38, 38, .1);
 }
 
+.admin-participant-check {
+  display: inline-grid;
+  flex: 0 0 18px;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  margin-top: .05rem;
+  border: 1px solid var(--red-devils);
+  border-radius: .35rem;
+  background: var(--red-devils);
+  color: #fff;
+  font-size: .72rem;
+}
+
 .admin-match-editor-actions {
   align-items: end;
 }
@@ -604,6 +618,22 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
   color: var(--text-muted);
   font-size: .7rem;
   font-weight: 700;
+}
+
+.admin-match-editor-actions .mvp-select > span small {
+  color: var(--text-muted);
+  font-size: .65rem;
+  font-weight: 500;
+  text-transform: none;
+}
+
+.admin-match-editor-actions .mvp-select select {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  border-color: rgba(220, 38, 38, .42);
+  background-color: #23252b;
+  color: var(--text-main);
 }
 
 .admin-event-form {
