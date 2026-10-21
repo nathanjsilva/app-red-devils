@@ -309,12 +309,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
 .championship-admin { container-type: inline-size; container-name: championship-admin; padding-top: 1.25rem; }
 .state-card { display: flex; align-items: center; justify-content: center; gap: .75rem; min-height: 180px; padding: 2rem; }.state-card--error { color: #fca5a5; flex-wrap: wrap; }
 .eyebrow, .section-kicker { display: block; color: var(--red-devils-hover); font-size: .7rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }.create-card { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; padding: 1.25rem; margin-bottom: 1.25rem; }.create-card h2, .admin-card h2 { margin: .25rem 0; font-size: 1.15rem; }.create-card p, .admin-card p { margin: 0; color: var(--text-muted); }.create-form { display: flex; flex: 1 1 460px; gap: .6rem; max-width: 600px; }.create-form input { flex: 1; }
-.championship-selector { display: flex; gap: .5rem; overflow-x: auto; margin-bottom: 1.25rem; padding-bottom: .25rem; }.selector-button { min-width: 150px; min-height: 52px; padding: .65rem .85rem; border: 1px solid var(--line-soft); border-radius: .8rem; background: var(--surface); color: var(--text-main); text-align: left; cursor: pointer; }.selector-button span, .selector-button small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }.selector-button small { margin-top: .25rem; color: var(--text-muted); }.selector-button.active, .selector-button:hover { border-color: var(--red-devils); background: var(--red-devils-soft); }
-.module-tabs { display: grid; grid-template-columns: repeat(5, 1fr); gap: .5rem; margin-bottom: 1.25rem; padding: .35rem; border: 1px solid var(--line-soft); border-radius: 1rem; background: rgba(255,255,255,.025); }.module-tab { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: .1rem .55rem; min-height: 58px; padding: .65rem .75rem; border: 1px solid transparent; border-radius: .75rem; background: transparent; color: var(--text-muted); text-align: left; cursor: pointer; }.module-tab i { grid-row: span 2; color: var(--red-devils-hover); font-size: 1.1rem; }.module-tab span { color: var(--text-main); font-weight: 750; font-size: .82rem; }.module-tab small { font-size: .68rem; }.module-tab.active, .module-tab:hover { border-color: var(--red-devils); background: var(--red-devils-soft); color: var(--text-main); }
+.championship-selector { display: flex; gap: .5rem; overflow-x: auto; margin-bottom: 1.25rem; padding-bottom: .25rem; }.selector-button { min-width: 150px; min-height: 52px; padding: .65rem .85rem; border: 1px solid var(--line-soft); border-radius: .8rem; background: #171717; color: #fff; text-align: left; cursor: pointer; }.selector-button span, .selector-button small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }.selector-button small { margin-top: .25rem; color: #d4d4d8; }.selector-button.active, .selector-button:hover { border-color: var(--red-devils); background: var(--red-devils); color: #fff; }
+.module-tabs { display: grid; grid-template-columns: repeat(5, 1fr); gap: .5rem; margin-bottom: 1.25rem; padding: .35rem; border: 1px solid var(--line-soft); border-radius: 1rem; background: rgba(255,255,255,.025); }.module-tab { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: .1rem .55rem; min-height: 58px; padding: .65rem .75rem; border: 1px solid #3f3f46; border-radius: .75rem; background: #171717; color: #fff; text-align: left; cursor: pointer; }.module-tab i { grid-row: span 2; color: #fff; font-size: 1.1rem; }.module-tab span { color: #fff; font-weight: 750; font-size: .82rem; }.module-tab small { color: #d4d4d8; font-size: .68rem; }.module-tab.active, .module-tab:hover { border-color: var(--red-devils); background: var(--red-devils); color: #fff; }
 .overview-grid { display: grid; grid-template-columns: minmax(240px, 1.7fr) repeat(3, 1fr); gap: .75rem; margin-bottom: 1.25rem; }.overview-main, .metric-card { min-height: 116px; padding: 1rem; }.overview-main { display: flex; align-items: center; justify-content: space-between; }.overview-main h2 { margin: .2rem 0 .55rem; }.overview-icon { color: var(--red-devils-hover); font-size: 2rem; }.metric-card { border: 1px solid var(--line-soft); border-radius: var(--radius-md); background: var(--surface); }.metric-card > span { color: var(--text-muted); font-size: .75rem; text-transform: uppercase; }.metric-card strong { display: block; margin-top: .3rem; font-size: 1.65rem; }.metric-card strong small { color: var(--text-muted); font-size: .85rem; }.progress-track { height: 4px; margin-top: .8rem; overflow: hidden; border-radius: 9px; background: var(--line-soft); }.progress-track span { display: block; height: 100%; border-radius: inherit; background: var(--red-devils); }
 .admin-grid { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 1.25rem; }.admin-card { min-width: 0; margin-bottom: 1.25rem; padding: 1.15rem; }.card-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: .55rem; }.card-heading > i { color: var(--red-devils-hover); font-size: 1.35rem; }.admin-card label { display: block; margin: .85rem 0 .35rem; color: var(--text-muted); font-size: .75rem; font-weight: 700; }.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; }.championship-admin input, .championship-admin select { width: 100%; min-height: 44px; padding: .65rem .75rem; border: 1px solid var(--line-strong); border-radius: .7rem; background: var(--surface-strong); color: var(--text-main); }.full { width: 100%; margin-top: 1rem; }.helper-text { color: var(--text-muted); font-size: .75rem; }
 .user-link-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(160px, .8fr); align-items: center; gap: .75rem; padding: .7rem 0; border-bottom: 1px solid var(--line-soft); }.user-link-row strong, .user-link-row small { display: block; }.user-link-row small { color: var(--text-muted); }.enrolled-card { margin-top: 1.25rem; }.player-filters { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: .65rem; margin: 1rem 0; padding: 1rem; border: 1px solid var(--line-soft); border-radius: .85rem; background: rgba(255,255,255,.025); }.player-filters label { margin: 0; }.enrolled-list { display: grid; gap: .35rem; }.enrolled-player { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: .75rem; padding: .75rem; border-bottom: 1px solid var(--line-soft); }.player-mark { display: grid; place-items: center; width: 34px; height: 34px; border-radius: .65rem; background: var(--red-devils-soft); color: var(--red-devils-hover); }.player-main strong, .player-main small { display: block; }.player-main small { margin-top: .15rem; color: var(--text-muted); }.stone-badge { color: var(--text-muted); font-size: .78rem; white-space: nowrap; }
-.registration-type-switch { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; margin: .85rem 0; }.registration-type-switch button { min-height: 40px; border: 1px solid var(--line-soft); border-radius: .6rem; background: transparent; color: var(--text-muted); cursor: pointer; }.registration-type-switch button.active, .registration-type-switch button:hover { border-color: var(--red-devils); background: var(--red-devils-soft); color: var(--text-main); }.form-label-static { display: block; margin-bottom: .35rem; color: var(--text-muted); font-size: .72rem; font-weight: 400; }.goalkeeper-roster { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }.goalkeeper-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: .6rem; padding: .65rem; border: 1px solid var(--line-soft); border-radius: .7rem; }.goalkeeper-row strong, .goalkeeper-row small { display: block; }.goalkeeper-row small { margin-top: .15rem; color: var(--text-muted); font-size: .72rem; }
+.registration-type-switch { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; margin: .85rem 0; }.registration-type-switch button { height: 42px; min-height: 42px; border: 1px solid #3f3f46; border-radius: .6rem; background: #171717; color: #fff; cursor: pointer; }.registration-type-switch button.active, .registration-type-switch button:hover { border-color: var(--red-devils); background: var(--red-devils); color: #fff; }.form-label-static { display: block; margin-bottom: .35rem; color: var(--text-muted); font-size: .72rem; font-weight: 400; }.goalkeeper-roster { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }.goalkeeper-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: .6rem; padding: .65rem; border: 1px solid var(--line-soft); border-radius: .7rem; }.goalkeeper-row strong, .goalkeeper-row small { display: block; }.goalkeeper-row small { margin-top: .15rem; color: var(--text-muted); font-size: .72rem; }
 .team-list { display: grid; gap: .75rem; margin-top: 1rem; }.team-assignment-card { padding: 1rem; border: 1px solid var(--line-soft); border-radius: 1rem; background: rgba(255,255,255,.025); }.team-assignment-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }.team-identity { display: flex; align-items: center; gap: .75rem; min-width: 0; }.team-identity h3 { margin: 0; font-size: 1rem; }.team-identity span { display: block; color: var(--text-muted); font-size: .75rem; }.team-crest { display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 44px; overflow: hidden; border: 1px solid var(--line-strong); border-radius: .8rem; background: var(--red-devils-soft); color: var(--red-devils-hover); font-weight: 800; }.team-crest img { width: 100%; height: 100%; object-fit: cover; }.team-name-input { width: min(260px, 100%) !important; min-height: 34px !important; padding: .35rem .5rem !important; font-weight: 700; }.team-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .4rem; }.crest-upload { position: relative; display: inline-flex !important; align-items: center; gap: .4rem; margin: 0 !important; padding: .5rem .65rem; border: 1px solid var(--line-soft); border-radius: .6rem; cursor: pointer; }.crest-upload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }.stone-slots { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .55rem; }.stone-slot span { display: block; margin-bottom: .3rem; font-size: .7rem; }.form-actions, .match-meta, .match-tools { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-top: 1rem; }.tie-breaker-card { display: grid; gap: .2rem; }
 .goalkeeper-slot { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-top: .8rem; padding: .75rem; border: 1px solid rgba(220, 38, 38, .35); border-radius: .75rem; background: rgba(220, 38, 38, .08); }.goalkeeper-slot strong { display: block; margin-top: .2rem; }.goalkeeper-slot > i { color: var(--red-devils-hover); font-size: 1.3rem; }
 .action-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem; }.workflow-action { display: flex; gap: .6rem; min-height: 78px; padding: .8rem; border: 1px solid var(--line-soft); border-radius: .8rem; background: transparent; color: var(--text-main); text-align: left; cursor: pointer; }.workflow-action i { color: var(--red-devils-hover); }.workflow-action span { display: grid; gap: .25rem; }.workflow-action small { color: var(--text-muted); font-size: .7rem; }.workflow-action:disabled { opacity: .4; cursor: not-allowed; }.admin-match { padding: 1rem 0; border-bottom: 1px solid var(--line-soft); }.match-teams { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: .75rem; font-weight: 700; }.match-teams span:last-child { text-align: right; }.match-teams strong { color: var(--red-devils-hover); }.penalty-editor { display: flex; align-items: center; flex-wrap: wrap; gap: .65rem; margin-top: .75rem; padding: .65rem; border: 1px solid rgba(250, 204, 21, .3); border-radius: .7rem; color: #facc15; font-size: .78rem; }.penalty-editor label { display: inline-flex; align-items: center; gap: .3rem; margin: 0; }.penalty-editor input { width: 58px !important; min-height: 34px !important; }.match-tools select { flex: 1; }.odds-summary { color: var(--text-muted); font-size: .75rem; }.participation-box { margin-top: .85rem; padding: .75rem; border: 1px solid var(--line-soft); border-radius: .75rem; }.form-section-heading { display: flex; justify-content: space-between; gap: .75rem; margin-bottom: .5rem; }.form-section-heading small { color: var(--text-muted); font-size: .7rem; }.participant-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem .7rem; }.participant-option { display: flex; align-items: center; gap: .35rem; margin: 0 !important; font-size: .75rem; }.participant-option input { width: auto !important; min-height: auto !important; }.mvp-select { display: flex; align-items: center; gap: .5rem; margin: 0 !important; }.mvp-select select { width: auto; min-width: 180px; }.event-form { display: flex; flex-wrap: wrap; gap: .55rem; margin-top: .75rem; padding: .75rem; border: 1px solid var(--line-soft); border-radius: .75rem; }.event-form select { flex: 1 1 160px; }.event-form label { display: inline-flex; align-items: center; gap: .35rem; margin: 0; white-space: nowrap; }.event-form input { width: auto; min-height: auto; }.minute-field { flex-direction: column; align-items: stretch !important; }.minute-field input { width: 70px !important; min-height: 36px !important; }.own-goal-option { padding-top: .75rem; }.button-row { display: flex; gap: .5rem; }.award-row { display: flex; justify-content: space-between; gap: 1rem; padding: .8rem 0; border-bottom: 1px solid var(--line-soft); }.award-row small { display: block; color: var(--text-muted); }.empty-state { display: flex; flex-direction: column; align-items: center; gap: .5rem; padding: 3rem 1rem; text-align: center; color: var(--text-muted); }.empty-state i { color: var(--red-devils-hover); font-size: 2rem; }.empty-state h2 { color: var(--text-main); }.empty-inline { padding: .8rem 0; color: var(--text-muted); font-size: .85rem; }.spin { animation: spin 1s linear infinite; } @keyframes spin { to { transform: rotate(360deg); } }
@@ -458,5 +458,192 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
   .admin-match-list { max-height: 390px; }
   .admin-match-summary-main strong { white-space: normal; line-height: 1.35; }
   .admin-match-summary-meta small { font-size: .64rem; }
+}
+/* Ações do painel: contraste único e área de toque consistente. */
+.championship-admin .selector-button,
+.championship-admin .module-tab,
+.championship-admin .registration-type-switch button,
+.championship-admin .workflow-action,
+.championship-admin .crest-upload,
+.championship-admin .admin-match-summary,
+.championship-admin-modal .admin-modal-close {
+  background: #171717;
+  border-color: #3f3f46;
+  color: #fff;
+}
+
+.championship-admin .selector-button small,
+.championship-admin .module-tab small,
+.championship-admin .workflow-action small {
+  color: #d4d4d8;
+}
+
+.championship-admin .selector-button.active,
+.championship-admin .selector-button:hover,
+.championship-admin .module-tab.active,
+.championship-admin .module-tab:hover,
+.championship-admin .registration-type-switch button.active,
+.championship-admin .registration-type-switch button:hover,
+.championship-admin .workflow-action:hover:not(:disabled),
+.championship-admin .crest-upload:hover,
+.championship-admin .admin-match-summary:hover,
+.championship-admin .admin-match-summary:focus-visible {
+  background: var(--red-devils);
+  border-color: var(--red-devils);
+  color: #fff;
+}
+
+.championship-admin .workflow-action i,
+.championship-admin .module-tab i {
+  color: #fff;
+}
+
+.championship-admin .crest-upload {
+  height: 42px;
+  min-height: 42px;
+  padding: 0 .8rem;
+  justify-content: center;
+  font-size: .8rem;
+  font-weight: 700;
+}
+.championship-admin-modal {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.championship-admin-modal .section-toolbar > div {
+  min-width: 0;
+}
+
+.championship-admin-modal .admin-modal-close {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  flex: 0 0 42px;
+  background: #171717;
+  color: #fff;
+}
+
+@media (max-width: 800px) {
+  .admin-match-editor-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-match-summary {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .admin-match-summary-meta {
+    justify-items: start;
+  }
+
+  .admin-match-summary > i {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}
+
+/* O modal é teleportado para o body; estas regras precisam ser por viewport,
+   não por container, para funcionar no celular. */
+@media (max-width: 560px) {
+  .championship-admin-modal-backdrop {
+    align-items: flex-end;
+    padding: .5rem;
+    overflow: hidden;
+  }
+
+  .championship-admin-modal {
+    width: 100%;
+    max-height: calc(100dvh - 1rem);
+    padding: .85rem;
+    border-radius: 1rem 1rem .75rem .75rem;
+  }
+
+  .championship-admin-modal > .section-toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: .6rem;
+  }
+
+  .championship-admin-modal > .section-toolbar .admin-modal-close {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .admin-match-hero {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: .45rem;
+    padding: .75rem;
+  }
+
+  .admin-match-hero strong {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    font-size: .82rem;
+  }
+
+  .admin-match-hero-score strong {
+    font-size: 1.35rem;
+  }
+
+  .admin-participant-list {
+    grid-template-columns: 1fr;
+    max-height: 220px;
+  }
+
+  .admin-event-list {
+    max-height: 240px;
+  }
+
+  .admin-event-form {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-event-form > select,
+  .admin-event-form > .minute-field,
+  .admin-event-form > .own-goal-option,
+  .admin-event-form > .btn {
+    width: 100%;
+  }
+
+  .admin-event-form .btn {
+    align-self: stretch;
+  }
+
+  .admin-match-editor-actions,
+  .admin-match-editor-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-match-editor-actions .btn,
+  .admin-match-editor-footer .btn {
+    width: 100%;
+  }
+
+  .admin-match-editor-footer .button-row {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .admin-event-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-event-row > div:first-child {
+    width: 100%;
+  }
+
+  .admin-event-row-actions {
+    width: 100%;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
 }
 </style>
