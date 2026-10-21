@@ -65,6 +65,17 @@
               </tbody>
             </table>
           </div>
+          <div class="standings-mobile-list" aria-label="Classificação resumida para celular">
+            <button v-for="row in details.standings" :key="`mobile-standing-${row.team_id}`" type="button" class="standings-mobile-card" @click="openChampionshipTeamById(row.team_id)">
+              <div class="standing-mobile-head">
+                <span class="standing-mobile-position">{{ row.position }}</span>
+                <span class="standing-mobile-team"><span class="team-crest team-crest--table"><img v-if="teamForStanding(row.team_id)?.crest_url" :src="teamForStanding(row.team_id)?.crest_url || ''" :alt="'Brasão do ' + row.name"><span v-else>{{ initials(row.name) }}</span></span><strong>{{ row.name }}</strong></span>
+                <span class="standing-mobile-points"><strong>{{ row.points }}</strong><small>Pts</small></span>
+              </div>
+              <div class="standing-mobile-stats"><span><strong>{{ row.played }}</strong><small>PJ</small></span><span><strong>{{ row.wins }}</strong><small>Vit</small></span><span><strong>{{ row.draws }}</strong><small>Emp</small></span><span><strong>{{ row.losses }}</strong><small>Der</small></span><span><strong>{{ row.goal_difference > 0 ? '+' + row.goal_difference : row.goal_difference }}</strong><small>SG</small></span></div>
+              <div class="standing-mobile-footer"><span>Últimos jogos</span><div class="form-results" :aria-label="'Últimos resultados de ' + row.name"><span v-for="(result, index) in recentResults(row.team_id)" :key="`mobile-${row.team_id}-${index}`" class="result-dot" :class="'result-' + result">{{ resultSymbol(result) }}</span><span v-if="!recentResults(row.team_id).length" class="result-empty">—</span></div><i class="bi bi-chevron-right" aria-hidden="true"></i></div>
+            </button>
+          </div>
           <div class="table-legend"><span><i class="qualification-dot"></i> Classificado para as eliminatórias</span><span><b class="legend-win">V</b> Vitória</span><span><b class="legend-draw">E</b> Empate</span><span><b class="legend-loss">D</b> Derrota</span></div>
           <p class="table-note">Desempate: pontos, vitórias, saldo, gols marcados, confronto direto e sorteio registrado.</p>
         </article>
@@ -100,6 +111,12 @@
         <article class="surface-card panel-card">
           <div class="section-toolbar"><div><span class="eyebrow">Estatísticas</span><h2 class="section-title mb-0">Desempenho individual</h2></div><span class="text-muted small">Somente partidas válidas e finalizadas</span></div>
           <div class="table-wrap stats-table-wrap"><table class="data-table compact-table stats-table"><thead><tr><th>Jogador</th><th>J</th><th>V</th><th>G</th><th>A</th><th>PG</th><th>MVP</th><th v-if="hasGoalkeepers">GS / SG</th></tr></thead><tbody><tr v-for="row in statistics" :key="row.participant_id"><td><button type="button" class="championship-player-link" @click="openChampionshipPlayer(row)"><strong>{{ row.player.name }}</strong><small class="table-subline">{{ row.position === 'goalkeeper' ? 'Goleiro' : 'Linha' }}</small></button></td><td>{{ row.played }}</td><td>{{ row.wins }}</td><td>{{ row.goals }}</td><td>{{ row.assists }}</td><td>{{ row.goal_participations }}</td><td>{{ row.mvp }}</td><td v-if="hasGoalkeepers">{{ row.position === 'goalkeeper' ? row.goals_conceded + ' / ' + row.clean_sheets : '—' }}</td></tr></tbody></table></div>
+          <div class="stats-mobile-list" aria-label="Estatísticas individuais para celular">
+            <button v-for="row in statistics" :key="`mobile-stat-${row.participant_id}`" type="button" class="stats-mobile-card" @click="openChampionshipPlayer(row)">
+              <div class="stats-mobile-head"><span class="player-mark"><i :class="row.position === 'goalkeeper' ? 'bi bi-shield-fill' : 'bi bi-person-fill'"></i></span><span><strong>{{ row.player.name }}</strong><small>{{ row.position === 'goalkeeper' ? 'Goleiro' : 'Jogador de linha' }}</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></div>
+              <div class="stats-mobile-grid"><span><strong>{{ row.played }}</strong><small>Jogos</small></span><span><strong>{{ row.wins }}</strong><small>Vitórias</small></span><span><strong>{{ row.goals }}</strong><small>Gols</small></span><span><strong>{{ row.assists }}</strong><small>Assist.</small></span><span><strong>{{ row.goal_participations }}</strong><small>Part. gols</small></span><span><strong>{{ row.mvp }}</strong><small>MVP</small></span><span v-if="hasGoalkeepers"><strong>{{ row.position === 'goalkeeper' ? row.goals_conceded : '—' }}</strong><small>{{ row.position === 'goalkeeper' ? 'GS' : 'GS' }}</small></span><span v-if="hasGoalkeepers"><strong>{{ row.position === 'goalkeeper' ? row.clean_sheets : '—' }}</strong><small>SG</small></span></div>
+            </button>
+          </div>
           <div v-if="!statistics.length" class="empty-inline">As estatísticas aparecerão após os jogos finalizados.</div>
         </article>
       </section>
@@ -1241,6 +1258,279 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleChampionshipKe
 
   .compact-select {
     width: 150px;
+  }
+}
+
+.championship-ranking-list {
+  display: grid;
+  max-height: 370px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  scrollbar-color: var(--red-devils) var(--surface-strong);
+}
+
+.championship-ranking-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .65rem;
+  width: 100%;
+  min-height: 44px;
+  padding: .5rem .15rem;
+  border: 0;
+  border-bottom: 1px solid var(--line-soft);
+  background: transparent;
+  color: var(--text-main);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.championship-ranking-row:last-child {
+  border-bottom: 0;
+}
+
+.championship-ranking-row:hover,
+.championship-ranking-row:focus-visible {
+  color: var(--red-devils-hover);
+}
+
+.championship-ranking-player {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: .5rem;
+}
+
+.championship-ranking-position {
+  display: grid;
+  flex: 0 0 24px;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--red-devils-soft);
+  color: var(--red-devils-hover);
+  font-size: .68rem;
+}
+
+.championship-ranking-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: .78rem;
+}
+
+.championship-ranking-value {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  font-size: .7rem;
+  white-space: nowrap;
+}
+
+.standings-mobile-list,
+.stats-mobile-list {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .championship-ranking-list {
+    max-height: 260px;
+  }
+
+  .standings-mobile-list,
+  .stats-mobile-list {
+    display: grid;
+    gap: .45rem;
+  }
+
+  .standings-mobile-card,
+  .stats-mobile-card {
+    display: grid;
+    width: 100%;
+    min-width: 0;
+    padding: .65rem;
+    border: 1px solid var(--line-soft);
+    border-radius: .75rem;
+    background: rgba(255, 255, 255, .025);
+    color: var(--text-main);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .standings-mobile-card:hover,
+  .standings-mobile-card:focus-visible,
+  .stats-mobile-card:hover,
+  .stats-mobile-card:focus-visible {
+    border-color: var(--red-devils);
+    background: var(--red-devils-soft);
+  }
+
+  .standing-mobile-head,
+  .stats-mobile-head {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    gap: .5rem;
+  }
+
+  .standing-mobile-position {
+    display: grid;
+    flex: 0 0 24px;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--red-devils-soft);
+    color: var(--red-devils-hover);
+    font-size: .7rem;
+    font-weight: 800;
+  }
+
+  .standing-mobile-team,
+  .stats-mobile-head > span:not(.player-mark) {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    flex: 1;
+    gap: .45rem;
+  }
+
+  .standing-mobile-team strong,
+  .stats-mobile-head strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: .75rem;
+  }
+
+  .standing-mobile-points {
+    display: grid;
+    justify-items: end;
+    flex: 0 0 auto;
+  }
+
+  .standing-mobile-points strong {
+    color: var(--red-devils-hover);
+    font-size: 1.05rem;
+    line-height: 1;
+  }
+
+  .standing-mobile-points small,
+  .standing-mobile-team small {
+    color: var(--text-muted);
+    font-size: .58rem;
+  }
+
+  .standing-mobile-stats,
+  .stats-mobile-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: .25rem;
+    margin-top: .55rem;
+    padding-top: .5rem;
+    border-top: 1px solid var(--line-soft);
+  }
+
+  .standing-mobile-stats span,
+  .stats-mobile-grid span {
+    display: grid;
+    justify-items: center;
+    gap: .1rem;
+    min-width: 0;
+  }
+
+  .standing-mobile-stats strong,
+  .stats-mobile-grid strong {
+    font-size: .72rem;
+    line-height: 1;
+  }
+
+  .standing-mobile-stats small,
+  .stats-mobile-grid small {
+    overflow: hidden;
+    color: var(--text-muted);
+    font-size: .55rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .standing-mobile-footer {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    margin-top: .5rem;
+    color: var(--text-muted);
+    font-size: .58rem;
+  }
+
+  .standing-mobile-footer .form-results {
+    margin-left: auto;
+  }
+
+  .standing-mobile-footer .result-dot {
+    width: 18px;
+    height: 18px;
+    font-size: .52rem;
+  }
+
+  .standing-mobile-footer > i,
+  .stats-mobile-head > i {
+    color: var(--red-devils-hover);
+    font-size: .72rem;
+  }
+
+  .stats-mobile-card {
+    gap: .5rem;
+  }
+
+  .stats-mobile-head .player-mark {
+    display: grid;
+    flex: 0 0 30px;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: .55rem;
+    background: var(--red-devils-soft);
+    color: var(--red-devils-hover);
+    font-size: .75rem;
+  }
+
+  .stats-mobile-head > span:not(.player-mark) {
+    display: grid;
+    align-items: start;
+    gap: .1rem;
+  }
+
+  .stats-mobile-head small {
+    color: var(--text-muted);
+    font-size: .6rem;
+  }
+
+  .stats-mobile-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-top: 0;
+    padding-top: .5rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .standings-mobile-card,
+  .stats-mobile-card {
+    padding: .55rem;
+  }
+
+  .standing-mobile-stats {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .stats-mobile-grid {
+    gap: .15rem;
+  }
+
+  .stats-mobile-grid small {
+    font-size: .5rem;
   }
 }
 </style>
