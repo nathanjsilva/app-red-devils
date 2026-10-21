@@ -41,6 +41,8 @@ export interface ChampionshipMatchEvent {
   id: number
   minute?: number | null
   team_id?: number | null
+  scorer_id?: number | null
+  assist_id?: number | null
   own_goal?: boolean
   scorer?: { id: number; name: string } | null
   assist?: { id: number; name: string } | null
