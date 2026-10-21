@@ -104,12 +104,19 @@
 
     <Teleport to="body">
       <div v-if="selectedMatch" class="championship-admin-modal-backdrop" role="presentation" @click.self="closeMatchEditor">
-        <section class="championship-admin-modal" role="dialog" aria-modal="true" aria-labelledby="admin-match-title">
-          <div class="section-toolbar"><div><span class="section-kicker">Súmula digital</span><h2 id="admin-match-title">{{ selectedMatch.home_team.name }} x {{ selectedMatch.away_team.name }}</h2><p class="card-description">Registre o jogo em três etapas: participantes, eventos e finalização.</p></div><button type="button" class="admin-modal-close" aria-label="Fechar súmula" @click="closeMatchEditor"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div>
+        <section ref="matchModalRef" class="championship-admin-modal" role="dialog" aria-modal="true" aria-labelledby="admin-match-title">
+          <header class="admin-modal-header">
+            <div>
+              <span class="section-kicker">Súmula digital</span>
+              <h2 id="admin-match-title">{{ selectedMatch.home_team.name }} <span aria-hidden="true">×</span> {{ selectedMatch.away_team.name }}</h2>
+              <p class="card-description">Registre participantes, lances e o resultado desta partida.</p>
+            </div>
+            <button type="button" class="admin-modal-close" aria-label="Fechar súmula" @click="closeMatchEditor"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+          </header>
           <div class="admin-match-hero"><div><strong>{{ selectedMatch.home_team.name }}</strong><small>Casa</small></div><div class="admin-match-hero-score"><strong>{{ score(selectedMatch) }}</strong><span>{{ selectedMatch.status === 'finished' ? 'Finalizada' : selectedMatch.status === 'cancelled' ? 'Cancelada' : 'Pendente' }}</span><small>{{ phaseLabel(selectedMatch.phase) }} · rodada {{ selectedMatch.round || '—' }}</small></div><div><strong>{{ selectedMatch.away_team.name }}</strong><small>Fora</small></div></div>
           <div class="admin-match-editor-grid">
-            <section class="admin-match-editor-section"><div class="form-section-heading"><div><strong>1. Participantes</strong><small>Marque quem jogou. Só eles podem receber eventos e MVP.</small></div><span class="pill-badge pill-muted">{{ participationCount(selectedMatch) }} selecionados</span></div><div class="admin-participant-list"><label v-for="player in matchPlayers(selectedMatch)" :key="player.id" class="admin-participant-option"><input v-model="matchParticipation[selectedMatch.id]" type="checkbox" :value="player.id"><span><strong>{{ player.player?.name || 'Jogador' }}</strong><small>{{ playerTeamName(selectedMatch, player) }}</small></span></label></div><div class="admin-match-editor-actions"><label class="mvp-select">MVP<select v-model.number="matchMvp[selectedMatch.id]"><option :value="0">Nenhum selecionado</option><option v-for="player in selectedMatchPlayers(selectedMatch)" :key="player.id" :value="player.id">{{ player.player?.name }}</option></select></label><button type="button" class="btn btn-outline-secondary btn-sm" :disabled="busy" @click="saveParticipation(selectedMatch)"><i class="bi bi-check2"></i> Salvar participantes</button></div></section>
-            <section class="admin-match-editor-section"><div class="form-section-heading"><div><strong>2. Eventos</strong><small>Gol, assistência e gol contra atualizam o placar automaticamente.</small></div><span class="pill-badge pill-info">{{ eventCount(selectedMatch) }} eventos</span></div><div class="admin-event-form"><select v-model.number="eventForm[selectedMatch.id].team_id" :disabled="selectedMatch.status === 'finished'"><option :value="0">Equipe do lance</option><option :value="selectedMatch.home_team.id">{{ selectedMatch.home_team.name }}</option><option :value="selectedMatch.away_team.id">{{ selectedMatch.away_team.name }}</option></select><select v-model.number="eventForm[selectedMatch.id].scorer_id" :disabled="selectedMatch.status === 'finished'"><option :value="0">Autor do gol</option><option v-for="player in eventPlayers(selectedMatch)" :key="player.id" :value="player.id">{{ player.player?.name }}</option></select><select v-model.number="eventForm[selectedMatch.id].assist_id" :disabled="selectedMatch.status === 'finished' || eventForm[selectedMatch.id].own_goal"><option :value="0">Assistência opcional</option><option v-for="player in assistPlayers(selectedMatch)" :key="player.id" :value="player.id">{{ player.player?.name }}</option></select><label class="minute-field">Minuto<input v-model.number="eventForm[selectedMatch.id].minute" type="number" min="0" max="150" :disabled="selectedMatch.status === 'finished'"></label><label class="own-goal-option"><input v-model="eventForm[selectedMatch.id].own_goal" type="checkbox" :disabled="selectedMatch.status === 'finished'"> Gol contra</label><button type="button" class="btn btn-red btn-sm" :disabled="busy || selectedMatch.status === 'finished'" @click="addEvent(selectedMatch)"><i class="bi bi-plus-lg"></i> Adicionar gol</button></div><div v-if="eventCount(selectedMatch)" class="admin-event-list"><div v-for="event in eventsForMatch(selectedMatch)" :key="event.id" class="admin-event-row"><div><strong>{{ event.minute ?? '—' }}' · {{ event.own_goal ? 'Gol contra' : eventPlayerName(selectedMatch, event, 'scorer') }}</strong><small v-if="!event.own_goal && event.assist_id">Assistência: {{ eventPlayerName(selectedMatch, event, 'assist') }}</small></div><div class="admin-event-row-actions"><label>Min<input v-model.number="eventDraft(event).minute" type="number" min="0" max="150" :disabled="selectedMatch.status === 'finished'"></label><label class="own-goal-option"><input v-model="eventDraft(event).own_goal" type="checkbox" :disabled="selectedMatch.status === 'finished'"> GC</label><button type="button" class="btn btn-outline-secondary btn-sm" :disabled="busy || selectedMatch.status === 'finished'" @click="updateEvent(selectedMatch, event)"><i class="bi bi-check2"></i></button><button type="button" class="btn btn-outline-danger btn-sm" :disabled="busy || selectedMatch.status === 'finished'" @click="removeEvent(selectedMatch, event)"><i class="bi bi-trash"></i></button></div></div></div><div v-else class="empty-inline">Nenhum gol registrado. Partidas sem gols podem ser finalizadas como 0 × 0.</div></section>
+            <section class="admin-match-editor-section"><div class="form-section-heading"><div><strong>1. Participantes</strong><small>Marque quem jogou. Só eles podem receber eventos e MVP.</small></div><span class="pill-badge pill-muted">{{ participationCount(selectedMatch) }} selecionados</span></div><div class="admin-participant-list"><label v-for="player in matchPlayers(selectedMatch)" :key="player.id" class="admin-participant-option"><input v-model="matchParticipation[selectedMatch.id]" type="checkbox" :value="player.id"><span><strong>{{ player.player?.name || 'Jogador' }}</strong><small>{{ playerTeamName(selectedMatch, player) }}</small></span></label></div><div class="admin-match-editor-actions"><label class="mvp-select"><span>MVP da partida</span><select v-model.number="matchMvp[selectedMatch.id]"><option :value="0">Nenhum selecionado</option><option v-for="player in selectedMatchPlayers(selectedMatch)" :key="player.id" :value="player.id">{{ player.player?.name }}</option></select></label><button type="button" class="btn btn-outline-secondary btn-sm" :disabled="busy" @click="saveParticipation(selectedMatch)"><i class="bi bi-check2"></i> Salvar participantes</button></div></section>
+            <section class="admin-match-editor-section"><div class="form-section-heading"><div><strong>2. Eventos</strong><small>Registre gols, assistências e gols contra.</small></div><span class="pill-badge pill-info">{{ eventCount(selectedMatch) }} eventos</span></div><div class="admin-event-form"><label class="admin-event-field"><span>Equipe do lance</span><select v-model.number="eventForm[selectedMatch.id].team_id" :disabled="selectedMatch.status === 'finished' || !participationCount(selectedMatch)"><option :value="0">Selecione a equipe</option><option :value="selectedMatch.home_team.id">{{ selectedMatch.home_team.name }}</option><option :value="selectedMatch.away_team.id">{{ selectedMatch.away_team.name }}</option></select></label><label class="admin-event-field"><span>Autor do gol</span><select v-model.number="eventForm[selectedMatch.id].scorer_id" :disabled="selectedMatch.status === 'finished' || !participationCount(selectedMatch)"><option :value="0">Selecione o jogador</option><option v-for="player in eventPlayers(selectedMatch)" :key="player.id" :value="player.id">{{ player.player?.name }}</option></select></label><label class="admin-event-field"><span>Assistência <small>(opcional)</small></span><select v-model.number="eventForm[selectedMatch.id].assist_id" :disabled="selectedMatch.status === 'finished' || eventForm[selectedMatch.id].own_goal || !participationCount(selectedMatch)"><option :value="0">Sem assistência</option><option v-for="player in assistPlayers(selectedMatch)" :key="player.id" :value="player.id">{{ player.player?.name }}</option></select></label><label class="admin-event-field admin-event-field--minute"><span>Minuto</span><input v-model.number="eventForm[selectedMatch.id].minute" type="number" min="0" max="150" placeholder="Ex.: 42" :disabled="selectedMatch.status === 'finished' || !participationCount(selectedMatch)"></label><label class="own-goal-option"><input v-model="eventForm[selectedMatch.id].own_goal" type="checkbox" :disabled="selectedMatch.status === 'finished' || !participationCount(selectedMatch)"><span>Gol contra</span></label><button type="button" class="btn btn-red btn-sm" :disabled="busy || selectedMatch.status === 'finished' || !participationCount(selectedMatch)" @click="addEvent(selectedMatch)"><i class="bi bi-plus-lg"></i> Adicionar gol</button></div><div v-if="eventCount(selectedMatch)" class="admin-event-list"><div v-for="event in eventsForMatch(selectedMatch)" :key="event.id" class="admin-event-row"><div><strong>{{ event.minute ?? '—' }}' · {{ event.own_goal ? 'Gol contra' : eventPlayerName(selectedMatch, event, 'scorer') }}</strong><small v-if="!event.own_goal && event.assist_id">Assistência: {{ eventPlayerName(selectedMatch, event, 'assist') }}</small></div><div class="admin-event-row-actions"><label>Min<input v-model.number="eventDraft(event).minute" type="number" min="0" max="150" :disabled="selectedMatch.status === 'finished'"></label><label class="own-goal-option"><input v-model="eventDraft(event).own_goal" type="checkbox" :disabled="selectedMatch.status === 'finished'"><span>GC</span></label><button type="button" class="btn btn-outline-secondary btn-sm" :disabled="busy || selectedMatch.status === 'finished'" @click="updateEvent(selectedMatch, event)"><i class="bi bi-check2"></i></button><button type="button" class="btn btn-outline-danger btn-sm" :disabled="busy || selectedMatch.status === 'finished'" @click="removeEvent(selectedMatch, event)"><i class="bi bi-trash"></i></button></div></div></div><div v-else class="admin-event-empty"><i class="bi bi-bullseye" aria-hidden="true"></i><strong>Nenhum gol registrado</strong><span>Selecione os participantes para liberar o cadastro dos lances.</span><small>Partidas sem gols podem ser finalizadas como 0 × 0.</small></div></section>
           </div>
           <div class="admin-match-editor-footer"><div><span class="section-kicker">Conferência</span><strong>{{ participationCount(selectedMatch) }} participantes · {{ eventCount(selectedMatch) }} eventos</strong><small v-if="selectedMatch.odds">Odds: Casa {{ formatOdd(selectedMatch.odds.home_odd) }} · Empate {{ formatOdd(selectedMatch.odds.draw_odd) }} · Fora {{ formatOdd(selectedMatch.odds.away_odd) }}</small></div><div class="button-row"><button type="button" class="btn btn-outline-secondary btn-sm" :disabled="busy" @click="calculateOdds(selectedMatch)"><i class="bi bi-graph-up-arrow"></i> {{ selectedMatch.odds ? 'Recalcular odds' : 'Calcular odds' }}</button><button v-if="selectedMatch.status !== 'finished'" type="button" class="btn btn-red" :disabled="busy" @click="finishMatch(selectedMatch)"><i class="bi bi-check2-circle"></i> Finalizar partida</button></div></div>
           <div v-if="selectedMatch.status !== 'finished' && selectedMatch.phase !== 'group' && selectedMatch.home_score !== null && selectedMatch.away_score !== null && selectedMatch.home_score === selectedMatch.away_score" class="penalty-editor"><span>Empate na eliminatória: informe os pênaltis antes de finalizar.</span><label>Casa<input v-model.number="selectedMatch.home_penalty_score" type="number" min="0"></label><label>Fora<input v-model.number="selectedMatch.away_penalty_score" type="number" min="0"></label></div>
@@ -120,7 +127,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useToast } from 'vue-toastification'
 import { ChampionshipService, type ChampionshipMatch, type ChampionshipMatchEvent, type ChampionshipPlayer, type ChampionshipTeam } from '../services/championshipService'
 import { PlayerService } from '../services/playerService'
@@ -154,6 +161,7 @@ const eventForm = reactive<Record<number, EventForm>>({})
 const eventEditForm = reactive<Record<number, EventEditForm>>({})
 const matchEvents = reactive<Record<number, ChampionshipMatchEvent[]>>({})
 const selectedMatchId = ref<number | null>(null)
+const matchModalRef = ref<HTMLElement | null>(null)
 const tieBreakForm = reactive({ team_a_id: 0, team_b_id: 0, winner_id: 0 })
 const registration = reactive<RegistrationForm>({ player_id: 0, player_type: 'field', stone_group: 1, stone_level: 1.1, team_id: 0 })
 const tabs = [{ id: 'overview', label: 'Visão geral', meta: 'Resumo', icon: 'bi bi-grid-1x2' }, { id: 'players', label: 'Jogadores', meta: 'Inscrições e Pedras', icon: 'bi bi-people' }, { id: 'teams', label: 'Equipes', meta: 'Formação', icon: 'bi bi-diagram-3' }, { id: 'matches', label: 'Partidas', meta: 'Resultados', icon: 'bi bi-calendar2-week' }, { id: 'awards', label: 'Premiações', meta: 'Votação', icon: 'bi bi-award' }]
@@ -222,6 +230,7 @@ const resetMatchEditorState = () => {
 const openMatchEditor = (match: ChampionshipMatch) => {
   initializeMatchState(match)
   selectedMatchId.value = match.id
+  void nextTick(() => matchModalRef.value?.scrollTo({ top: 0, behavior: 'auto' }))
 }
 const closeMatchEditor = () => { selectedMatchId.value = null }
 
@@ -528,6 +537,166 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
   color: #fff;
 }
 
+.admin-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  min-width: 0;
+  margin-bottom: .85rem;
+}
+
+.admin-modal-header > div {
+  min-width: 0;
+}
+
+.admin-modal-header h2 {
+  margin: .2rem 0;
+  font-size: clamp(1.05rem, 2vw, 1.4rem);
+  line-height: 1.25;
+}
+
+.admin-modal-header .card-description {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: .78rem;
+  line-height: 1.45;
+}
+
+.admin-match-hero {
+  background: linear-gradient(135deg, rgba(220, 38, 38, .13), rgba(24, 26, 29, .96));
+  border-color: rgba(220, 38, 38, .42);
+}
+
+.admin-match-editor-section {
+  background: #181a1d;
+  border-color: rgba(255, 255, 255, .1);
+}
+
+.admin-participant-list {
+  max-height: 235px;
+  padding: .2rem .35rem;
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: .7rem;
+  background: rgba(0, 0, 0, .16);
+}
+
+.admin-participant-option {
+  border-color: rgba(255, 255, 255, .08);
+  border-radius: .4rem;
+}
+
+.admin-participant-option:hover {
+  background: rgba(220, 38, 38, .1);
+}
+
+.admin-match-editor-actions {
+  align-items: end;
+}
+
+.admin-match-editor-actions .mvp-select {
+  display: grid;
+  align-items: stretch;
+  gap: .3rem;
+}
+
+.admin-match-editor-actions .mvp-select > span {
+  color: var(--text-muted);
+  font-size: .7rem;
+  font-weight: 700;
+}
+
+.admin-event-form {
+  gap: .7rem;
+  padding: .8rem;
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: .75rem;
+  background: rgba(0, 0, 0, .16);
+}
+
+.admin-event-field {
+  display: grid;
+  gap: .3rem;
+  min-width: 0;
+  margin: 0 !important;
+  color: var(--text-muted);
+  font-size: .7rem;
+  font-weight: 700;
+}
+
+.admin-event-field > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-event-field > span small {
+  color: var(--text-muted);
+  font-size: .65rem;
+  font-weight: 500;
+  text-transform: none;
+}
+
+.admin-event-field select,
+.admin-event-field input {
+  margin: 0 !important;
+  min-height: 42px;
+}
+
+.admin-event-field--minute input {
+  text-align: center;
+}
+
+.admin-event-form .own-goal-option {
+  align-self: end;
+  min-height: 42px;
+  margin: 0 !important;
+  padding: .65rem .2rem;
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: .6rem;
+  background: rgba(255, 255, 255, .03);
+  color: #fff;
+}
+
+.admin-event-form .own-goal-option input {
+  margin: 0;
+}
+
+.admin-event-form > .btn {
+  align-self: end;
+  min-height: 42px;
+}
+
+.admin-event-empty {
+  display: grid;
+  place-items: center;
+  min-height: 190px;
+  gap: .35rem;
+  padding: 1.25rem;
+  border: 1px dashed rgba(255, 255, 255, .14);
+  border-radius: .75rem;
+  background: rgba(0, 0, 0, .12);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.admin-event-empty i {
+  color: var(--red-devils-hover);
+  font-size: 1.6rem;
+}
+
+.admin-event-empty strong {
+  color: var(--text-main);
+  font-size: .85rem;
+}
+
+.admin-event-empty span,
+.admin-event-empty small {
+  max-width: 32rem;
+  font-size: .72rem;
+  line-height: 1.45;
+}
+
 @media (max-width: 800px) {
   .admin-match-editor-grid {
     grid-template-columns: 1fr;
@@ -644,6 +813,38 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
     width: 100%;
     justify-content: flex-end;
     flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 560px) {
+  .championship-admin-modal > .admin-modal-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: .6rem;
+  }
+
+  .championship-admin-modal > .admin-modal-header .admin-modal-close {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .admin-participant-list {
+    max-height: 220px;
+  }
+
+  .admin-event-list {
+    max-height: 270px;
+  }
+
+  .admin-event-form > .admin-event-field,
+  .admin-event-form > .own-goal-option,
+  .admin-event-form > .btn {
+    width: 100%;
+  }
+
+  .admin-event-empty {
+    min-height: 160px;
   }
 }
 </style>
