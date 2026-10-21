@@ -353,8 +353,10 @@
 
 .ranking-panel-body {
     padding: 0.35rem;
-    max-height: 265px;
+    max-height: 500px;
     overflow-y: auto;
+    scrollbar-gutter: stable;
+    scrollbar-color: var(--red-devils) var(--surface-strong);
 }
 
 .ranking-row {
@@ -482,6 +484,10 @@
     .home-highlight-ring {
         width: 56px;
         height: 56px;
+    }
+
+    .ranking-panel-body {
+        max-height: 250px;
     }
 
     .home-highlight-divider {

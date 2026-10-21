@@ -44,10 +44,10 @@
         </article>
 
         <section class="championship-team-grid" aria-label="Equipes participantes">
-          <article v-for="team in details.championship.teams" :key="team.id" class="surface-card team-card">
+          <button v-for="team in details.championship.teams" :key="team.id" type="button" class="surface-card team-card team-card--interactive" :aria-label="'Abrir detalhes do time ' + team.name" @click="openChampionshipTeam(team)">
             <div class="team-crest"><img v-if="team.crest_url" :src="team.crest_url" :alt="'Brasão do ' + team.name"><span v-else>{{ initials(team.name) }}</span></div>
-            <div class="team-card-copy"><strong>{{ team.name }}</strong><span>{{ team.players?.length || 0 }} participantes</span></div>
-          </article>
+            <div class="team-card-copy"><strong>{{ team.name }}</strong><span>{{ team.players?.length || 0 }} participantes</span></div><i class="bi bi-chevron-right team-card-arrow" aria-hidden="true"></i>
+          </button>
         </section>
 
         <article class="surface-card panel-card standings-card">
@@ -58,7 +58,7 @@
               <tbody>
                 <tr v-for="row in details.standings" :key="row.team_id" :class="{ 'standings-leader': row.position === 1, 'standings-qualified': row.position <= 4 }">
                   <td class="sticky-col sticky-position position-cell"><strong>{{ row.position }}</strong></td>
-                  <td class="sticky-col sticky-team team-cell"><div class="standing-team"><div class="team-crest team-crest--table"><img v-if="teamForStanding(row.team_id)?.crest_url" :src="teamForStanding(row.team_id)?.crest_url || ''" :alt="'Brasão do ' + row.name"><span v-else>{{ initials(row.name) }}</span></div><strong>{{ row.name }}</strong></div></td>
+                  <td class="sticky-col sticky-team team-cell"><button type="button" class="standing-team-button" :aria-label="'Abrir detalhes do time ' + row.name" @click="openChampionshipTeamById(row.team_id)"><div class="standing-team"><div class="team-crest team-crest--table"><img v-if="teamForStanding(row.team_id)?.crest_url" :src="teamForStanding(row.team_id)?.crest_url || ''" :alt="'Brasão do ' + row.name"><span v-else>{{ initials(row.name) }}</span></div><strong>{{ row.name }}</strong></div><i class="bi bi-arrow-up-right" aria-hidden="true"></i></button></td>
                   <td class="points-col"><strong>{{ row.points }}</strong></td><td>{{ row.played }}</td><td>{{ row.wins }}</td><td>{{ row.draws }}</td><td>{{ row.losses }}</td><td>{{ row.goals_for }}</td><td>{{ row.goals_against }}</td><td>{{ row.goal_difference > 0 ? '+' + row.goal_difference : row.goal_difference }}</td>
                   <td><div class="form-results" :aria-label="'Últimos resultados de ' + row.name"><span v-for="(result, index) in recentResults(row.team_id)" :key="row.team_id + '-' + index" class="result-dot" :class="'result-' + result" :title="resultLabel(result)">{{ resultSymbol(result) }}</span><span v-if="!recentResults(row.team_id).length" class="result-empty">—</span></div></td>
                 </tr>
@@ -75,8 +75,8 @@
           <article class="surface-card panel-card">
             <div class="section-toolbar"><div><span class="eyebrow">Calendário</span><h2 class="section-title mb-0">Partidas</h2></div><span class="pill-badge pill-muted">{{ details.matches.length }} jogos</span></div>
             <div v-if="!details.matches.length" class="empty-inline">Nenhum confronto gerado ainda.</div>
-            <div v-for="match in details.matches" :key="match.id" class="match-row">
-              <span class="match-team">{{ match.home_team.name }}</span><div class="match-score-box"><strong class="match-score" :class="{ pending: match.status !== 'finished' }">{{ score(match) }}</strong><small>{{ match.status === 'finished' ? 'Finalizado' : 'Agendado' }} • {{ phaseLabel(match.phase) }}</small></div><span class="match-team match-team--away">{{ match.away_team.name }}</span>
+            <div v-for="match in details.matches" :key="match.id" class="match-row" role="button" tabindex="0" :aria-label="'Abrir detalhes de ' + match.home_team.name + ' contra ' + match.away_team.name" @click="openChampionshipMatch(match)" @keydown.enter="openChampionshipMatch(match)" @keydown.space.prevent="openChampionshipMatch(match)">
+              <button type="button" class="match-team match-team-button" @click.stop="openChampionshipTeam(match.home_team)">{{ match.home_team.name }}</button><div class="match-score-box"><strong class="match-score" :class="{ pending: match.status !== 'finished' }">{{ score(match) }}</strong><small>{{ match.status === 'finished' ? 'Finalizado' : 'Agendado' }} • {{ phaseLabel(match.phase) }}</small></div><button type="button" class="match-team match-team--away match-team-button" @click.stop="openChampionshipTeam(match.away_team)">{{ match.away_team.name }}</button>
               <div v-if="match.odds" class="odds-inline" :title="'Modelo ' + (match.odds.parameters?.model || 'informativo')"><span>Odds informativas</span><strong>Casa {{ formatOdd(match.odds.home_odd) }} • Empate {{ formatOdd(match.odds.draw_odd) }} • Fora {{ formatOdd(match.odds.away_odd) }}</strong></div>
             </div>
           </article>
@@ -88,18 +88,18 @@
         </div>
         <article class="surface-card panel-card bracket">
           <div class="section-toolbar"><div><span class="eyebrow">Fase eliminatória</span><h2 class="section-title mb-0">Chaveamento</h2></div><span class="text-muted small">Pênaltis decidem eliminatórias empatadas</span></div>
-          <div class="bracket-grid"><div v-for="phase in ['semi_final', 'challenger_final', 'final']" :key="phase" class="bracket-stage"><h3>{{ phaseLabel(phase) }}</h3><div v-for="match in matchesByPhase(phase)" :key="match.id" class="bracket-match"><span>{{ match.home_team.name }}</span><strong>{{ score(match) }}</strong><span>{{ match.away_team.name }}</span></div><span v-if="!matchesByPhase(phase).length" class="empty-inline">Aguardando fase anterior</span></div></div>
+          <div class="bracket-grid"><div v-for="phase in ['semi_final', 'challenger_final', 'final']" :key="phase" class="bracket-stage"><h3>{{ phaseLabel(phase) }}</h3><div v-for="match in matchesByPhase(phase)" :key="match.id" class="bracket-match" role="button" tabindex="0" @click="openChampionshipMatch(match)" @keydown.enter="openChampionshipMatch(match)" @keydown.space.prevent="openChampionshipMatch(match)"><span>{{ match.home_team.name }}</span><strong>{{ score(match) }}</strong><span>{{ match.away_team.name }}</span></div><span v-if="!matchesByPhase(phase).length" class="empty-inline">Aguardando fase anterior</span></div></div>
         </article>
       </section>
 
       <section v-if="publicTab === 'stats'" class="championship-section" role="tabpanel">
         <article class="surface-card panel-card">
           <div class="section-toolbar"><div><span class="eyebrow">Desempenho</span><h2 class="section-title mb-0">Rankings</h2></div><select v-model="phaseFilter" class="form-select compact-select" @change="loadRankings"><option value="all">Campeonato completo</option><option value="group">Classificatória</option><option value="semi_final">Semifinais</option><option value="challenger_final">Final dos Desafiantes</option><option value="final">Grande Final</option></select></div>
-          <div class="ranking-columns"><div class="ranking-block"><h3>Artilharia</h3><RankingList :rows="rankings.scorers" value-label="gols" value-key="goals" /></div><div class="ranking-block"><h3>Assistências</h3><RankingList :rows="rankings.assists" value-label="assistências" value-key="assists" /></div><div class="ranking-block"><h3>MVP</h3><RankingList :rows="rankings.mvp" value-label="prêmios" value-key="mvp" /></div><div class="ranking-block"><h3>Goleiros</h3><RankingList :rows="rankings.goalkeepers" value-label="SG sofridos" value-key="goals_conceded" :ascending="true" /></div></div>
+          <div class="ranking-columns"><div class="ranking-block"><h3>Artilharia</h3><RankingList :rows="rankings.scorers" value-label="gols" value-key="goals" @select="openChampionshipPlayer" /></div><div class="ranking-block"><h3>Assistências</h3><RankingList :rows="rankings.assists" value-label="assistências" value-key="assists" @select="openChampionshipPlayer" /></div><div class="ranking-block"><h3>MVP</h3><RankingList :rows="rankings.mvp" value-label="prêmios" value-key="mvp" @select="openChampionshipPlayer" /></div><div class="ranking-block"><h3>Goleiros</h3><RankingList :rows="rankings.goalkeepers" value-label="SG sofridos" value-key="goals_conceded" :ascending="true" @select="openChampionshipPlayer" /></div></div>
         </article>
         <article class="surface-card panel-card">
           <div class="section-toolbar"><div><span class="eyebrow">Estatísticas</span><h2 class="section-title mb-0">Desempenho individual</h2></div><span class="text-muted small">Somente partidas válidas e finalizadas</span></div>
-          <div class="table-wrap"><table class="data-table compact-table stats-table"><thead><tr><th>Jogador</th><th>J</th><th>V</th><th>G</th><th>A</th><th>PG</th><th>MVP</th><th v-if="hasGoalkeepers">GS / SG</th></tr></thead><tbody><tr v-for="row in statistics" :key="row.participant_id"><td><strong>{{ row.player.name }}</strong><small class="table-subline">{{ row.position === 'goalkeeper' ? 'Goleiro' : 'Linha' }}</small></td><td>{{ row.played }}</td><td>{{ row.wins }}</td><td>{{ row.goals }}</td><td>{{ row.assists }}</td><td>{{ row.goal_participations }}</td><td>{{ row.mvp }}</td><td v-if="hasGoalkeepers">{{ row.position === 'goalkeeper' ? row.goals_conceded + ' / ' + row.clean_sheets : '—' }}</td></tr></tbody></table></div>
+          <div class="table-wrap stats-table-wrap"><table class="data-table compact-table stats-table"><thead><tr><th>Jogador</th><th>J</th><th>V</th><th>G</th><th>A</th><th>PG</th><th>MVP</th><th v-if="hasGoalkeepers">GS / SG</th></tr></thead><tbody><tr v-for="row in statistics" :key="row.participant_id"><td><button type="button" class="championship-player-link" @click="openChampionshipPlayer(row)"><strong>{{ row.player.name }}</strong><small class="table-subline">{{ row.position === 'goalkeeper' ? 'Goleiro' : 'Linha' }}</small></button></td><td>{{ row.played }}</td><td>{{ row.wins }}</td><td>{{ row.goals }}</td><td>{{ row.assists }}</td><td>{{ row.goal_participations }}</td><td>{{ row.mvp }}</td><td v-if="hasGoalkeepers">{{ row.position === 'goalkeeper' ? row.goals_conceded + ' / ' + row.clean_sheets : '—' }}</td></tr></tbody></table></div>
           <div v-if="!statistics.length" class="empty-inline">As estatísticas aparecerão após os jogos finalizados.</div>
         </article>
       </section>
@@ -120,17 +120,74 @@
         </article>
       </section>
     </template>
+
+    <Teleport to="body">
+      <div v-if="selectedChampionshipTeam || selectedChampionshipPlayer || selectedChampionshipMatch" class="championship-modal-backdrop" role="presentation" @click.self="closeChampionshipOverlay">
+        <section v-if="selectedChampionshipTeam" class="championship-modal championship-team-panel" role="dialog" aria-modal="true" aria-labelledby="championship-team-modal-title-complete">
+          <div class="section-toolbar"><div><span class="eyebrow">Time no campeonato</span><h2 id="championship-team-modal-title-complete" class="section-title mb-0">{{ selectedChampionshipTeam.name }}</h2></div><button type="button" class="championship-detail-close" aria-label="Fechar detalhes do time" @click="closeChampionshipTeam"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div>
+          <div class="championship-team-hero"><div class="team-crest team-crest--winner"><img v-if="selectedChampionshipTeam.crest_url" :src="selectedChampionshipTeam.crest_url" :alt="'Brasao do ' + selectedChampionshipTeam.name"><span v-else>{{ initials(selectedChampionshipTeam.name) }}</span></div><div><p class="championship-player-context">{{ selectedTeamStanding ? selectedTeamStanding.position + ' colocado' : 'Equipe inscrita' }} <span>•</span> {{ selectedChampionshipTeam.players?.length || 0 }} participantes</p><p class="championship-player-period">Dados exclusivamente deste campeonato</p></div></div>
+          <div class="championship-team-metrics"><div><span>Pontos</span><strong>{{ selectedTeamStanding?.points ?? 0 }}</strong></div><div><span>Partidas</span><strong>{{ selectedTeamStanding?.played ?? 0 }}</strong></div><div><span>Vitorias</span><strong>{{ selectedTeamStanding?.wins ?? 0 }}</strong></div><div><span>Saldo</span><strong>{{ (selectedTeamStanding?.goal_difference ?? 0) > 0 ? '+' + selectedTeamStanding?.goal_difference : selectedTeamStanding?.goal_difference ?? 0 }}</strong></div></div>
+          <div class="championship-detail-tabs" role="tablist" aria-label="Detalhes do time"><button v-for="tab in teamDetailTabs" :key="tab.id" type="button" :class="{ active: teamModalTab === tab.id }" role="tab" :aria-selected="teamModalTab === tab.id" @click="teamModalTab = tab.id">{{ tab.label }}</button></div>
+          <div v-if="teamModalTab === 'overview'" class="championship-detail-overview"><div class="championship-form-panel"><div class="section-toolbar"><div><span class="eyebrow">Momento</span><h3 class="section-title mb-0">Ultimos resultados</h3></div><span class="text-muted small">Fase classificatoria</span></div><div class="form-results form-results--large"><span v-for="(result, index) in recentResults(selectedChampionshipTeam.id)" :key="selectedChampionshipTeam.id + '-modal-' + index" class="result-dot" :class="'result-' + result" :title="resultLabel(result)">{{ resultSymbol(result) }}</span><span v-if="!recentResults(selectedChampionshipTeam.id).length" class="empty-inline">Sem partidas finalizadas</span></div></div><div class="championship-detail-stat-grid"><div><span>Gols marcados</span><strong>{{ selectedTeamStanding?.goals_for ?? 0 }}</strong></div><div><span>Gols sofridos</span><strong>{{ selectedTeamStanding?.goals_against ?? 0 }}</strong></div><div><span>Empates</span><strong>{{ selectedTeamStanding?.draws ?? 0 }}</strong></div><div><span>Derrotas</span><strong>{{ selectedTeamStanding?.losses ?? 0 }}</strong></div></div></div>
+          <div v-else-if="teamModalTab === 'matches'" class="championship-detail-list"><div class="section-toolbar"><div><span class="eyebrow">Calendario do time</span><h3 class="section-title mb-0">Partidas</h3></div><span class="text-muted small">Clique para abrir o jogo</span></div><div class="championship-team-match-list"><button v-for="match in selectedTeamMatches" :key="match.id" type="button" class="championship-team-match" @click="openChampionshipMatch(match)"><span><strong>{{ match.home_team.name }} <small>{{ score(match) }}</small> {{ match.away_team.name }}</strong><small>{{ phaseLabel(match.phase) }} · {{ match.status === 'finished' ? 'Finalizado' : 'Agendado' }}</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></button><div v-if="!selectedTeamMatches.length" class="empty-inline">Nenhuma partida encontrada para este time.</div></div></div>
+          <div v-else class="championship-team-roster"><div class="section-toolbar"><div><span class="eyebrow">Elenco</span><h3 class="section-title mb-0">Jogadores do time</h3></div><span class="text-muted small">Clique para ver os numeros do campeonato</span></div><div class="championship-team-player-list"><button v-for="entry in selectedChampionshipTeam.players || []" :key="entry.id" type="button" class="championship-team-player" :disabled="!teamPlayerStatistics(entry)" @click="openChampionshipTeamPlayer(entry)"><span><strong>{{ championshipPlayerName(entry) }}</strong><small>{{ entry.player_type === 'goalkeeper' ? 'Goleiro' : 'Jogador de linha' }}</small></span><i class="bi bi-arrow-up-right" aria-hidden="true"></i></button><div v-if="!(selectedChampionshipTeam.players || []).length" class="empty-inline">Nenhum jogador inscrito neste time.</div></div></div>
+        </section>
+        <section v-else-if="selectedChampionshipPlayer" class="championship-modal championship-player-panel" role="dialog" aria-modal="true" aria-labelledby="championship-player-modal-title-complete">
+          <div class="section-toolbar"><div><span class="eyebrow">Perfil no campeonato</span><h2 id="championship-player-modal-title-complete" class="section-title mb-0">{{ selectedChampionshipPlayer.player.name }}</h2></div><button type="button" class="championship-detail-close" aria-label="Fechar detalhes do jogador" @click="closeChampionshipPlayer"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div>
+          <div class="championship-player-hero"><div class="team-crest team-crest--winner">{{ initials(selectedChampionshipPlayer.player.name) }}</div><div><p class="championship-player-context">{{ selectedPlayerTeam?.name || 'Jogador inscrito no campeonato' }} <span>•</span> {{ selectedChampionshipPlayer.position === 'goalkeeper' ? 'Goleiro' : 'Jogador de linha' }}</p><p class="championship-player-period">Numeros da fase selecionada: {{ phaseFilter === 'all' ? 'campeonato completo' : phaseLabel(phaseFilter) }}</p></div></div>
+          <div class="championship-detail-tabs" role="tablist" aria-label="Detalhes do jogador"><button v-for="tab in playerDetailTabs" :key="tab.id" type="button" :class="{ active: playerModalTab === tab.id }" role="tab" :aria-selected="playerModalTab === tab.id" @click="playerModalTab = tab.id">{{ tab.label }}</button></div>
+          <div v-if="playerModalTab === 'overview'" class="championship-player-metrics"><div v-for="metric in selectedPlayerRankings" :key="metric.label" class="championship-player-metric"><span>{{ metric.label }}</span><strong>{{ metric.value }}</strong><small v-if="metric.position">{{ metric.position }} no ranking</small></div><div class="championship-player-metric"><span>Partidas</span><strong>{{ selectedChampionshipPlayer.played }}</strong><small>{{ selectedChampionshipPlayer.wins }} vitorias</small></div></div>
+          <div v-else class="championship-detail-list"><div class="section-toolbar"><div><span class="eyebrow">Desempenho</span><h3 class="section-title mb-0">Partidas do campeonato</h3></div><span class="text-muted small">Somente dados do campeonato</span></div><p v-if="!playerMatchData.hasParticipationData && playerMatchData.matches.length" class="championship-data-note"><i class="bi bi-info-circle" aria-hidden="true"></i> A API publica nao informa a participacao individual por partida; os jogos abaixo sao os confrontos do time.</p><div class="championship-team-match-list"><button v-for="match in playerMatchData.matches" :key="match.id" type="button" class="championship-team-match" @click="openChampionshipMatch(match)"><span><strong>{{ match.home_team.name }} <small>{{ score(match) }}</small> {{ match.away_team.name }}</strong><small>{{ phaseLabel(match.phase) }} · {{ match.status === 'finished' ? 'Finalizado' : 'Agendado' }}</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></button><div v-if="!playerMatchData.matches.length" class="empty-inline">Nenhuma partida do time encontrada.</div></div></div>
+        </section>
+        <section v-else-if="selectedChampionshipMatch" class="championship-modal championship-match-panel" role="dialog" aria-modal="true" aria-labelledby="championship-match-modal-title">
+          <div class="section-toolbar"><div><span class="eyebrow">Partida do campeonato</span><h2 id="championship-match-modal-title" class="section-title mb-0">{{ selectedChampionshipMatch.home_team.name }} x {{ selectedChampionshipMatch.away_team.name }}</h2></div><button type="button" class="championship-detail-close" aria-label="Fechar detalhes da partida" @click="closeChampionshipMatch"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div>
+          <div class="championship-match-hero"><button type="button" class="championship-match-team" @click="openChampionshipTeam(selectedChampionshipMatch.home_team)"><div class="team-crest team-crest--winner"><img v-if="selectedChampionshipMatch.home_team.crest_url" :src="selectedChampionshipMatch.home_team.crest_url" :alt="'Brasao do ' + selectedChampionshipMatch.home_team.name"><span v-else>{{ initials(selectedChampionshipMatch.home_team.name) }}</span></div><strong>{{ selectedChampionshipMatch.home_team.name }}</strong></button><div class="championship-match-score"><strong :class="{ pending: selectedChampionshipMatch.status !== 'finished' }">{{ score(selectedChampionshipMatch) }}</strong><span>{{ selectedChampionshipMatch.status === 'finished' ? 'Finalizado' : selectedChampionshipMatch.status === 'cancelled' ? 'Cancelado' : 'Agendado' }}</span><small>{{ phaseLabel(selectedChampionshipMatch.phase) }} · rodada {{ selectedChampionshipMatch.round || '—' }}</small></div><button type="button" class="championship-match-team" @click="openChampionshipTeam(selectedChampionshipMatch.away_team)"><div class="team-crest team-crest--winner"><img v-if="selectedChampionshipMatch.away_team.crest_url" :src="selectedChampionshipMatch.away_team.crest_url" :alt="'Brasao do ' + selectedChampionshipMatch.away_team.name"><span v-else>{{ initials(selectedChampionshipMatch.away_team.name) }}</span></div><strong>{{ selectedChampionshipMatch.away_team.name }}</strong></button></div>
+          <div class="championship-detail-tabs" role="tablist" aria-label="Detalhes da partida"><button v-for="tab in matchDetailTabs" :key="tab.id" type="button" :class="{ active: matchModalTab === tab.id }" role="tab" :aria-selected="matchModalTab === tab.id" @click="matchModalTab = tab.id">{{ tab.label }}</button></div>
+          <div v-if="matchModalTab === 'overview'" class="championship-match-overview"><div class="championship-match-metrics"><div><span>Modelo de odds</span><strong>{{ selectedChampionshipMatch.odds?.parameters?.model || 'Informativo' }}</strong></div><div><span>Casa</span><strong>{{ selectedChampionshipMatch.odds ? formatOdd(selectedChampionshipMatch.odds.home_odd) : '—' }}</strong></div><div><span>Empate</span><strong>{{ selectedChampionshipMatch.odds ? formatOdd(selectedChampionshipMatch.odds.draw_odd) : '—' }}</strong></div><div><span>Fora</span><strong>{{ selectedChampionshipMatch.odds ? formatOdd(selectedChampionshipMatch.odds.away_odd) : '—' }}</strong></div></div><div class="championship-event-panel"><div class="section-toolbar"><div><span class="eyebrow">Linha do tempo</span><h3 class="section-title mb-0">Eventos da partida</h3></div></div><div v-if="selectedChampionshipMatch.events?.length" class="championship-event-list"><div v-for="event in selectedChampionshipMatch.events" :key="event.id" class="championship-event"><strong>{{ event.minute ?? '—' }}'</strong><span>{{ event.scorer?.name || event.player?.name || 'Evento registrado' }}<small v-if="event.assist">Assistencia: {{ event.assist.name }}</small></span></div></div><p v-else class="championship-data-note"><i class="bi bi-info-circle" aria-hidden="true"></i> A API publica do campeonato ainda nao disponibiliza a linha do tempo desta partida.</p></div></div>
+          <div v-else-if="matchModalTab === 'lineups'" class="championship-detail-list"><div class="section-toolbar"><div><span class="eyebrow">Escalacoes</span><h3 class="section-title mb-0">Jogadores relacionados</h3></div><span class="text-muted small">Numeros deste campeonato</span></div><div class="championship-lineups"><div><h3>{{ selectedChampionshipMatch.home_team.name }}</h3><button v-for="entry in selectedChampionshipMatch.home_team.players || []" :key="entry.id" type="button" class="championship-lineup-player" :disabled="!teamPlayerStatistics(entry)" @click="openChampionshipTeamPlayer(entry)"><span>{{ championshipPlayerName(entry) }}</span><small>{{ teamPlayerStatistics(entry)?.played ?? 0 }} jogos · {{ teamPlayerStatistics(entry)?.goals ?? 0 }} gols</small></button><p v-if="!(selectedChampionshipMatch.home_team.players || []).length" class="empty-inline">Escalacao nao publicada.</p></div><div><h3>{{ selectedChampionshipMatch.away_team.name }}</h3><button v-for="entry in selectedChampionshipMatch.away_team.players || []" :key="entry.id" type="button" class="championship-lineup-player" :disabled="!teamPlayerStatistics(entry)" @click="openChampionshipTeamPlayer(entry)"><span>{{ championshipPlayerName(entry) }}</span><small>{{ teamPlayerStatistics(entry)?.played ?? 0 }} jogos · {{ teamPlayerStatistics(entry)?.goals ?? 0 }} gols</small></button><p v-if="!(selectedChampionshipMatch.away_team.players || []).length" class="empty-inline">Escalacao nao publicada.</p></div></div></div>
+          <div v-else class="championship-detail-list"><div class="section-toolbar"><div><span class="eyebrow">Historico</span><h3 class="section-title mb-0">Confrontos no campeonato</h3></div><span class="text-muted small">Ultimos jogos entre os times</span></div><div class="championship-team-match-list"><button v-for="match in selectedMatchHistory" :key="match.id" type="button" class="championship-team-match" @click="openChampionshipMatch(match)"><span><strong>{{ match.home_team.name }} <small>{{ score(match) }}</small> {{ match.away_team.name }}</strong><small>{{ phaseLabel(match.phase) }} · {{ match.status === 'finished' ? 'Finalizado' : 'Agendado' }}</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></button><div v-if="!selectedMatchHistory.length" class="empty-inline">Nao ha outro confronto entre os times neste campeonato.</div></div></div>
+        </section>
+        <section v-if="false" class="championship-modal championship-team-panel" role="dialog" aria-modal="true" aria-labelledby="championship-team-modal-title">
+          <div class="section-toolbar"><div><span class="eyebrow">Time no campeonato</span><h2 id="championship-team-modal-title" class="section-title mb-0">{{ selectedChampionshipTeam.name }}</h2></div><button type="button" class="championship-detail-close" aria-label="Fechar detalhes do time" @click="closeChampionshipTeam"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div>
+          <div class="championship-team-hero"><div class="team-crest team-crest--winner"><img v-if="selectedChampionshipTeam.crest_url" :src="selectedChampionshipTeam.crest_url" :alt="'Brasão do ' + selectedChampionshipTeam.name"><span v-else>{{ initials(selectedChampionshipTeam.name) }}</span></div><div><p class="championship-player-context">{{ selectedTeamStanding ? selectedTeamStanding.position + 'º colocado' : 'Equipe inscrita' }} <span>•</span> {{ selectedChampionshipTeam.players?.length || 0 }} participantes</p><p class="championship-player-period">Campanha e jogadores deste campeonato</p></div></div>
+          <div class="championship-team-metrics"><div><span>Pontos</span><strong>{{ selectedTeamStanding?.points ?? 0 }}</strong></div><div><span>Partidas</span><strong>{{ selectedTeamStanding?.played ?? 0 }}</strong></div><div><span>Vitórias</span><strong>{{ selectedTeamStanding?.wins ?? 0 }}</strong></div><div><span>Saldo</span><strong>{{ (selectedTeamStanding?.goal_difference ?? 0) > 0 ? '+' + selectedTeamStanding?.goal_difference : selectedTeamStanding?.goal_difference ?? 0 }}</strong></div></div>
+          <div class="championship-team-roster"><div class="section-toolbar"><div><span class="eyebrow">Elenco</span><h3 class="section-title mb-0">Jogadores do time</h3></div><span class="text-muted small">Clique para ver os números do campeonato</span></div><div class="championship-team-player-list"><button v-for="entry in selectedChampionshipTeam.players || []" :key="entry.id" type="button" class="championship-team-player" :disabled="!teamPlayerStatistics(entry)" @click="openChampionshipTeamPlayer(entry)"><span><strong>{{ championshipPlayerName(entry) }}</strong><small>{{ entry.player_type === 'goalkeeper' ? 'Goleiro' : 'Jogador de linha' }}</small></span><i class="bi bi-arrow-up-right" aria-hidden="true"></i></button><div v-if="!(selectedChampionshipTeam.players || []).length" class="empty-inline">Nenhum jogador inscrito neste time.</div></div></div>
+        </section>
+        <section v-else-if="false" class="championship-modal championship-player-panel" role="dialog" aria-modal="true" aria-labelledby="championship-player-modal-title">
+          <div class="section-toolbar"><div><span class="eyebrow">Perfil no campeonato</span><h2 id="championship-player-modal-title" class="section-title mb-0">{{ selectedChampionshipPlayer.player.name }}</h2></div><button type="button" class="championship-detail-close" aria-label="Fechar detalhes do jogador" @click="closeChampionshipPlayer"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div>
+          <div class="championship-player-hero"><div class="team-crest team-crest--winner">{{ initials(selectedChampionshipPlayer.player.name) }}</div><div><p class="championship-player-context">{{ selectedPlayerTeam?.name || 'Jogador inscrito no campeonato' }} <span>•</span> {{ selectedChampionshipPlayer.position === 'goalkeeper' ? 'Goleiro' : 'Jogador de linha' }}</p><p class="championship-player-period">Números da fase selecionada: {{ phaseFilter === 'all' ? 'campeonato completo' : phaseLabel(phaseFilter) }}</p></div></div>
+          <div class="championship-player-metrics"><div v-for="metric in selectedPlayerRankings" :key="metric.label" class="championship-player-metric"><span>{{ metric.label }}</span><strong>{{ metric.value }}</strong><small v-if="metric.position">{{ metric.position }}º no ranking</small></div><div class="championship-player-metric"><span>Partidas</span><strong>{{ selectedChampionshipPlayer.played }}</strong><small>{{ selectedChampionshipPlayer.wins }} vitórias</small></div></div>
+        </section>
+      </div>
+    </Teleport>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, defineComponent, h, onMounted, ref } from 'vue'
+import { computed, defineComponent, h, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useToast } from 'vue-toastification'
 import { useAuthStore } from '../stores/auth'
-import { ChampionshipService, type ChampionshipMatch, type ChampionshipStatisticsRow } from '../services/championshipService'
+import { ChampionshipService, type ChampionshipMatch, type ChampionshipPlayer, type ChampionshipStatisticsRow, type ChampionshipTeam } from '../services/championshipService'
 
 type PublicTab = 'overview' | 'matches' | 'stats' | 'awards'
 type FormResult = 'win' | 'draw' | 'loss'
+type TeamDetailTab = 'overview' | 'matches' | 'squad'
+type PlayerDetailTab = 'overview' | 'matches'
+type MatchDetailTab = 'overview' | 'lineups' | 'history'
+const teamDetailTabs: Array<{ id: TeamDetailTab; label: string }> = [
+  { id: 'overview', label: 'Resumo' },
+  { id: 'matches', label: 'Partidas' },
+  { id: 'squad', label: 'Elenco' },
+]
+const playerDetailTabs: Array<{ id: PlayerDetailTab; label: string }> = [
+  { id: 'overview', label: 'Numeros' },
+  { id: 'matches', label: 'Partidas' },
+]
+const matchDetailTabs: Array<{ id: MatchDetailTab; label: string }> = [
+  { id: 'overview', label: 'Resumo' },
+  { id: 'lineups', label: 'Escalacoes' },
+  { id: 'history', label: 'Historico' },
+]
 const publicTabs: Array<{ id: PublicTab; label: string; meta: string; icon: string }> = [
   { id: 'overview', label: 'Classificação', meta: 'Tabela e equipes', icon: 'bi bi-list-ol' },
   { id: 'matches', label: 'Partidas', meta: 'Calendário e chave', icon: 'bi bi-calendar3' },
@@ -140,8 +197,29 @@ const publicTabs: Array<{ id: PublicTab; label: string; meta: string; icon: stri
 
 const RankingList = defineComponent({
   props: { rows: { type: Array, default: () => [] }, valueLabel: { type: String, required: true }, valueKey: { type: String, required: true }, ascending: { type: Boolean, default: false } },
-  setup(props: { rows: ChampionshipStatisticsRow[]; valueLabel: string; valueKey: string; ascending: boolean }) {
-    return () => h('div', { class: 'ranking-list' }, props.rows.slice(0, 5).map((row, index) => h('div', { class: 'ranking-row', key: row.participant_id }, [h('span', { class: 'ranking-player-name' }, [h('b', { class: 'ranking-position' }, String(index + 1)), row.player.name]), h('strong', {}, String(Number((row as unknown as Record<string, number>)[props.valueKey] || 0)) + ' ' + props.valueLabel)])))
+  emits: ['select'],
+  setup(props: { rows: ChampionshipStatisticsRow[]; valueLabel: string; valueKey: string; ascending: boolean }, { emit }) {
+    return () => {
+      const rows = [...props.rows].sort((left, right) => {
+        const leftValue = Number((left as unknown as Record<string, number>)[props.valueKey] || 0)
+        const rightValue = Number((right as unknown as Record<string, number>)[props.valueKey] || 0)
+        return props.ascending ? leftValue - rightValue : rightValue - leftValue
+      })
+
+      return h('div', { class: 'championship-ranking-list' }, rows.map((row, index) => h('button', {
+        type: 'button',
+        class: 'championship-ranking-row',
+        key: row.participant_id,
+        onClick: () => emit('select', row),
+        'aria-label': `Abrir números de campeonato de ${row.player.name}`,
+      }, [
+        h('span', { class: 'championship-ranking-player' }, [
+          h('b', { class: 'championship-ranking-position' }, String(index + 1)),
+          h('span', { class: 'championship-ranking-name' }, row.player.name),
+        ]),
+        h('strong', { class: 'championship-ranking-value' }, `${Number((row as unknown as Record<string, number>)[props.valueKey] || 0)} ${props.valueLabel}`),
+      ])))
+    }
   },
 })
 
@@ -152,9 +230,15 @@ const selectedId = ref<number>()
 const details = ref<Awaited<ReturnType<typeof ChampionshipService.details>> | null>(null)
 const rankings = ref<Awaited<ReturnType<typeof ChampionshipService.rankings>>>({ scorers: [], assists: [], mvp: [], goalkeepers: [] })
 const statistics = ref<ChampionshipStatisticsRow[]>([])
+const selectedChampionshipTeam = ref<ChampionshipTeam | null>(null)
+const selectedChampionshipPlayer = ref<ChampionshipStatisticsRow | null>(null)
+const selectedChampionshipMatch = ref<ChampionshipMatch | null>(null)
 const awards = ref<Awaited<ReturnType<typeof ChampionshipService.awards>>>([])
 const phaseFilter = ref('all')
 const publicTab = ref<PublicTab>('overview')
+const teamModalTab = ref<TeamDetailTab>('overview')
+const playerModalTab = ref<PlayerDetailTab>('overview')
+const matchModalTab = ref<MatchDetailTab>('overview')
 const isLoading = ref(true)
 const loadError = ref('')
 const isAuthenticated = computed(() => authStore.isAuthenticated)
@@ -173,6 +257,109 @@ const score = (match: ChampionshipMatch) => {
 const formatOdd = (value: number) => Number(value || 0).toFixed(2)
 const matchesByPhase = (phase: string) => details.value?.matches.filter((match) => match.phase === phase) || []
 const teamForStanding = (teamId: number) => details.value?.championship.teams.find((team) => team.id === teamId)
+const selectedTeamStanding = computed(() => details.value?.standings.find((row) => row.team_id === selectedChampionshipTeam.value?.id))
+const selectedTeamMatches = computed(() => {
+  const teamId = selectedChampionshipTeam.value?.id
+  if (!teamId) return []
+  return [...(details.value?.matches || [])].filter((match) => match.home_team.id === teamId || match.away_team.id === teamId).sort((left, right) => (right.round || 0) - (left.round || 0) || right.id - left.id)
+})
+const teamPlayerStatistics = (entry: ChampionshipPlayer) => statistics.value.find((row) => row.player.id === entry.player_id || row.player.id === entry.player?.id)
+const championshipPlayerName = (entry: ChampionshipPlayer) => entry.player?.name || teamPlayerStatistics(entry)?.player.name || `Participante #${entry.player_id}`
+const openChampionshipTeam = (team: ChampionshipTeam) => {
+  selectedChampionshipTeam.value = team
+  selectedChampionshipPlayer.value = null
+  selectedChampionshipMatch.value = null
+  teamModalTab.value = 'overview'
+  publicTab.value = 'overview'
+}
+const openChampionshipTeamById = (teamId: number) => {
+  const team = teamForStanding(teamId)
+  if (team) openChampionshipTeam(team)
+}
+const closeChampionshipTeam = () => {
+  selectedChampionshipTeam.value = null
+}
+const openChampionshipTeamPlayer = (entry: ChampionshipPlayer) => {
+  const playerStatistics = teamPlayerStatistics(entry)
+  if (!playerStatistics) {
+    toast.info('Este jogador ainda não possui números registrados nesta fase.')
+    return
+  }
+  selectedChampionshipTeam.value = null
+  openChampionshipPlayer(playerStatistics)
+}
+const selectedPlayerTeam = computed(() => {
+  const playerId = selectedChampionshipPlayer.value?.player.id
+  if (!playerId) return undefined
+  return details.value?.championship.teams.find((team) => team.players?.some((entry) => entry.player_id === playerId || entry.player?.id === playerId))
+})
+const playerMatchData = computed(() => {
+  const player = selectedChampionshipPlayer.value
+  const team = selectedPlayerTeam.value
+  if (!player || !team) return { matches: [] as ChampionshipMatch[], hasParticipationData: false }
+  const teamMatches = (details.value?.matches || []).filter((match) => match.home_team.id === team.id || match.away_team.id === team.id)
+  const hasParticipationData = teamMatches.some((match) => Array.isArray(match.participations))
+  const matches = hasParticipationData
+    ? teamMatches.filter((match) => match.participations?.some((participation) => participation.championship_player_id === player.participant_id))
+    : teamMatches
+  return {
+    matches: [...matches].sort((left, right) => (right.round || 0) - (left.round || 0) || right.id - left.id),
+    hasParticipationData,
+  }
+})
+const selectedMatchHistory = computed(() => {
+  const current = selectedChampionshipMatch.value
+  if (!current) return []
+  const teamIds = [current.home_team.id, current.away_team.id]
+  return [...(details.value?.matches || [])].filter((match) => match.id !== current.id && [match.home_team.id, match.away_team.id].includes(teamIds[0]) && [match.home_team.id, match.away_team.id].includes(teamIds[1])).sort((left, right) => (right.round || 0) - (left.round || 0) || right.id - left.id)
+})
+const rankingPosition = (rows: ChampionshipStatisticsRow[], valueKey: keyof ChampionshipStatisticsRow, playerId: number, ascending = false) => {
+  const sorted = [...rows].sort((left, right) => {
+    const leftValue = Number(left[valueKey] || 0)
+    const rightValue = Number(right[valueKey] || 0)
+    return ascending ? leftValue - rightValue : rightValue - leftValue
+  })
+  const position = sorted.findIndex((row) => row.player.id === playerId)
+  return position >= 0 ? position + 1 : null
+}
+const selectedPlayerRankings = computed(() => {
+  const player = selectedChampionshipPlayer.value
+  if (!player) return []
+  const metrics = [
+    { label: 'Gols', value: player.goals, position: rankingPosition(rankings.value.scorers, 'goals', player.player.id) },
+    { label: 'Assistências', value: player.assists, position: rankingPosition(rankings.value.assists, 'assists', player.player.id) },
+    { label: 'MVP', value: player.mvp, position: rankingPosition(rankings.value.mvp, 'mvp', player.player.id) },
+  ]
+  if (player.position === 'goalkeeper') metrics.unshift({ label: 'Gols sofridos', value: player.goals_conceded, position: rankingPosition(rankings.value.goalkeepers, 'goals_conceded', player.player.id, true) })
+  return metrics
+})
+const openChampionshipPlayer = (player: ChampionshipStatisticsRow) => {
+  selectedChampionshipPlayer.value = player
+  selectedChampionshipTeam.value = null
+  selectedChampionshipMatch.value = null
+  playerModalTab.value = 'overview'
+  publicTab.value = 'stats'
+}
+const closeChampionshipPlayer = () => {
+  selectedChampionshipPlayer.value = null
+}
+const openChampionshipMatch = (match: ChampionshipMatch) => {
+  selectedChampionshipTeam.value = null
+  selectedChampionshipPlayer.value = null
+  selectedChampionshipMatch.value = match
+  matchModalTab.value = 'overview'
+}
+const closeChampionshipMatch = () => {
+  selectedChampionshipMatch.value = null
+}
+const closeChampionshipOverlay = () => {
+  selectedChampionshipTeam.value = null
+  selectedChampionshipPlayer.value = null
+  selectedChampionshipMatch.value = null
+}
+const handleChampionshipKeydown = (event: KeyboardEvent) => {
+  if (event.key === 'Escape') closeChampionshipOverlay()
+}
 const resultLabel = (result: FormResult) => ({ win: 'Vitória', draw: 'Empate', loss: 'Derrota' })[result]
 const resultSymbol = (result: FormResult) => ({ win: 'V', draw: 'E', loss: 'D' })[result]
 const recentResults = (teamId: number): FormResult[] => {
@@ -190,6 +377,7 @@ const loadRankings = async () => {
   const [rankingData, statisticsData] = await Promise.all([ChampionshipService.rankings(selectedId.value, phaseFilter.value), ChampionshipService.statistics(selectedId.value, phaseFilter.value)])
   rankings.value = rankingData
   statistics.value = statisticsData
+  if (selectedChampionshipPlayer.value) selectedChampionshipPlayer.value = statisticsData.find((row) => row.player.id === selectedChampionshipPlayer.value?.player.id) || null
 }
 const loadDetails = async () => {
   if (!selectedId.value) { details.value = null; isLoading.value = false; return }
@@ -212,6 +400,7 @@ const vote = async (categoryId: number, candidateId: number) => {
   } catch { /* O interceptor exibe a mensagem devolvida pela API. */ }
 }
 onMounted(async () => {
+  window.addEventListener('keydown', handleChampionshipKeydown)
   try {
     championships.value = await ChampionshipService.list()
     selectedId.value = championships.value[0]?.id
@@ -222,6 +411,7 @@ onMounted(async () => {
     isLoading.value = false
   }
 })
+onBeforeUnmount(() => window.removeEventListener('keydown', handleChampionshipKeydown))
 </script>
 
 <style scoped>
@@ -257,6 +447,9 @@ onMounted(async () => {
 .champion-icon { margin-left: auto; color: #facc15; font-size: 1.6rem; }
 .championship-team-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .6rem; }
 .team-card { display: flex; align-items: center; gap: .65rem; min-width: 0; padding: .7rem .75rem; }
+.team-card--interactive { width: 100%; border: 1px solid var(--line-soft); color: var(--text-main); text-align: left; cursor: pointer; }
+.team-card--interactive:hover, .team-card--interactive:focus-visible { border-color: var(--red-devils); background: var(--red-devils-soft); }
+.team-card-arrow { margin-left: auto; color: var(--red-devils-hover); }
 .team-card-copy { min-width: 0; }
 .team-card strong, .team-card-copy span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .team-card-copy span { margin-top: .18rem; color: var(--text-muted); font-size: .7rem; }
@@ -264,10 +457,28 @@ onMounted(async () => {
 .team-crest--winner { width: 54px; height: 54px; flex-basis: 54px; border-radius: 1rem; }
 .team-crest--table { width: 30px; height: 30px; flex-basis: 30px; border-radius: .55rem; font-size: .65rem; }
 .team-crest img { width: 100%; height: 100%; object-fit: cover; }
+.championship-team-panel { border-color: rgba(220, 38, 38, .3); background: linear-gradient(135deg, rgba(220, 38, 38, .08), rgba(255, 255, 255, .02)); }
+.championship-team-hero { display: flex; align-items: center; gap: .85rem; }
+.championship-team-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .6rem; margin-top: .85rem; }
+.championship-team-metrics > div { display: grid; gap: .12rem; padding: .65rem .7rem; border: 1px solid var(--line-soft); border-radius: .7rem; background: rgba(255, 255, 255, .025); }
+.championship-team-metrics span { color: var(--text-muted); font-size: .68rem; }
+.championship-team-metrics strong { font-size: 1.05rem; }
+.championship-team-roster { margin-top: 1rem; }
+.championship-team-roster .section-toolbar { margin-bottom: .45rem; }
+.championship-team-player-list { max-height: 440px; overflow-y: auto; scrollbar-gutter: stable; scrollbar-color: var(--red-devils) var(--surface-strong); }
+.championship-team-player { display: flex; align-items: center; justify-content: space-between; gap: .75rem; width: 100%; min-height: 44px; padding: .45rem .15rem; border: 0; border-bottom: 1px solid var(--line-soft); background: transparent; color: var(--text-main); font: inherit; text-align: left; cursor: pointer; }
+.championship-team-player:last-child { border-bottom: 0; }
+.championship-team-player:hover:not(:disabled), .championship-team-player:focus-visible:not(:disabled) { color: var(--red-devils-hover); }
+.championship-team-player:disabled { color: var(--text-muted); cursor: default; }
+.championship-team-player span { display: grid; min-width: 0; gap: .12rem; }
+.championship-team-player strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.championship-team-player small { color: var(--text-muted); font-size: .68rem; }
+.championship-team-player i { color: var(--red-devils-hover); }
 .panel-card { min-width: 0; padding: 1rem; }
 .section-context { display: inline-flex; align-items: center; gap: .35rem; color: var(--text-muted); font-size: .72rem; }
 .table-wrap { min-width: 0; overflow-x: auto; scrollbar-color: var(--red-devils) var(--surface-strong); }
 .standings-table-wrap { border: 1px solid var(--line-soft); border-radius: .75rem; }
+.stats-table-wrap { max-height: 510px; overflow: auto; border: 1px solid var(--line-soft); border-radius: .75rem; scrollbar-color: var(--red-devils) var(--surface-strong); }
 .data-table th { background: var(--surface-muted); color: var(--text-muted); }
 .standings-table { min-width: 820px; font-size: .82rem; }
 .standings-table thead th { background: var(--surface-muted); color: var(--text-muted); padding: .7rem .65rem; }
@@ -325,13 +536,85 @@ onMounted(async () => {
 .ranking-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
 .ranking-block { min-width: 0; padding: .75rem; border: 1px solid var(--line-soft); border-radius: .75rem; background: rgba(255,255,255,.02); }
 .ranking-block h3 { margin: 0 0 .35rem; font-size: .78rem; }
-.ranking-row { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .55rem 0; border-bottom: 1px solid var(--line-soft); font-size: .78rem; }
-.ranking-row:last-child { border-bottom: 0; }
-.ranking-player-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ranking-position { display: inline-grid; place-items: center; width: 22px; height: 22px; margin-right: .4rem; border-radius: .4rem; background: var(--red-devils-soft); color: var(--red-devils-hover); font-size: .68rem; }
 .compact-select { width: min(100%, 230px); }
 .compact-table { font-size: .8rem; }
 .compact-table th, .compact-table td { white-space: nowrap; }
+.stats-table thead th { position: sticky; top: 0; z-index: 2; background: var(--surface-muted); }
+.championship-player-link { display: inline-flex; flex-direction: column; width: 100%; min-width: 0; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.championship-player-link:hover strong { color: var(--red-devils-hover); }
+.championship-player-panel { border-color: rgba(220, 38, 38, .3); background: linear-gradient(135deg, rgba(220, 38, 38, .08), rgba(255, 255, 255, .02)); }
+.championship-modal-backdrop { position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; padding: 1rem; background: rgba(7, 3, 3, .78); backdrop-filter: blur(8px); }
+.championship-modal { width: min(100%, 760px); max-height: min(88vh, 760px); overflow-y: auto; padding: 1rem; border: 1px solid var(--line-strong); border-radius: 1rem; box-shadow: 0 24px 70px rgba(0, 0, 0, .5); }
+.championship-detail-close { display: inline-grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--line-soft); border-radius: .6rem; background: transparent; color: var(--text-muted); cursor: pointer; }
+.championship-detail-close:hover { border-color: var(--red-devils); color: var(--text-main); }
+.championship-player-hero { display: flex; align-items: center; gap: .85rem; }
+.championship-player-context, .championship-player-period { margin: 0; color: var(--text-muted); font-size: .78rem; }
+.championship-player-context { color: var(--text-main); font-weight: 700; }
+.championship-player-context span { margin: 0 .25rem; color: var(--red-devils-hover); }
+.championship-player-period { margin-top: .2rem; }
+.championship-player-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .6rem; margin-top: .85rem; }
+.championship-player-metric { display: grid; gap: .12rem; padding: .65rem .7rem; border: 1px solid var(--line-soft); border-radius: .7rem; background: rgba(255, 255, 255, .025); }
+.championship-player-metric span, .championship-player-metric small { color: var(--text-muted); font-size: .68rem; }
+.championship-player-metric strong { font-size: 1.05rem; }
+.standing-team-button { display: flex; align-items: center; justify-content: space-between; gap: .4rem; width: 100%; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.standing-team-button > i { color: var(--red-devils-hover); font-size: .72rem; opacity: 0; transition: opacity .15s ease; }
+.standing-team-button:hover > i, .standing-team-button:focus-visible > i { opacity: 1; }
+.match-team-button { padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: inherit; cursor: pointer; }
+.match-team-button:hover, .match-team-button:focus-visible { color: var(--red-devils-hover); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: .2rem; }
+.match-row:hover, .match-row:focus-visible { background: rgba(255, 255, 255, .035); }
+.bracket-match { cursor: pointer; }
+.bracket-match:hover, .bracket-match:focus-visible { border-radius: .5rem; background: rgba(255, 255, 255, .045); }
+.championship-detail-tabs { display: flex; gap: .35rem; margin-top: 1rem; padding-bottom: .4rem; overflow-x: auto; border-bottom: 1px solid var(--line-soft); }
+.championship-detail-tabs button { min-height: 34px; padding: .4rem .75rem; border: 1px solid transparent; border-radius: .55rem; background: transparent; color: var(--text-muted); font: inherit; font-size: .75rem; font-weight: 800; cursor: pointer; white-space: nowrap; }
+.championship-detail-tabs button:hover, .championship-detail-tabs button.active { border-color: rgba(220, 38, 38, .45); background: var(--red-devils-soft); color: var(--text-main); }
+.championship-detail-overview { display: grid; gap: .75rem; margin-top: .85rem; }
+.championship-form-panel, .championship-detail-stat-grid > div, .championship-event-panel { padding: .75rem; border: 1px solid var(--line-soft); border-radius: .75rem; background: rgba(255, 255, 255, .02); }
+.championship-form-panel .section-toolbar { margin-bottom: .45rem; }
+.form-results--large { min-height: 34px; gap: .35rem; }
+.form-results--large .result-dot { width: 29px; height: 29px; }
+.championship-detail-stat-grid, .championship-match-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .6rem; margin-top: .75rem; }
+.championship-detail-stat-grid > div, .championship-match-metrics > div { display: grid; gap: .12rem; }
+.championship-detail-stat-grid span, .championship-match-metrics span { color: var(--text-muted); font-size: .68rem; }
+.championship-detail-stat-grid strong, .championship-match-metrics strong { font-size: 1rem; }
+.championship-team-matches { margin-top: 1rem; }
+.championship-team-match-list { max-height: 480px; overflow-y: auto; scrollbar-gutter: stable; scrollbar-color: var(--red-devils) var(--surface-strong); }
+.championship-team-match { display: flex; align-items: center; justify-content: space-between; gap: .75rem; width: 100%; min-height: 48px; padding: .5rem .15rem; border: 0; border-bottom: 1px solid var(--line-soft); background: transparent; color: var(--text-main); font: inherit; text-align: left; cursor: pointer; }
+.championship-team-match:last-child { border-bottom: 0; }
+.championship-team-match:hover, .championship-team-match:focus-visible { background: rgba(255, 255, 255, .04); color: var(--red-devils-hover); }
+.championship-team-match span { display: grid; min-width: 0; gap: .15rem; }
+.championship-team-match strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .78rem; }
+.championship-team-match strong small { color: var(--text-main); font-size: .72rem; }
+.championship-team-match span > small { color: var(--text-muted); font-size: .68rem; }
+.championship-team-match > i { color: var(--red-devils-hover); }
+.championship-data-note { display: flex; align-items: flex-start; gap: .45rem; margin: .75rem 0; color: var(--text-muted); font-size: .75rem; line-height: 1.45; }
+.championship-data-note i { flex: 0 0 auto; color: var(--red-devils-hover); }
+.championship-match-panel { border-color: rgba(220, 38, 38, .3); background: linear-gradient(135deg, rgba(220, 38, 38, .08), rgba(255, 255, 255, .02)); }
+.championship-match-hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(120px, auto) minmax(0, 1fr); align-items: center; gap: .75rem; margin-top: .35rem; }
+.championship-match-team { display: grid; justify-items: center; gap: .45rem; min-width: 0; padding: .5rem; border: 1px solid transparent; border-radius: .75rem; background: transparent; color: var(--text-main); font: inherit; cursor: pointer; }
+.championship-match-team:hover, .championship-match-team:focus-visible { border-color: var(--red-devils); background: var(--red-devils-soft); }
+.championship-match-team strong { max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; }
+.championship-match-score { display: grid; justify-items: center; gap: .15rem; text-align: center; }
+.championship-match-score strong { font-size: 1.7rem; }
+.championship-match-score strong.pending { color: var(--red-devils-hover); }
+.championship-match-score span { color: var(--text-muted); font-size: .72rem; }
+.championship-match-score small { color: var(--text-muted); font-size: .65rem; }
+.championship-match-overview { margin-top: .85rem; }
+.championship-event-panel { margin-top: .75rem; }
+.championship-event-list { display: grid; gap: .35rem; }
+.championship-event { display: grid; grid-template-columns: 38px minmax(0, 1fr); gap: .6rem; align-items: start; padding: .55rem 0; border-bottom: 1px solid var(--line-soft); font-size: .78rem; }
+.championship-event:last-child { border-bottom: 0; }
+.championship-event > strong { color: var(--red-devils-hover); }
+.championship-event span { display: grid; gap: .15rem; }
+.championship-event small { color: var(--text-muted); font-size: .68rem; }
+.championship-lineups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+.championship-lineups > div { min-width: 0; padding: .75rem; border: 1px solid var(--line-soft); border-radius: .75rem; background: rgba(255, 255, 255, .02); }
+.championship-lineups h3 { margin: 0 0 .4rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .82rem; }
+.championship-lineup-player { display: flex; align-items: center; justify-content: space-between; gap: .5rem; width: 100%; min-height: 38px; padding: .4rem 0; border: 0; border-bottom: 1px solid var(--line-soft); background: transparent; color: var(--text-main); font: inherit; text-align: left; cursor: pointer; }
+.championship-lineup-player:last-of-type { border-bottom: 0; }
+.championship-lineup-player:hover:not(:disabled), .championship-lineup-player:focus-visible:not(:disabled) { color: var(--red-devils-hover); }
+.championship-lineup-player:disabled { color: var(--text-muted); cursor: default; }
+.championship-lineup-player span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .76rem; }
+.championship-lineup-player small { color: var(--text-muted); font-size: .65rem; white-space: nowrap; }
 .table-subline { display: block; color: var(--text-muted); font-size: .68rem; }
 .awards-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
 .award-block { min-width: 0; padding: .85rem; border: 1px solid var(--line-soft); border-radius: .8rem; background: rgba(255,255,255,.02); }
@@ -348,6 +631,7 @@ onMounted(async () => {
 .award-status { margin: .7rem 0 0; color: var(--text-muted); font-size: .75rem; line-height: 1.45; }
 .empty-inline { padding: .8rem 0; color: var(--text-muted); font-size: .85rem; }
 @container championship-page (max-width: 1050px) { .championship-team-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } .championship-columns { grid-template-columns: 1fr; } }
-@container championship-page (max-width: 680px) { .championship-page { padding-top: .4rem; } .championship-header { align-items: stretch; } .championship-picker { width: 100%; } .championship-tabs { grid-template-columns: repeat(4, minmax(150px, 1fr)); margin-right: -.75rem; padding-right: .75rem; border-right: 0; border-radius: .85rem 0 0 .85rem; } .championship-team-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .champion-banner { align-items: flex-start; } .section-context { max-width: 150px; text-align: right; } .ranking-columns, .awards-grid { grid-template-columns: 1fr; } .match-summary-card { order: -1; } }
+@container championship-page (max-width: 680px) { .championship-page { padding-top: .4rem; } .championship-header { align-items: stretch; } .championship-picker { width: 100%; } .championship-tabs { grid-template-columns: repeat(4, minmax(150px, 1fr)); margin-right: -.75rem; padding-right: .75rem; border-right: 0; border-radius: .85rem 0 0 .85rem; } .championship-team-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .champion-banner { align-items: flex-start; } .section-context { max-width: 150px; text-align: right; } .ranking-columns, .awards-grid { grid-template-columns: 1fr; } .stats-table-wrap { max-height: 270px; } .championship-player-metrics, .championship-team-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .championship-team-player-list, .championship-team-match-list, .championship-ranking-list { max-height: 220px; } .championship-lineups { grid-template-columns: 1fr; } .championship-detail-stat-grid, .championship-match-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .match-summary-card { order: -1; } }
 @container championship-page (max-width: 420px) { .title-row { align-items: flex-start; flex-direction: column; gap: .35rem; } .championship-team-grid { gap: .45rem; } .team-card { padding: .6rem; } .team-crest { width: 36px; height: 36px; flex-basis: 36px; } .team-crest--winner { width: 46px; height: 46px; flex-basis: 46px; } .champion-banner { padding: .85rem; } .champion-icon { font-size: 1.2rem; } .section-context { display: none; } .panel-card { padding: .8rem; } .match-row { gap: .35rem; } .match-score-box { min-width: 80px; } .odds-inline { align-items: flex-start; flex-direction: column; gap: .2rem; } .table-legend { gap: .5rem; } }
+@media (max-width: 767px) { .championship-modal-backdrop { align-items: flex-end; padding: .5rem; } .championship-modal { max-height: 92vh; padding: .8rem; border-radius: 1rem 1rem .75rem .75rem; } .championship-team-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .championship-team-player-list { max-height: 220px; } }
 </style>

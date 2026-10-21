@@ -585,7 +585,7 @@ const fetchRanking = async () => {
   isLoadingRanking.value = true
   rankingError.value = false
   try {
-    currentRanking.value = await RankingService.getFullRanking(rankingType.value, 8, filters.value)
+    currentRanking.value = await RankingService.getFullRanking(rankingType.value, 100, filters.value)
   } catch (error) {
     console.error(error)
     currentRanking.value = null
@@ -604,7 +604,7 @@ const fetchPresence = async () => {
   isLoadingPresence.value = true
   presenceError.value = false
   try {
-    presenceRanking.value = await RankingService.getFullRanking('appearances', 8, filters.value)
+    presenceRanking.value = await RankingService.getFullRanking('appearances', 100, filters.value)
   } catch (error) {
     console.error(error)
     presenceRanking.value = null
@@ -623,7 +623,7 @@ const fetchTopScorerFrequency = async () => {
   isLoadingTopScorerFrequency.value = true
   topScorerFrequencyError.value = false
   try {
-    topScorerFrequencyRanking.value = await RankingService.getFullRanking('top-scorer-frequency', 8, filters.value)
+    topScorerFrequencyRanking.value = await RankingService.getFullRanking('top-scorer-frequency', 100, filters.value)
   } catch (error) {
     console.error(error)
     topScorerFrequencyRanking.value = null
@@ -641,7 +641,7 @@ const fetchTopAssisterFrequency = async () => {
   isLoadingTopAssisterFrequency.value = true
   topAssisterFrequencyError.value = false
   try {
-    topAssisterFrequencyRanking.value = await RankingService.getFullRanking('top-assister-frequency', 8, filters.value)
+    topAssisterFrequencyRanking.value = await RankingService.getFullRanking('top-assister-frequency', 100, filters.value)
   } catch (error) {
     console.error(error)
     topAssisterFrequencyRanking.value = null

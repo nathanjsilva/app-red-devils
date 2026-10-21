@@ -534,3 +534,86 @@ select:focus-visible {
         min-height: 44px;
     }
 }
+
+/* Rankings do campeonato: o componente e renderizado dinamicamente, por isso
+   usa nomes proprios para nao herdar o grid de rankings da home. */
+.championship-ranking-list {
+    max-height: 440px;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    scrollbar-color: var(--red-devils) var(--surface-strong);
+}
+
+.championship-ranking-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) max-content;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 44px;
+    padding: 0.45rem 0.15rem;
+    border-bottom: 1px solid var(--line-soft);
+    border-top: 0;
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--text-main);
+    font-size: 0.78rem;
+    font-family: inherit;
+    text-decoration: none;
+    text-align: left;
+    cursor: pointer;
+}
+
+.championship-ranking-row:last-child {
+    border-bottom: 0;
+}
+
+.championship-ranking-row:hover,
+.championship-ranking-row:focus-visible {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.045);
+}
+
+.championship-ranking-player {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    gap: 0.4rem;
+}
+
+.championship-ranking-position {
+    display: inline-grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+    border-radius: 0.4rem;
+    background: var(--red-devils-soft);
+    color: var(--red-devils-hover);
+    font-size: 0.68rem;
+}
+
+.championship-ranking-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.championship-ranking-value {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--text-main);
+    font-size: 0.76rem;
+    font-weight: 800;
+    text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@container championship-page (max-width: 680px) {
+    .championship-ranking-list {
+        max-height: 220px;
+    }
+}

@@ -1,6 +1,8 @@
 <template>
-  <div class="chart-box" :style="{ height: barsHeight }">
-    <Bar :data="chartData" :options="chartOptions" />
+  <div class="ranking-chart-scroll">
+    <div class="chart-box" :style="{ height: barsHeight }">
+      <Bar :data="chartData" :options="chartOptions" />
+    </div>
   </div>
 </template>
 
@@ -63,5 +65,18 @@ const chartOptions = computed(() => ({
 .chart-box {
   position: relative;
   width: 100%;
+}
+
+.ranking-chart-scroll {
+  max-height: 500px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  scrollbar-color: var(--red-devils) var(--surface-strong);
+}
+
+@media (max-width: 767px) {
+  .ranking-chart-scroll {
+    max-height: 250px;
+  }
 }
 </style>

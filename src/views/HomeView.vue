@@ -102,7 +102,7 @@
       <div class="surface-card-body home-state-card text-center py-5">
         <h2 class="section-title mb-2">Nao foi possivel carregar os rankings</h2>
         <p class="text-muted mb-3">{{ error }}</p>
-        <button class="btn btn-outline-secondary" @click="fetchRankings(filters, 5)">Tentar novamente</button>
+        <button class="btn btn-outline-secondary" @click="fetchRankings(filters, rankingPageSize)">Tentar novamente</button>
       </div>
     </div>
 
@@ -211,6 +211,7 @@ const isLoadingPeladaCounts = ref(false)
 const peladaCountByDivision = ref({ quinta: 0, sabado: 0 })
 
 const rankingsList = computed(() => rankings.value || [])
+const rankingPageSize = 100
 const totalMatches = computed(() => dashboard.value?.total_peladas ?? 0)
 const isAdmin = computed(() => authStore.user?.profile === 'admin')
 
@@ -276,7 +277,7 @@ const fetchPeladaCounts = async () => {
 watch(division, async () => {
   fetchDashboard()
   try {
-    await fetchRankings(filters.value, 20)
+    await fetchRankings(filters.value, rankingPageSize)
   } catch (fetchError) {
     console.error('Error fetching rankings:', fetchError)
   }
@@ -293,7 +294,7 @@ onMounted(async () => {
   fetchPeladaCounts()
 
   try {
-    await fetchRankings(filters.value, 20)
+    await fetchRankings(filters.value, rankingPageSize)
   } catch (fetchError) {
     console.error('Error fetching rankings:', fetchError)
   }

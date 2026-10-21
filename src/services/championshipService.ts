@@ -37,6 +37,16 @@ export interface ChampionshipMatchParticipation {
   mvp?: boolean
 }
 
+export interface ChampionshipMatchEvent {
+  id: number
+  minute?: number | null
+  team_id?: number | null
+  own_goal?: boolean
+  scorer?: { id: number; name: string } | null
+  assist?: { id: number; name: string } | null
+  player?: { id: number; name: string } | null
+}
+
 export interface ChampionshipMatch {
   id: number
   phase: ChampionshipPhase
@@ -50,6 +60,7 @@ export interface ChampionshipMatch {
   away_team: ChampionshipTeam
   odds?: ChampionshipOdds | null
   participations?: ChampionshipMatchParticipation[]
+  events?: ChampionshipMatchEvent[]
 }
 
 export interface ChampionshipStanding {
