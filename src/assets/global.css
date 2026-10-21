@@ -31,6 +31,7 @@ body {
     color: var(--text-main);
     -webkit-tap-highlight-color: transparent;
     overscroll-behavior-y: none;
+    overflow-x: hidden;
 }
 
 a,
@@ -136,6 +137,7 @@ select:focus-visible {
 .page-shell {
     width: min(100%, 1440px);
     margin: 0 auto;
+    min-width: 0;
 }
 
 .page-header {
@@ -164,6 +166,7 @@ select:focus-visible {
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-soft);
     backdrop-filter: blur(12px);
+    min-width: 0;
 }
 
 .surface-card + .surface-card {
@@ -376,6 +379,7 @@ select:focus-visible {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.92rem;
+    min-width: 0;
 }
 
 .data-table thead th {
@@ -467,6 +471,10 @@ select:focus-visible {
         padding-left: 1rem;
         padding-right: 1rem;
     }
+
+    .page-shell {
+        max-width: 100%;
+    }
 }
 
 @media (max-width: 767px) {
@@ -484,6 +492,10 @@ select:focus-visible {
     .section-toolbar {
         flex-direction: column;
         align-items: stretch;
+    }
+
+    .section-toolbar > * {
+        max-width: 100%;
     }
 
     .surface-card-body {

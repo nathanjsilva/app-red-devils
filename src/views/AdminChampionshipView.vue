@@ -231,4 +231,56 @@ onMounted(loadInitialData)
 @container championship-admin (max-width: 380px) { .overview-grid { grid-template-columns: 1fr; }.overview-main { grid-column: auto; }.stone-slots, .form-row { grid-template-columns: 1fr; }.create-form { flex-direction: column; } }
 .button-row { flex-wrap: wrap; justify-content: flex-end; }
 .award-description { margin: .35rem 0 0; color: var(--text-muted); font-size: .78rem; line-height: 1.45; }
+.championship-admin { padding-bottom: 2rem; }
+.championship-admin .page-header { margin-bottom: 1rem; }
+.championship-admin .surface-card { overflow: hidden; }
+.create-card { padding: 1rem 1.1rem; }
+.create-card h2, .admin-card h2 { line-height: 1.2; }
+.module-tabs { position: sticky; top: .5rem; z-index: 12; backdrop-filter: blur(14px); }
+.module-tab { min-width: 0; }
+.admin-card { padding: 1rem; }
+.overview-grid { grid-template-columns: minmax(250px, 1.6fr) repeat(3, minmax(120px, 1fr)); }
+.overview-main, .metric-card { min-height: 104px; }
+.player-filters input, .player-filters select { margin-top: .35rem; }
+.team-assignment-card { overflow: hidden; }
+.team-name-input { min-width: 0; }
+.match-teams span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.match-meta span, .odds-summary { min-width: 0; overflow-wrap: anywhere; }
+.workflow-action { min-width: 0; }
+
+@container championship-admin (max-width: 800px) {
+  .module-tabs { display: flex; overflow-x: auto; justify-content: flex-start; }
+  .module-tab { flex: 0 0 155px; }
+  .overview-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .overview-main { grid-column: 1 / -1; }
+}
+
+@container championship-admin (max-width: 560px) {
+  .create-card { align-items: stretch; }
+  .create-form { flex-direction: column; max-width: none; }
+  .create-form .btn { width: 100%; }
+  .module-tabs { margin-right: -.25rem; padding-right: .25rem; }
+  .module-tab { flex-basis: 145px; }
+  .overview-grid { gap: .5rem; }
+  .overview-main, .metric-card { min-height: 94px; padding: .75rem; }
+  .metric-card strong { font-size: 1.35rem; }
+  .team-assignment-header { align-items: stretch; }
+  .team-actions { justify-content: flex-start; }
+  .team-actions .btn, .team-actions .crest-upload { flex: 1 1 auto; }
+  .form-actions, .match-meta, .match-tools { align-items: stretch; flex-direction: column; }
+  .form-actions .btn, .match-meta .btn, .match-tools .btn { width: 100%; }
+  .match-teams { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
+  .match-teams strong { font-size: .85rem; }
+  .player-filters { grid-template-columns: 1fr; padding: .75rem; }
+  .enrolled-player { grid-template-columns: auto minmax(0, 1fr); }
+  .enrolled-player .stone-badge, .enrolled-player .pill-badge { grid-column: 2; justify-self: start; }
+}
+
+@container championship-admin (max-width: 380px) {
+  .overview-grid { grid-template-columns: 1fr 1fr; }
+  .overview-main { grid-column: 1 / -1; }
+  .admin-card { padding: .8rem; }
+  .form-row, .stone-slots { grid-template-columns: 1fr; }
+  .module-tab { flex-basis: 138px; }
+}
 </style>

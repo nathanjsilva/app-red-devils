@@ -181,6 +181,7 @@
 .app-main {
     min-width: 0;
     padding: 1.5rem;
+    overflow-x: hidden;
 }
 
 @media (max-width: 1100px) {
@@ -242,5 +243,16 @@
 
     .app-main {
         padding: 4.5rem 1rem 1.5rem;
+    }
+}
+
+@media (max-width: 420px) {
+    .app-main {
+        padding-left: .75rem;
+        padding-right: .75rem;
+    }
+
+    .mobile-menu-toggle {
+        right: .75rem;
     }
 }
