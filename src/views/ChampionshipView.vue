@@ -123,18 +123,19 @@
 
       <section v-if="publicTab === 'awards'" class="championship-section" role="tabpanel">
         <article class="surface-card panel-card awards-card">
-          <div class="section-toolbar"><div><span class="eyebrow">Reconhecimento</span><h2 class="section-title mb-0">Premiações</h2></div><span class="text-muted small">Vote em uma categoria elegível</span></div>
+          <div class="section-toolbar"><div><span class="eyebrow">Reconhecimento</span><h2 class="section-title mb-0">Premiações</h2></div><span class="text-muted small">{{ details?.championship.status === 'finished' ? 'Vote em uma categoria elegível' : 'Votação liberada após o encerramento' }}</span></div>
           <div class="awards-grid">
             <article v-for="award in awards" :key="award.id" class="award-block">
               <div class="award-heading"><div><h3>{{ award.name }}</h3><p v-if="award.description">{{ award.description }}</p></div><span class="pill-badge" :class="award.type === 'vote' ? 'pill-info' : 'pill-muted'">{{ award.type === 'vote' ? 'Votação' : 'Automática' }}</span></div>
               <div v-if="award.published" class="award-results"><div v-for="result in award.results" :key="result.id" class="award-result"><span>{{ result.winner?.player?.name || 'Resultado automático' }}</span><strong>{{ result.votes }} votos • {{ result.percentage }}%</strong></div></div>
+              <p v-else-if="award.type === 'vote' && details?.championship.status !== 'finished'" class="award-status">Votação bloqueada. Ela será liberada após o encerramento do campeonato.</p>
               <p v-else-if="award.type === 'vote' && award.voting_open" class="award-status">Identifique-se no painel abaixo para acompanhar seu voto nesta categoria.</p>
               <p v-else-if="award.type === 'vote'" class="award-status">Votação encerrada. O resultado será publicado pela organização.</p>
             </article>
           </div>
           <div v-if="!awards.length" class="empty-inline">As premiações serão disponibilizadas ao longo do campeonato.</div>
         </article>
-        <ChampionshipVoterPanel v-if="details" :key="details.championship.id" :championship-id="details.championship.id" :awards="awards" />
+        <ChampionshipVoterPanel v-if="details" :key="details.championship.id" :championship-id="details.championship.id" :championship-finished="details.championship.status === 'finished'" :awards="awards" />
       </section>
     </template>
 

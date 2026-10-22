@@ -9,6 +9,7 @@
     </div>
 
     <p class="voter-note">Escolha seu nome e use um PIN de 6 dígitos. Este cadastro serve apenas para votar e não verifica a identidade real do participante.</p>
+    <p v-if="!championshipFinished" class="voter-locked-note">A votação está bloqueada até o encerramento do campeonato. Você pode fazer seu cadastro desde já.</p>
 
     <div v-if="!session" class="voter-form">
       <div class="voter-mode-switch" role="tablist" aria-label="Acesso à votação">
@@ -47,10 +48,11 @@
           <div>
             <strong>{{ award.name }}</strong>
             <small v-if="hasVoted(award.id)" class="voter-complete"><i class="bi bi-check-circle-fill" aria-hidden="true"></i> Voto realizado</small>
+            <small v-else-if="!championshipFinished">Votação bloqueada até o encerramento do campeonato</small>
             <small v-else-if="!award.voting_open || award.published">Votação encerrada</small>
             <small v-else>Escolha uma pessoa nesta categoria</small>
           </div>
-          <template v-if="award.voting_open && !award.published && !hasVoted(award.id)">
+          <template v-if="championshipFinished && award.voting_open && !award.published && !hasVoted(award.id)">
             <select v-model.number="candidateSelections[award.id]" :aria-label="`Candidato para ${award.name}`">
               <option :value="0">Selecione um participante</option>
               <option v-for="candidate in candidatesFor(award)" :key="candidate.id" :value="candidate.id">{{ candidate.player?.name || `Participante #${candidate.id}` }}</option>
@@ -76,6 +78,7 @@ import {
 
 const props = defineProps<{
   championshipId: number
+  championshipFinished: boolean
   awards: ChampionshipAward[]
 }>()
 
@@ -182,6 +185,7 @@ onMounted(async () => {
 <style scoped>
 .voter-panel { display: grid; gap: .85rem; }
 .voter-note { margin: -.45rem 0 0; color: var(--text-muted); font-size: .78rem; line-height: 1.5; }
+.voter-locked-note { margin: 0; padding: .65rem .75rem; border: 1px solid var(--line-soft); border-radius: .6rem; color: var(--text-main); background: rgba(255,255,255,.03); font-size: .78rem; line-height: 1.5; }
 .voter-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; align-items: end; }
 .voter-mode-switch { display: flex; gap: .35rem; grid-column: 1 / -1; padding: .25rem; border: 1px solid var(--line-soft); border-radius: .7rem; }
 .voter-mode-switch button { flex: 1; min-height: 38px; padding: .4rem .65rem; border: 0; border-radius: .5rem; background: transparent; color: var(--text-muted); font: inherit; font-size: .78rem; font-weight: 750; }
