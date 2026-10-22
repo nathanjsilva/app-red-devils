@@ -42,9 +42,10 @@ Todas as respostas passam por `(response as any).data?.data ?? response.data` �
 | Ler times por pelada (**público**) | `GET /teams/pelada/:id/fields`, `/players`, `/organized`, `/players-with-statistics` | `teamService.ts` |
 | Organizar times (admin) | `POST /admin/teams/pelada/:id/organize` | `teamService.ts` |
 | Campeonatos (público) | `GET /championships`, `GET /championships/:id`, `/awards`, `/statistics`, `/rankings` | `championshipService.ts` |
-| Campeonato (votação pública) | `POST /championship-awards/:category/votes` | `championshipService.ts` |
+| Campeonato (votação por PIN) | `GET/POST /championships/:id/voting/*`, `POST /championship-votes/:category` com `X-Championship-Voter-Session` | `championshipService.ts`, `ChampionshipVoterPanel.vue` |
+| Campeonato (voto legado) | `POST /championship-awards/:category/votes` | `championshipService.ts` |
 | Encerrar votação do campeonato (admin) | `PUT /admin/championships/:championship/awards/voting-state` | `championshipService.ts` |
-| Campeonato (admin) | `POST /admin/championships`, inscrições (com vínculo de goleiro a uma única equipe), formação, confrontos, playoffs, times, eventos, participação, odds e premiações | `championshipService.ts` |
+| Campeonato (admin) | `POST /admin/championships`, inscrições (com vínculo de goleiro a uma única equipe), formação, confrontos, playoffs, times, eventos, participação, odds, premiações e gestão de votantes | `championshipService.ts`, `AdminChampionshipVoters.vue` |
 | Rankings completos | `GET /statistics/rankings/{wins,goals,assists,goal-participations,win-rate,appearances,goalkeepers}` (envelope `{data,meta}` enriquecido) | `rankingService.ts` |
 | Visão geral da temporada | `GET /statistics/dashboard` | `statisticsService.ts` |
 | Evolução (série temporal) | `GET /statistics/evolution?group_by=month` | `statisticsService.ts` |
@@ -57,7 +58,7 @@ Rotas que existem na API e **não são consumidas** pelo frontend hoje (disponí
 
 ## Configuração relevante
 
-- `API_BASE_URL` está hardcoded em `src/utils/constants.ts` (não usa `.env` atualmente). **Estado atual: aponta para `http://localhost/api`** (API rodando localmente via Docker, ver `docker-compose.yaml` do repositório `api-red-devils`) — trocar para a URL de produção antes de buildar/deployar para produção.
+- `API_BASE_URL` em `src/utils/constants.ts` aceita `VITE_API_BASE_URL`; sem override, usa o host da página e direciona páginas servidas na porta `8080` para a API na porta `8081`. Isso corresponde aos ports publicados pelo Compose de produção. O dev server na porta `3000` usa a API no host local, porta padrão (`http://localhost/api`).
 - Alias `@` aponta para `src/` (Vite + tsconfig).
 - Dev server na porta 3000.
 - `chart.js` + `vue-chartjs` são usados pela página `/estatisticas` (registro central em `src/utils/chartSetup.ts`, importado uma vez em `main.js`).

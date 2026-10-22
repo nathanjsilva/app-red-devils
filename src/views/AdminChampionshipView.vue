@@ -94,11 +94,12 @@
         </section>
 
         <section v-if="activeTab === 'matches'" class="matches-tab">
-          <section class="surface-card admin-card workflow-card"><div class="card-heading"><div><span class="section-kicker">Fluxo</span><h2>Próximas ações</h2></div></div><div class="action-grid"><button class="workflow-action" :disabled="busy || details.matches.length > 0 || details.championship.status !== 'draft'" @click="generateFixtures"><i class="bi bi-calendar-plus"></i><span><strong>Gerar confrontos</strong><small>Cria os 10 jogos</small></span></button><button class="workflow-action" :disabled="busy || details.championship.status !== 'draft'" @click="startChampionship"><i class="bi bi-play-circle"></i><span><strong>Validar e iniciar</strong><small>Confirma a configuração</small></span></button><button class="workflow-action" :disabled="busy || !canGeneratePlayoffs" @click="generatePlayoffs"><i class="bi bi-signpost-split"></i><span><strong>Gerar eliminatórias</strong><small>Congela a classificação</small></span></button></div></section>
+          <section class="surface-card admin-card workflow-card"><div class="card-heading"><div><span class="section-kicker">Fluxo</span><h2>Próximas ações</h2></div></div><div class="action-grid"><button class="workflow-action" :disabled="busy || details.matches.length > 0 || details.championship.status !== 'active'" @click="generateFixtures"><i class="bi bi-calendar-plus"></i><span><strong>Gerar confrontos</strong><small>Cria os 10 jogos</small></span></button><button class="workflow-action" :disabled="busy || details.championship.status !== 'draft'" @click="startChampionship"><i class="bi bi-play-circle"></i><span><strong>Validar e iniciar</strong><small>Confirma a configuração</small></span></button><button class="workflow-action" :disabled="busy || !canGeneratePlayoffs" @click="generatePlayoffs"><i class="bi bi-signpost-split"></i><span><strong>Gerar eliminatórias</strong><small>Congela a classificação</small></span></button></div></section>
           <section class="surface-card admin-card matches-card match-operations-card"><div class="card-heading"><div><span class="section-kicker">Súmula digital</span><h2>Partidas e estatísticas</h2><p class="card-description">Abra uma partida para marcar participantes, MVP, gols, assistências e gol contra. O placar é calculado pelos eventos.</p></div><span class="pill-badge pill-muted">{{ finishedMatchesCount }}/{{ details.matches.length }} finalizadas</span></div><div v-if="!details.matches.length" class="empty-inline">Os confrontos ainda não foram gerados.</div><div v-else class="admin-match-list"><button v-for="match in details.matches" :key="match.id" type="button" class="admin-match-summary" :class="{ 'admin-match-summary--finished': match.status === 'finished' }" @click="openMatchEditor(match)"><span class="admin-match-summary-main"><small>{{ phaseLabel(match.phase) }} · rodada {{ match.round || '—' }}</small><strong>{{ match.home_team.name }} <b>{{ score(match) }}</b> {{ match.away_team.name }}</strong></span><span class="admin-match-summary-meta"><span class="pill-badge" :class="match.status === 'finished' ? 'pill-ok' : 'pill-info'">{{ match.status === 'finished' ? 'Finalizada' : 'Pendente' }}</span><small>{{ participationCount(match) }} participantes · {{ eventCount(match) }} eventos</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></button></div></section>
         </section>
 
         <section v-if="activeTab === 'awards'" class="surface-card admin-card awards-card"><div class="card-heading"><div><span class="section-kicker">Reconhecimento</span><h2>Premiações</h2></div><div class="button-row"><button class="btn btn-outline-secondary btn-sm" @click="loadAwards">Atualizar</button><button class="btn btn-outline-danger btn-sm" :disabled="busy || details.championship.status !== 'finished' || !canEndVoting" @click="endVoting"><i class="bi bi-stop-circle"></i> Encerrar votação</button><button class="btn btn-red btn-sm" :disabled="busy || details.championship.status !== 'finished' || canEndVoting" @click="publishAwards">Publicar resultados</button></div></div><div v-if="!awards.length" class="empty-inline">Nenhuma categoria carregada.</div><div v-for="award in awards" :key="award.id" class="award-row"><div><strong>{{ award.name }}</strong><small>{{ award.type === 'vote' ? (award.voting_open && !award.published ? 'Votação aberta' : 'Votação encerrada') : 'Estatística automática' }}</small><p v-if="award.description" class="award-description">{{ award.description }}</p><div v-for="result in award.results" :key="result.id">{{ result.winner?.player?.name || 'Resultado' }} — {{ result.votes }} votos ({{ result.percentage }}%)</div></div></div></section>
+        <AdminChampionshipVoters v-if="activeTab === 'awards'" :key="details.championship.id" :championship-id="details.championship.id" :participants="details.championship.players || []" />
       </template>
     </template>
 
@@ -129,6 +130,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useToast } from 'vue-toastification'
+import AdminChampionshipVoters from '../components/AdminChampionshipVoters.vue'
 import { ChampionshipService, type ChampionshipMatch, type ChampionshipMatchEvent, type ChampionshipPlayer, type ChampionshipTeam } from '../services/championshipService'
 import { PlayerService } from '../services/playerService'
 import type { Player } from '../types'
@@ -1573,5 +1575,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
   .team-actions .crest-upload {
     font-size: .6rem;
   }
+}
+
+.championship-admin :deep(button),
+.championship-admin :deep(button *),
+.championship-admin :deep(.crest-upload),
+.championship-admin :deep(.crest-upload *) {
+  color: #fff !important;
 }
 </style>

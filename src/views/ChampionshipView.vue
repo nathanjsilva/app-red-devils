@@ -128,13 +128,13 @@
             <article v-for="award in awards" :key="award.id" class="award-block">
               <div class="award-heading"><div><h3>{{ award.name }}</h3><p v-if="award.description">{{ award.description }}</p></div><span class="pill-badge" :class="award.type === 'vote' ? 'pill-info' : 'pill-muted'">{{ award.type === 'vote' ? 'Votação' : 'Automática' }}</span></div>
               <div v-if="award.published" class="award-results"><div v-for="result in award.results" :key="result.id" class="award-result"><span>{{ result.winner?.player?.name || 'Resultado automático' }}</span><strong>{{ result.votes }} votos • {{ result.percentage }}%</strong></div></div>
-              <div v-else-if="award.type === 'vote' && award.voting_open && isAuthenticated" class="candidate-list"><button v-for="candidate in award.candidates" :key="candidate.id" type="button" class="candidate-button" @click="vote(award.id, candidate.id)">{{ candidate.player?.name }}<i class="bi bi-check2" aria-hidden="true"></i></button></div>
-              <p v-else-if="award.type === 'vote' && award.voting_open" class="award-status">Faça login com uma conta vinculada a um participante para votar.</p>
+              <p v-else-if="award.type === 'vote' && award.voting_open" class="award-status">Identifique-se no painel abaixo para acompanhar seu voto nesta categoria.</p>
               <p v-else-if="award.type === 'vote'" class="award-status">Votação encerrada. O resultado será publicado pela organização.</p>
             </article>
           </div>
           <div v-if="!awards.length" class="empty-inline">As premiações serão disponibilizadas ao longo do campeonato.</div>
         </article>
+        <ChampionshipVoterPanel v-if="details" :key="details.championship.id" :championship-id="details.championship.id" :awards="awards" />
       </section>
     </template>
 
@@ -183,7 +183,7 @@
 <script setup lang="ts">
 import { computed, defineComponent, h, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useToast } from 'vue-toastification'
-import { useAuthStore } from '../stores/auth'
+import ChampionshipVoterPanel from '../components/ChampionshipVoterPanel.vue'
 import { ChampionshipService, type ChampionshipMatch, type ChampionshipPlayer, type ChampionshipStatisticsRow, type ChampionshipTeam } from '../services/championshipService'
 
 type PublicTab = 'overview' | 'matches' | 'stats' | 'awards'
@@ -240,7 +240,6 @@ const RankingList = defineComponent({
   },
 })
 
-const authStore = useAuthStore()
 const toast = useToast()
 const championships = ref<Awaited<ReturnType<typeof ChampionshipService.list>>>([])
 const selectedId = ref<number>()
@@ -258,7 +257,6 @@ const playerModalTab = ref<PlayerDetailTab>('overview')
 const matchModalTab = ref<MatchDetailTab>('overview')
 const isLoading = ref(true)
 const loadError = ref('')
-const isAuthenticated = computed(() => authStore.isAuthenticated)
 const hasGoalkeepers = computed(() => statistics.value.some((row) => row.position === 'goalkeeper'))
 const finishedMatchesCount = computed(() => details.value?.matches.filter((match) => match.status === 'finished').length || 0)
 const knockoutMatchesCount = computed(() => details.value?.matches.filter((match) => match.phase !== 'group').length || 0)
@@ -407,14 +405,6 @@ const loadDetails = async () => {
     console.error(error)
     loadError.value = 'Não foi possível carregar este campeonato.'
   } finally { isLoading.value = false }
-}
-const vote = async (categoryId: number, candidateId: number) => {
-  if (!isAuthenticated.value) { toast.info('Faça login para votar.'); return }
-  try {
-    await ChampionshipService.vote(categoryId, candidateId)
-    toast.success('Voto registrado')
-    if (selectedId.value) awards.value = await ChampionshipService.awards(selectedId.value)
-  } catch { /* O interceptor exibe a mensagem devolvida pela API. */ }
 }
 onMounted(async () => {
   window.addEventListener('keydown', handleChampionshipKeydown)
@@ -1531,6 +1521,285 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleChampionshipKe
 
   .stats-mobile-grid small {
     font-size: .5rem;
+  }
+}
+
+/* Navegação e superfícies seguem o mesmo padrão visual do painel admin. */
+.championship-page {
+  padding-bottom: 2rem;
+}
+
+.championship-header {
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.championship-page .surface-card {
+  overflow: hidden;
+}
+
+.championship-section {
+  gap: 1.25rem;
+}
+
+.championship-picker .form-select {
+  min-height: 44px;
+  padding: .65rem .75rem;
+  border: 1px solid var(--line-strong);
+  border-radius: .7rem;
+  background-color: var(--surface-strong);
+  color: var(--text-main);
+}
+
+.championship-picker .form-select:focus {
+  border-color: var(--red-devils);
+  box-shadow: 0 0 0 .2rem var(--red-devils-soft);
+}
+
+.championship-tabs {
+  position: sticky;
+  top: .5rem;
+  z-index: 12;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: .5rem;
+  margin-bottom: 1.25rem;
+  padding: .35rem;
+  backdrop-filter: blur(14px);
+}
+
+.championship-tab {
+  min-width: 0;
+  min-height: 58px;
+  padding: .65rem .75rem;
+  border: 1px solid #3f3f46;
+  background: #171717;
+  color: #fff;
+}
+
+.championship-tab i,
+.championship-tab span {
+  color: #fff;
+}
+
+.championship-tab span {
+  font-weight: 750;
+}
+
+.championship-tab small {
+  color: #d4d4d8;
+}
+
+.championship-tab.active,
+.championship-tab:hover,
+.championship-tab:focus-visible {
+  border-color: var(--red-devils);
+  background: var(--red-devils);
+  color: #fff;
+}
+
+.championship-detail-tabs button {
+  min-height: 38px;
+  border-color: #3f3f46;
+  background: #171717;
+  color: #fff;
+}
+
+.championship-detail-tabs button:hover,
+.championship-detail-tabs button.active {
+  border-color: var(--red-devils);
+  background: var(--red-devils);
+  color: #fff;
+}
+
+.candidate-button {
+  border-color: #3f3f46;
+  background: #171717;
+}
+
+.candidate-button:hover,
+.candidate-button:focus-visible {
+  border-color: var(--red-devils);
+  background: var(--red-devils);
+  color: #fff;
+}
+
+.candidate-button:hover i,
+.candidate-button:focus-visible i {
+  color: #fff;
+}
+
+.championship-ranking-row {
+  min-height: 44px;
+  margin-bottom: .35rem;
+  padding: .5rem .65rem;
+  border: 1px solid #3f3f46;
+  border-radius: .65rem;
+  background: #171717;
+}
+
+.championship-ranking-row:last-child {
+  margin-bottom: 0;
+}
+
+.championship-ranking-row:hover,
+.championship-ranking-row:focus-visible {
+  border-color: var(--red-devils);
+  background: var(--red-devils);
+  color: #fff;
+}
+
+.championship-ranking-row:hover .championship-ranking-position,
+.championship-ranking-row:focus-visible .championship-ranking-position {
+  background: rgba(255, 255, 255, .16);
+  color: #fff;
+}
+
+.championship-ranking-row:hover .championship-ranking-value,
+.championship-ranking-row:focus-visible .championship-ranking-value {
+  color: #fff;
+}
+
+.match-row {
+  margin-bottom: .55rem;
+  padding: .8rem .9rem;
+  border: 1px solid #3f3f46;
+  border-radius: .8rem;
+  background: #171717;
+}
+
+.match-row:last-child {
+  border-bottom: 1px solid #3f3f46;
+}
+
+.match-row:hover,
+.match-row:focus-visible {
+  border-color: var(--red-devils);
+  background: var(--red-devils);
+}
+
+.match-row:hover .match-score,
+.match-row:hover .match-team,
+.match-row:hover .match-score-box small,
+.match-row:hover .odds-inline,
+.match-row:hover .odds-inline strong,
+.match-row:focus-visible .match-score,
+.match-row:focus-visible .match-team,
+.match-row:focus-visible .match-score-box small,
+.match-row:focus-visible .odds-inline,
+.match-row:focus-visible .odds-inline strong {
+  color: #fff;
+}
+
+.championship-modal {
+  background: var(--surface);
+  backdrop-filter: blur(14px);
+}
+
+@media (max-width: 767px) {
+  .championship-page {
+    padding: .35rem 0 1.25rem;
+  }
+
+  .championship-header {
+    align-items: stretch;
+    gap: .55rem;
+    margin-bottom: .7rem;
+  }
+
+  .championship-section {
+    gap: .65rem;
+  }
+
+  .championship-picker .form-select {
+    min-height: 40px;
+    padding: .5rem .6rem;
+    border-radius: .6rem;
+    font-size: .78rem;
+  }
+
+  .championship-tabs {
+    display: flex;
+    gap: .25rem;
+    margin: 0 -.15rem .7rem;
+    padding: .25rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    border-radius: .75rem;
+    scrollbar-width: thin;
+  }
+
+  .championship-tab {
+    display: grid;
+    flex: 0 0 126px;
+    grid-template-columns: auto minmax(0, 1fr);
+    min-width: 126px;
+    min-height: 46px;
+    padding: .4rem .45rem;
+    border-radius: .55rem;
+    gap: .1rem .3rem;
+  }
+
+  .championship-tab i {
+    font-size: .88rem;
+  }
+
+  .championship-tab span {
+    font-size: .7rem;
+    line-height: 1.1;
+  }
+
+  .championship-tab small {
+    display: none;
+  }
+
+  .championship-page .panel-card {
+    padding: .75rem;
+  }
+
+  .standings-mobile-card,
+  .stats-mobile-card {
+    border-color: #3f3f46;
+    background: #171717;
+  }
+
+  .standings-mobile-card:hover,
+  .standings-mobile-card:focus-visible,
+  .stats-mobile-card:hover,
+  .stats-mobile-card:focus-visible {
+    border-color: var(--red-devils);
+    background: var(--red-devils);
+    color: #fff;
+  }
+
+  .standings-mobile-card:hover small,
+  .standings-mobile-card:focus-visible small,
+  .standings-mobile-card:hover .standing-mobile-footer,
+  .standings-mobile-card:focus-visible .standing-mobile-footer,
+  .stats-mobile-card:hover small,
+  .stats-mobile-card:focus-visible small {
+    color: #fff;
+  }
+
+  .standings-mobile-card:hover .standing-mobile-position,
+  .standings-mobile-card:focus-visible .standing-mobile-position,
+  .stats-mobile-card:hover .player-mark,
+  .stats-mobile-card:focus-visible .player-mark {
+    border-color: rgba(255, 255, 255, .35);
+    background: #171717;
+    color: #fff;
+  }
+
+  .standings-mobile-card:hover .team-crest,
+  .standings-mobile-card:focus-visible .team-crest,
+  .standings-mobile-card:hover > i,
+  .standings-mobile-card:focus-visible > i,
+  .stats-mobile-card:hover > i,
+  .stats-mobile-card:focus-visible > i {
+    color: #fff;
+  }
+
+  .match-row {
+    padding: .65rem;
   }
 }
 </style>

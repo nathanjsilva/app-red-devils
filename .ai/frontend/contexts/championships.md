@@ -8,6 +8,8 @@ O módulo de campeonato é independente das peladas existentes. Ele administra u
 
 - `src/views/ChampionshipView.vue`: tela pública com classificação, partidas, odds, chaveamento, rankings, estatísticas e premiações.
 - `src/views/AdminChampionshipView.vue`: painel administrativo de configuração e operação da competição.
+- `src/components/ChampionshipVoterPanel.vue`: cadastro, identificação, status individual e voto por PIN; token guardado em `sessionStorage` por campeonato.
+- `src/components/AdminChampionshipVoters.vue`: listagem, correção do vínculo e redefinição de PIN dentro da seção de premiações do admin.
 - `src/services/championshipService.ts`: chamadas à API do campeonato e tipos das respostas.
 - `src/router/index.js`: rotas `/campeonatos` e `/admin/championships`.
 - `src/components/SidebarComponent.vue`: links públicos e administrativos.
@@ -20,7 +22,8 @@ O módulo de campeonato é independente das peladas existentes. Ele administra u
 4. Gerar os dez confrontos da primeira fase e validar/iniciar a competição.
 5. Marcar os participantes de cada partida, escolher o MVP, registrar gols, assistências e gols contra. O placar é recalculado pela API a partir dos eventos.
 6. Calcular odds informativas, registrar desempates quando necessário e finalizar partidas. Eliminatórias empatadas exigem placares de pênaltis.
-7. Gerar os playoffs após os dez jogos da fase de grupos, manter as categorias disponíveis para votação, encerrar todas as votações em uma única ação administrativa e publicar os resultados após a Grande Final.
+7. O participante se cadastra para votar selecionando sua inscrição e criando um PIN numérico de seis dígitos. Nos próximos acessos, seleciona o nome e informa o PIN; a sessão de votação fica separada da conta administrativa.
+8. Gerar os playoffs após os dez jogos da fase de grupos, manter as categorias disponíveis para votação, encerrar todas as votações em uma única ação administrativa e publicar os resultados após a Grande Final.
 
 ## Regras de negócio
 
@@ -33,12 +36,14 @@ O módulo de campeonato é independente das peladas existentes. Ele administra u
 - Assistências devem ser dadas por outro participante da mesma equipe do autor do gol. Apenas participantes da partida podem receber eventos ou MVP.
 - Estatísticas consideram somente partidas finalizadas e válidas.
 - Existem quinze premiações. Artilheiro e Garçom são automáticos; as outras categorias são votadas.
-- Votação fica disponível até o administrador encerrar todas as categorias, exige conta autenticada vinculada a jogador inscrito, permite um voto por categoria, impede auto-voto e respeita a elegibilidade de goleiros/defensores. Resultados ficam ocultos até publicação.
+- Votação fica disponível até o administrador encerrar todas as categorias. O participante pode usar o cadastro simples por PIN, limitado a um cadastro por jogador e a um voto por categoria. O backend valida a sessão, impede auto-voto e respeita a elegibilidade de goleiros/defensores. Resultados ficam ocultos até publicação.
+- PIN fica armazenado em hash; após cinco tentativas incorretas, a identificação bloqueia por 15 minutos. A sessão aleatória expira em 12 horas e o token bruto só fica no `sessionStorage` do navegador.
+- Administradores podem consultar cadastros/categorias votadas, corrigir o vínculo dentro do campeonato e redefinir PIN. Mudanças de vínculo entram na auditoria e invalidam a sessão; votos existentes permanecem no mesmo cadastro.
 - Odds são apenas informação esportiva e usam o modelo Poisson persistido pela API; não há apostas financeiras.
 
 ## Endpoints específicos
 
-As rotas públicas começam em `/championships`. As operações administrativas começam em `/admin` e exigem usuário administrador. A votação usa `POST /championship-awards/:category/votes` e exige autenticação; o encerramento global usa `PUT /admin/championships/:championship/awards/voting-state`.
+As rotas públicas começam em `/championships`. O cadastro, identificação e consulta de status de votação usam `/championships/:id/voting/*`; o voto por PIN usa `POST /championship-votes/:category` com cabeçalho `X-Championship-Voter-Session`. A rota legada `POST /championship-awards/:category/votes` ainda aceita contas autenticadas e compartilha a regra de voto único. As operações administrativas começam em `/admin` e exigem usuário administrador; gestão de cadastros usa `/admin/championships/:id/voters` e `/admin/championship-voters/:id/{player,pin}`.
 
 Não criar ou editar backend neste repositório. Se o contrato da API mudar, confirmar a mudança antes de alterar os serviços do frontend.
 

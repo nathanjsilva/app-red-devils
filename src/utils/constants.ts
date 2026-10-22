@@ -1,4 +1,8 @@
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || `${window.location.protocol}//${window.location.hostname}/api`
+const defaultApiOrigin = window.location.port === '8080'
+  ? `${window.location.protocol}//${window.location.hostname}:8081`
+  : `${window.location.protocol}//${window.location.hostname}`
+
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || `${defaultApiOrigin}/api`
 
 export const STORAGE_KEYS = {
   TOKEN: 'token',

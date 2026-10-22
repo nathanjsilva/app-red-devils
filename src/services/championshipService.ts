@@ -142,6 +142,39 @@ export interface ChampionshipAward {
   results?: ChampionshipAwardResult[]
 }
 
+export interface ChampionshipVoterPlayerOption {
+  id: number
+  name: string
+  nickname?: string | null
+  player_type: ChampionshipPlayerType
+}
+
+export interface ChampionshipVoterSession {
+  championship_player_id: number
+  player: { name: string; nickname?: string | null }
+}
+
+export interface ChampionshipVoterCategoryStatus {
+  id: number
+  name: string
+  type: 'vote' | 'statistic'
+  voting_open: boolean
+  published: boolean
+  has_voted: boolean
+}
+
+export interface ChampionshipVoterStatus {
+  voter: ChampionshipVoterSession
+  categories: ChampionshipVoterCategoryStatus[]
+}
+
+export interface ChampionshipVoterAdminRecord {
+  id: number
+  championship_player_id: number
+  player: { id: number; name: string; nickname?: string | null }
+  categories_voted: Array<{ id: number; name: string }>
+}
+
 const payload = <T>(response: { data: T | { data: T } }): T => {
   const value = response.data
   if (value && typeof value === 'object' && 'data' in value) {
@@ -222,6 +255,60 @@ export class ChampionshipService {
 
   static async vote(categoryId: number, candidateId: number): Promise<Record<string, unknown>> {
     return payload(await api.post(`/championship-awards/${categoryId}/votes`, { candidate_id: candidateId }))
+  }
+
+  static async voterPlayers(championshipId: number): Promise<ChampionshipVoterPlayerOption[]> {
+    return payload(await api.get(`/championships/${championshipId}/voting/players`))
+  }
+
+  static async registerVoter(championshipId: number, championshipPlayerId: number, pin: string): Promise<{ token: string; voter: ChampionshipVoterSession }> {
+    return payload(await api.post(`/championships/${championshipId}/voting/voters`, {
+      championship_player_id: championshipPlayerId,
+      pin,
+      pin_confirmation: pin,
+    }))
+  }
+
+  static async loginVoter(championshipId: number, championshipPlayerId: number, pin: string): Promise<{ token: string; voter: ChampionshipVoterSession }> {
+    return payload(await api.post(`/championships/${championshipId}/voting/session`, {
+      championship_player_id: championshipPlayerId,
+      pin,
+    }))
+  }
+
+  static async voterStatus(championshipId: number, token: string): Promise<ChampionshipVoterStatus> {
+    return payload(await api.get(`/championships/${championshipId}/voting/session`, {
+      headers: { 'X-Championship-Voter-Session': token },
+    }))
+  }
+
+  static async logoutVoter(championshipId: number, token: string): Promise<void> {
+    await api.delete(`/championships/${championshipId}/voting/session`, {
+      headers: { 'X-Championship-Voter-Session': token },
+    })
+  }
+
+  static async voteAsVoter(categoryId: number, candidateId: number, token: string): Promise<Record<string, unknown>> {
+    return payload(await api.post(`/championship-votes/${categoryId}`, { candidate_id: candidateId }, {
+      headers: { 'X-Championship-Voter-Session': token },
+    }))
+  }
+
+  static async championshipVoters(championshipId: number): Promise<ChampionshipVoterAdminRecord[]> {
+    return payload(await api.get(`/admin/championships/${championshipId}/voters`))
+  }
+
+  static async linkChampionshipVoter(voterId: number, championshipPlayerId: number): Promise<Pick<ChampionshipVoterAdminRecord, 'id' | 'championship_player_id' | 'player'>> {
+    return payload(await api.put(`/admin/championship-voters/${voterId}/player`, {
+      championship_player_id: championshipPlayerId,
+    }))
+  }
+
+  static async resetChampionshipVoterPin(voterId: number, pin: string): Promise<{ message: string }> {
+    return payload(await api.put(`/admin/championship-voters/${voterId}/pin`, {
+      pin,
+      pin_confirmation: pin,
+    }))
   }
 
   static async uploadCrest(teamId: number, file: File): Promise<ChampionshipTeam> {

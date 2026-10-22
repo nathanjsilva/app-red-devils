@@ -18,6 +18,9 @@ api.interceptors.request.use(
       config.headers = config.headers || {}
       config.headers.Authorization = token
     }
+    if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+      config.headers.delete('Content-Type')
+    }
     return config
   },
   (error) => Promise.reject(error)
@@ -33,6 +36,10 @@ api.interceptors.response.use(
 
       switch (status) {
         case 401:
+          if (error.config?.headers?.['X-Championship-Voter-Session'] || error.config?.url?.includes('/voting/session') || error.config?.url?.includes('/championship-votes/')) {
+            toast.info(data?.message || 'Identifique-se novamente para continuar votando.')
+            break
+          }
           if (error.config?.url?.includes('/login')) {
             toast.error(data?.message || 'Usuario ou senha incorretos.')
             break
