@@ -39,6 +39,7 @@
         :model-value="pageSize"
         :options="pageSizeOptions"
         input-class="pag-select"
+        aria-label="Itens por página"
         @update:model-value="(value) => value != null && $emit('update:pageSize', Number(value))"
       />
     </div>

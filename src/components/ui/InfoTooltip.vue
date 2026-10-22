@@ -5,7 +5,8 @@
       class="info-tooltip-trigger"
       :aria-label="`O que é: ${label ?? 'esta estatística'}`"
       :aria-expanded="open"
-      @click="open = !open"
+      :aria-describedby="open ? tooltipId : undefined"
+      @click="open = true"
       @focus="open = true"
       @blur="open = false"
       @mouseenter="open = true"
@@ -13,12 +14,12 @@
     >
       <i class="bi bi-info-circle"></i>
     </button>
-    <span v-if="open" class="info-tooltip-bubble" role="tooltip">{{ text }}</span>
+    <span v-if="open" :id="tooltipId" class="info-tooltip-bubble" role="tooltip">{{ text }}</span>
   </span>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, useId } from 'vue'
 
 defineProps<{
   text: string
@@ -26,6 +27,7 @@ defineProps<{
 }>()
 
 const open = ref(false)
+const tooltipId = `info-tooltip-${useId()}`
 </script>
 
 <style scoped>
@@ -55,6 +57,13 @@ const open = ref(false)
 
 .info-tooltip-trigger i {
   font-size: 0.85rem;
+}
+
+@media (max-width: 767px) {
+  .info-tooltip-trigger {
+    width: 44px;
+    height: 44px;
+  }
 }
 
 .info-tooltip-bubble {

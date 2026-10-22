@@ -219,13 +219,13 @@
 
     <Transition name="modal-fade">
       <div v-if="selectedPlayer" class="modal-veil" @click.self="closeModal">
-        <div class="modal-card" role="dialog" aria-modal="true">
+        <div ref="playerDialogRef" class="modal-card" role="dialog" aria-modal="true" aria-labelledby="player-dialog-title" tabindex="-1">
           <div class="modal-head">
             <span class="modal-avatar" :style="{ background: avatarColor(selectedPlayer.player.name) }">
               {{ initials(selectedPlayer.player.name) }}
             </span>
             <div class="modal-head-text">
-              <h2>{{ selectedPlayer.player.name }}</h2>
+              <h2 id="player-dialog-title">{{ selectedPlayer.player.name }}</h2>
               <p>{{ selectedPlayer.player.position === 'goleiro' ? 'Goleiro' : 'Jogador de linha' }}</p>
             </div>
             <button class="modal-close" @click="closeModal" aria-label="Fechar">
@@ -289,13 +289,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import SearchableSelect from '../components/ui/SearchableSelect.vue'
 import StatTile from '../components/ui/StatTile.vue'
 import Pagination from '../components/ui/Pagination.vue'
 import { useSEO } from '../composables/useSEO'
 import { useResponsive } from '../composables/useResponsive'
+import { useDialogFocus } from '../composables/useDialogFocus'
 import { StatisticsService } from '../services/statisticsService'
 import type { PlayerOverviewItem, PlayersOverviewResponse, StatisticsFilters } from '../types'
 import logo from '../assets/logo-red-devils.png'
@@ -323,6 +324,8 @@ const search = ref('')
 const positionFilter = ref<'all' | 'linha' | 'goleiro'>('all')
 const eligibilityFilter = ref<'all' | 'eligible' | 'not_eligible'>('all')
 const selectedPlayer = ref<PlayerOverviewItem | null>(null)
+const playerDialogRef = ref<HTMLElement | null>(null)
+const isPlayerDialogOpen = computed(() => selectedPlayer.value !== null)
 const currentPage = ref(1)
 const pageSize = ref<number>(10)
 const pageSizeOptions = [
@@ -399,13 +402,13 @@ const initials = (name: string) => name.split(' ').slice(0, 2).map((word) => wor
 
 const openModal = (entry: PlayerOverviewItem) => {
   selectedPlayer.value = entry
-  document.body.style.overflow = 'hidden'
 }
 
 const closeModal = () => {
   selectedPlayer.value = null
-  document.body.style.overflow = ''
 }
+
+useDialogFocus(playerDialogRef, isPlayerDialogOpen, closeModal)
 
 const fetchOverview = async () => {
   isLoading.value = true
@@ -430,7 +433,4 @@ onMounted(async () => {
   await fetchOverview()
 })
 
-onUnmounted(() => {
-  document.body.style.overflow = ''
-})
 </script>

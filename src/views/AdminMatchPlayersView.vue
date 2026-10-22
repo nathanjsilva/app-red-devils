@@ -17,6 +17,7 @@
               v-model="form.pelada_id"
               :options="peladaOptions"
               placeholder="Selecione a pelada"
+              aria-label="Pelada"
               :disabled="allPeladas.length === 0 || isLoadingPeladas"
               @change="loadPeladaData"
             />
@@ -44,7 +45,7 @@
           <span class="text-muted small">{{ playerStats.length }} registro{{ playerStats.length !== 1 ? 's' : '' }}</span>
         </div>
 
-        <div class="table-responsive">
+        <div v-if="!isMobile" class="table-responsive">
           <table class="data-table stack-mobile">
             <thead>
               <tr>
@@ -97,6 +98,7 @@
                   <SearchableSelect
                     v-model="playerStat.statistics.result"
                     :options="resultOptions"
+                    :aria-label="`Resultado de ${playerStat.player.name}`"
                     input-class="form-select-sm result-select"
                     @change="syncWinner(playerStat)"
                   />
@@ -120,6 +122,63 @@
             </tbody>
           </table>
         </div>
+
+        <div v-else class="player-stat-mobile-list" role="list" aria-label="Jogadores da pelada">
+          <article v-for="playerStat in playerStats" :key="playerStat.player.id" class="player-stat-mobile-card" role="listitem">
+            <header class="player-stat-mobile-header">
+              <strong>{{ playerStat.player.name }}</strong>
+              <span class="pill-badge" :class="playerStat.player.position === 'goleiro' ? 'pill-info' : 'pill-muted'">
+                {{ playerStat.player.position === 'goleiro' ? 'Goleiro' : 'Linha' }}
+              </span>
+            </header>
+
+            <div class="player-stat-mobile-metrics">
+              <label>
+                <span>Gols</span>
+                <input v-model.number="playerStat.statistics.goals" type="number" class="form-control stat-input" min="0" />
+              </label>
+              <label>
+                <span>Assistências</span>
+                <input v-model.number="playerStat.statistics.assists" type="number" class="form-control stat-input" min="0" />
+              </label>
+              <label>
+                <span>Gols sofridos</span>
+                <input
+                  v-if="playerStat.player.position === 'goleiro'"
+                  v-model.number="playerStat.statistics.goals_conceded"
+                  type="number"
+                  class="form-control stat-input"
+                  min="0"
+                />
+                <span v-else class="player-stat-empty">—</span>
+              </label>
+            </div>
+
+            <label class="player-stat-mobile-result">
+              <span>Resultado</span>
+              <SearchableSelect
+                v-model="playerStat.statistics.result"
+                :options="resultOptions"
+                :aria-label="`Resultado de ${playerStat.player.name}`"
+                @change="syncWinner(playerStat)"
+              />
+            </label>
+
+            <div class="player-stat-mobile-actions">
+              <button class="btn btn-sm btn-red" @click="savePlayerStatistics(playerStat)" :disabled="isSaving === playerStat.player.id">
+                {{ isSaving === playerStat.player.id ? 'Salvando...' : 'Salvar' }}
+              </button>
+              <button
+                v-if="playerStat.matchPlayerId"
+                class="btn btn-sm btn-outline-danger"
+                @click="removePlayerStatistics(playerStat)"
+                :disabled="isSaving === playerStat.player.id"
+              >
+                Excluir
+              </button>
+            </div>
+          </article>
+        </div>
       </div>
     </section>
 
@@ -140,6 +199,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
 import SearchableSelect from '../components/ui/SearchableSelect.vue'
+import { useResponsive } from '../composables/useResponsive'
 import { AdminService } from '../services/adminService'
 import { PeladaService } from '../services/peladaService'
 import { TeamService } from '../services/teamService'
@@ -166,6 +226,7 @@ interface PlayerWithStatistics {
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
+const { isMobile } = useResponsive()
 const selectedPelada = ref<Pelada | null>(null)
 const allPeladas = ref<Pelada[]>([])
 const isLoadingPlayers = ref(false)
@@ -377,10 +438,110 @@ watch(() => route.query.pelada_id, async (newPeladaId) => {
   min-width: 118px;
 }
 
-@media (max-width: 640px) {
-  .stat-input,
-  .result-select {
-    min-width: 140px;
+.player-stat-mobile-list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.player-stat-mobile-card {
+  display: grid;
+  gap: 0.65rem;
+  min-width: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 0.85rem;
+  background: var(--surface-strong);
+}
+
+.player-stat-mobile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.player-stat-mobile-header strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-stat-mobile-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.player-stat-mobile-metrics label,
+.player-stat-mobile-result {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+  margin: 0;
+}
+
+.player-stat-mobile-metrics label > span:first-child,
+.player-stat-mobile-result > span {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.player-stat-mobile-metrics .stat-input {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 0.45rem;
+  text-align: center;
+}
+
+.player-stat-empty {
+  display: grid;
+  place-items: center;
+  min-height: 42px;
+  color: var(--text-muted);
+}
+
+.player-stat-mobile-result :deep(.searchable-select-input) {
+  min-width: 0;
+  min-height: 42px;
+}
+
+.player-stat-mobile-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.player-stat-mobile-actions .btn {
+  flex: 1 1 auto;
+}
+
+@media (min-width: 769px) {
+  .player-stat-mobile-list {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .table-responsive {
+    display: none;
+  }
+}
+
+@media (max-width: 359px) {
+  .player-stat-mobile-card {
+    padding: 0.6rem;
+  }
+
+  .player-stat-mobile-metrics {
+    gap: 0.35rem;
+  }
+
+  .player-stat-mobile-metrics label > span:first-child {
+    font-size: 0.62rem;
   }
 }
 </style>

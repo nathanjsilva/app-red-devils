@@ -16,6 +16,7 @@
               v-model="peladaId"
               :options="peladaOptions"
               placeholder="Selecione a pelada"
+              aria-label="Pelada"
               :disabled="isLoadingPeladas"
               @change="loadTeamContext"
             />
@@ -84,6 +85,7 @@
                   :model-value="goalkeeperAssignments[slot] ?? null"
                   :options="goalkeeperOptionsFor(slot)"
                   placeholder="Selecione o goleiro"
+                  :aria-label="goalkeeperMode === 'team' ? `Goleiro do Time ${slot}` : `Goleiro do Gol ${slot}`"
                   @update:model-value="(value) => onChangeGoalkeeperAssignment(slot, value)"
                 />
               </div>
@@ -109,6 +111,7 @@
                       :model-value="teamAssignmentsMap[field.team_number]?.[slotIndex - 1] ?? null"
                       :options="playerOptionsFor(field.team_number, slotIndex - 1)"
                       placeholder="Selecione o jogador"
+                      :aria-label="`Jogador de linha ${slotIndex} do Time ${field.team_number}`"
                       @update:model-value="(value) => onChangeSingleAssignment(field.team_number, slotIndex - 1, value)"
                     />
                   </div>

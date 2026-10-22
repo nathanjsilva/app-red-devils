@@ -1,5 +1,5 @@
 <template>
-  <div class="searchable-select" :class="{ open: isOpen, disabled: disabled }" @keydown.esc="close">
+  <div class="searchable-select" :class="{ open: isOpen, disabled: disabled }" @keydown.esc.prevent="closeImmediately">
     <input
       ref="inputEl"
       type="text"
@@ -7,30 +7,42 @@
       :class="inputClass"
       :placeholder="placeholder"
       :disabled="disabled"
+      :aria-label="ariaLabel || placeholder || 'Selecionar opção'"
+      :aria-expanded="isOpen"
+      :aria-controls="isOpen ? listboxId : undefined"
+      :aria-activedescendant="activeOptionId || undefined"
+      aria-autocomplete="list"
+      aria-haspopup="listbox"
+      role="combobox"
       v-model="query"
       @focus="onFocus"
       @blur="close"
       @keydown.enter.prevent="selectFirstMatch"
+      @keydown.down.prevent="moveActiveOption(1)"
+      @keydown.up.prevent="moveActiveOption(-1)"
     />
     <i class="bi bi-chevron-down searchable-select-caret"></i>
-    <ul v-if="isOpen && filteredOptions.length > 0" class="searchable-select-suggestions">
+    <ul v-if="isOpen" :id="listboxId" class="searchable-select-suggestions" role="listbox">
       <li
-        v-for="option in filteredOptions"
+        v-for="(option, index) in filteredOptions"
+        :id="optionId(index)"
         :key="option.value"
-        :class="{ disabled: option.disabled, active: option.value === modelValue }"
+        :class="{ disabled: option.disabled, active: activeOptionIndex === index, selected: option.value === modelValue }"
+        role="option"
+        :aria-selected="option.value === modelValue"
+        :aria-disabled="!!option.disabled"
+        @mousemove="activeOptionIndex = index"
         @mousedown.prevent="selectOption(option)"
       >
         {{ option.label }}
       </li>
-    </ul>
-    <ul v-else-if="isOpen" class="searchable-select-suggestions">
-      <li class="empty">Nenhum resultado</li>
+      <li v-if="filteredOptions.length === 0" class="empty" role="option" aria-disabled="true">Nenhum resultado</li>
     </ul>
   </div>
 </template>
 
 <script setup lang="ts" generic="T extends string | number">
-import { computed, ref, watch } from 'vue'
+import { computed, ref, useId, watch } from 'vue'
 
 export interface SearchableSelectOption<T> {
   value: T
@@ -44,6 +56,7 @@ const props = defineProps<{
   placeholder?: string
   disabled?: boolean
   inputClass?: string
+  ariaLabel?: string
 }>()
 
 const emit = defineEmits<{
@@ -54,6 +67,12 @@ const emit = defineEmits<{
 const inputEl = ref<HTMLInputElement | null>(null)
 const query = ref('')
 const isOpen = ref(false)
+const activeOptionIndex = ref(-1)
+const listboxId = `searchable-select-${useId()}`
+const optionId = (index: number) => `${listboxId}-option-${index}`
+const activeOptionId = computed(() =>
+  isOpen.value && activeOptionIndex.value >= 0 ? optionId(activeOptionIndex.value) : ''
+)
 
 const DIACRITICS_PATTERN = /\p{M}/gu
 
@@ -82,17 +101,34 @@ const filteredOptions = computed(() => {
   return props.options.filter((option) => normalize(option.label).includes(q))
 })
 
+const setInitialActiveOption = () => {
+  const selectedIndex = filteredOptions.value.findIndex(
+    (option) => option.value === props.modelValue && !option.disabled
+  )
+  activeOptionIndex.value = selectedIndex >= 0
+    ? selectedIndex
+    : filteredOptions.value.findIndex((option) => !option.disabled)
+}
+
 const onFocus = () => {
   if (props.disabled) return
   isOpen.value = true
   query.value = ''
+  setInitialActiveOption()
 }
 
 const close = () => {
   setTimeout(() => {
     isOpen.value = false
     query.value = selectedLabel.value
+    activeOptionIndex.value = -1
   }, 150)
+}
+
+const closeImmediately = () => {
+  isOpen.value = false
+  query.value = selectedLabel.value
+  activeOptionIndex.value = -1
 }
 
 const selectOption = (option: SearchableSelectOption<T>) => {
@@ -101,13 +137,43 @@ const selectOption = (option: SearchableSelectOption<T>) => {
   emit('change', option.value)
   query.value = option.label
   isOpen.value = false
+  activeOptionIndex.value = -1
   inputEl.value?.blur()
 }
 
+const moveActiveOption = (direction: 1 | -1) => {
+  if (props.disabled) return
+  if (!isOpen.value) {
+    isOpen.value = true
+    query.value = ''
+  }
+
+  const enabledIndices = filteredOptions.value
+    .map((option, index) => option.disabled ? -1 : index)
+    .filter((index) => index >= 0)
+  if (enabledIndices.length === 0) {
+    activeOptionIndex.value = -1
+    return
+  }
+
+  const currentPosition = enabledIndices.indexOf(activeOptionIndex.value)
+  const nextPosition = currentPosition < 0
+    ? (direction > 0 ? 0 : enabledIndices.length - 1)
+    : (currentPosition + direction + enabledIndices.length) % enabledIndices.length
+  activeOptionIndex.value = enabledIndices[nextPosition]
+}
+
 const selectFirstMatch = () => {
-  const match = filteredOptions.value.find((option) => !option.disabled)
+  const activeOption = filteredOptions.value[activeOptionIndex.value]
+  const match = activeOption && !activeOption.disabled
+    ? activeOption
+    : filteredOptions.value.find((option) => !option.disabled)
   if (match) selectOption(match)
 }
+
+watch(filteredOptions, () => {
+  if (isOpen.value) setInitialActiveOption()
+})
 </script>
 
 <style scoped>
@@ -162,6 +228,10 @@ const selectFirstMatch = () => {
 
 .searchable-select-suggestions li.active {
   background: rgba(220, 38, 38, 0.22);
+}
+
+.searchable-select-suggestions li.selected {
+  font-weight: 800;
 }
 
 .searchable-select-suggestions li.disabled {

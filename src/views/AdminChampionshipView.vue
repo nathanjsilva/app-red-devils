@@ -105,7 +105,7 @@
 
     <Teleport to="body">
       <div v-if="selectedMatch" class="championship-admin-modal-backdrop" role="presentation" @click.self="closeMatchEditor">
-        <section ref="matchModalRef" class="championship-admin-modal" role="dialog" aria-modal="true" aria-labelledby="admin-match-title">
+        <section ref="matchModalRef" class="championship-admin-modal" role="dialog" aria-modal="true" aria-labelledby="admin-match-title" tabindex="-1">
           <header class="admin-modal-header">
             <div>
               <span class="section-kicker">Súmula digital</span>
@@ -128,12 +128,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import { useToast } from 'vue-toastification'
 import AdminChampionshipVoters from '../components/AdminChampionshipVoters.vue'
 import { ChampionshipService, type ChampionshipMatch, type ChampionshipMatchEvent, type ChampionshipPlayer, type ChampionshipTeam } from '../services/championshipService'
 import { PlayerService } from '../services/playerService'
 import type { Player } from '../types'
+import { useDialogFocus } from '../composables/useDialogFocus'
 
 interface RegistrationForm { player_id: number; player_type: 'field' | 'goalkeeper'; stone_group: number; stone_level: number | null; team_id: number }
 interface EventForm { scorer_id: number; assist_id: number; team_id: number; own_goal: boolean; minute: number | null }
@@ -176,6 +177,7 @@ const canEndVoting = computed(() => awards.value.some((award) => award.type === 
 const metrics = computed(() => [{ label: 'Participantes', value: details.value?.championship.players?.length || 0, total: 30 }, { label: 'Partidas', value: details.value?.matches.length || 0, total: 14 }, { label: 'Equipes', value: details.value?.championship.teams.length || 0, total: 5 }])
 const finishedMatchesCount = computed(() => details.value?.matches.filter((match) => match.status === 'finished').length || 0)
 const selectedMatch = computed(() => details.value?.matches.find((match) => match.id === selectedMatchId.value) || null)
+const isMatchDialogOpen = computed(() => selectedMatch.value !== null)
 const canGeneratePlayoffs = computed(() => { const groupMatches = details.value?.matches.filter((match) => match.phase === 'group') || []; return details.value?.championship.phase === 'group' && groupMatches.length === 10 && groupMatches.every((match) => match.status === 'finished') && !details.value?.matches.some((match) => match.phase === 'semi_final') })
 const registrationPlayers = computed(() => availablePlayers.value.filter((player) => registration.player_type === 'field' ? player.position === 'linha' : player.position === 'goleiro'))
 const enrolledPlayers = computed(() => { const teams = new Map<number, ChampionshipTeam>(); (details.value?.championship.teams || []).forEach((team) => (team.players || []).forEach((player) => teams.set(player.id, team))); return (details.value?.championship.players || []).map((item) => ({ ...item, name: item.player?.name || `Jogador ${item.player_id}`, type: item.player_type, teamName: teams.get(item.id)?.name || '', teamId: teams.get(item.id)?.id || '', stoneGroup: item.stone_group, stoneLevel: item.stone_level })) })
@@ -235,6 +237,7 @@ const openMatchEditor = (match: ChampionshipMatch) => {
   void nextTick(() => matchModalRef.value?.scrollTo({ top: 0, behavior: 'auto' }))
 }
 const closeMatchEditor = () => { selectedMatchId.value = null }
+useDialogFocus(matchModalRef, isMatchDialogOpen, closeMatchEditor)
 
 const loadDetails = async () => { if (!selectedId.value) { details.value = null; return }; details.value = await ChampionshipService.details(selectedId.value); details.value.championship.teams.forEach((team) => { teamNameDraft[team.id] = team.name; assignment[team.id] = assignment[team.id] || {}; (team.players || []).forEach((player) => { if (player.player_type === 'field' && player.stone_group) assignment[team.id][player.stone_group] = player.id }) }); details.value.matches.forEach(initializeMatchState) }
 const loadAwards = async () => { awards.value = selectedId.value ? await ChampionshipService.awards(selectedId.value) : [] }
@@ -310,10 +313,7 @@ const removeEvent = async (match: ChampionshipMatch, event: ChampionshipMatchEve
 const endVoting = async () => { if (!selectedId.value || !canEndVoting.value || !confirm('Encerrar a votação para todas as categorias? Depois disso, nenhum novo voto será aceito.')) return; busy.value = true; try { awards.value = await ChampionshipService.endVoting(selectedId.value); toast.success('Votação encerrada para todas as categorias') } finally { busy.value = false } }
 const publishAwards = async () => { busy.value = true; try { awards.value = await ChampionshipService.publishAwards(selectedId.value!); toast.success('Resultados publicados') } finally { busy.value = false } }
 const linkUser = async (user: Awaited<ReturnType<typeof ChampionshipService.users>>[number], event: Event) => { busy.value = true; try { const playerId = Number((event.target as HTMLSelectElement).value) || null; Object.assign(user, await ChampionshipService.linkUserPlayer(user.id, playerId)); toast.success('Vínculo atualizado') } finally { busy.value = false } }
-const handleKeydown = (event: KeyboardEvent) => { if (event.key === 'Escape' && selectedMatchId.value !== null) closeMatchEditor() }
-
-onMounted(() => { window.addEventListener('keydown', handleKeydown); void loadInitialData() })
-onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
+onMounted(() => { void loadInitialData() })
 </script>
 
 <style scoped>

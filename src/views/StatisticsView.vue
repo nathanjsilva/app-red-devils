@@ -185,6 +185,7 @@
               :model-value="rankingType"
               :options="rankingCategories.map((cat) => ({ value: cat.value, label: cat.label }))"
               class="stats-ranking-select"
+              aria-label="Categoria do ranking"
               @update:model-value="(value) => value && (rankingType = value)"
             />
           </div>
@@ -347,10 +348,10 @@
 
       <Transition name="modal-fade">
         <div v-if="goalkeeperDetail" class="modal-veil" @click.self="closeGoalkeeperDetail">
-          <div class="modal-card" role="dialog" aria-modal="true">
+          <div ref="goalkeeperDialogRef" class="modal-card" role="dialog" aria-modal="true" aria-labelledby="goalkeeper-dialog-title" tabindex="-1">
             <div class="modal-head">
               <div class="modal-head-text">
-                <h2>{{ goalkeeperDetail.player.name }}</h2>
+                <h2 id="goalkeeper-dialog-title">{{ goalkeeperDetail.player.name }}</h2>
               </div>
               <button class="modal-close" @click="closeGoalkeeperDetail" aria-label="Fechar">
                 <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -482,6 +483,7 @@ import StatTile from '../components/ui/StatTile.vue'
 import SearchableSelect from '../components/ui/SearchableSelect.vue'
 import InfoTooltip from '../components/ui/InfoTooltip.vue'
 import { useResponsive } from '../composables/useResponsive'
+import { useDialogFocus } from '../composables/useDialogFocus'
 
 const { updateSEO } = useSEO()
 const { isMobile } = useResponsive()
@@ -727,6 +729,8 @@ const goalkeepers = ref<GoalkeeperRankingItem[]>([])
 const isLoadingGoalkeepers = ref(false)
 const goalkeepersError = ref(false)
 const goalkeeperDetail = ref<GoalkeeperDetail | null>(null)
+const goalkeeperDialogRef = ref<HTMLElement | null>(null)
+const isGoalkeeperDialogOpen = computed(() => goalkeeperDetail.value !== null)
 
 const fetchGoalkeepers = async () => {
   isLoadingGoalkeepers.value = true
@@ -753,6 +757,8 @@ const openGoalkeeperDetail = async (playerId: number) => {
 const closeGoalkeeperDetail = () => {
   goalkeeperDetail.value = null
 }
+
+useDialogFocus(goalkeeperDialogRef, isGoalkeeperDialogOpen, closeGoalkeeperDetail)
 
 watch(division, () => {
   fetchDashboard()

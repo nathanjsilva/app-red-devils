@@ -86,10 +86,10 @@
           <article class="surface-card panel-card">
             <div class="section-toolbar"><div><span class="eyebrow">Calendário</span><h2 class="section-title mb-0">Partidas</h2></div><span class="pill-badge pill-muted">{{ details.matches.length }} jogos</span></div>
             <div v-if="!details.matches.length" class="empty-inline">Nenhum confronto gerado ainda.</div>
-            <div v-for="match in details.matches" :key="match.id" class="match-row" role="button" tabindex="0" :aria-label="'Abrir detalhes de ' + match.home_team.name + ' contra ' + match.away_team.name" @click="openChampionshipMatch(match)" @keydown.enter="openChampionshipMatch(match)" @keydown.space.prevent="openChampionshipMatch(match)">
-              <button type="button" class="match-team match-team-button" @click.stop="openChampionshipTeam(match.home_team)">{{ match.home_team.name }}</button><div class="match-score-box"><strong class="match-score" :class="{ pending: match.status !== 'finished' }">{{ score(match) }}</strong><small>{{ match.status === 'finished' ? 'Finalizado' : 'Agendado' }} • {{ phaseLabel(match.phase) }}</small></div><button type="button" class="match-team match-team--away match-team-button" @click.stop="openChampionshipTeam(match.away_team)">{{ match.away_team.name }}</button>
+            <article v-for="match in details.matches" :key="match.id" class="match-row">
+              <button type="button" class="match-team match-team-button" @click="openChampionshipTeam(match.home_team)">{{ match.home_team.name }}</button><button type="button" class="match-score-box" :aria-label="'Abrir detalhes da partida de ' + match.home_team.name + ' contra ' + match.away_team.name" @click="openChampionshipMatch(match)"><strong class="match-score" :class="{ pending: match.status !== 'finished' }">{{ score(match) }}</strong><small>{{ match.status === 'finished' ? 'Finalizado' : 'Agendado' }} • {{ phaseLabel(match.phase) }}</small></button><button type="button" class="match-team match-team--away match-team-button" @click="openChampionshipTeam(match.away_team)">{{ match.away_team.name }}</button>
               <div v-if="match.odds" class="odds-inline" :title="'Modelo ' + (match.odds.parameters?.model || 'informativo')"><span>Odds informativas</span><strong>Casa {{ formatOdd(match.odds.home_odd) }} • Empate {{ formatOdd(match.odds.draw_odd) }} • Fora {{ formatOdd(match.odds.away_odd) }}</strong></div>
-            </div>
+            </article>
           </article>
           <article class="surface-card panel-card match-summary-card">
             <div class="section-toolbar"><div><span class="eyebrow">Leitura rápida</span><h2 class="section-title mb-0">Resumo da fase</h2></div></div>
@@ -141,7 +141,7 @@
 
     <Teleport to="body">
       <div v-if="selectedChampionshipTeam || selectedChampionshipPlayer || selectedChampionshipMatch" class="championship-modal-backdrop" role="presentation" @click.self="closeChampionshipOverlay">
-        <section v-if="selectedChampionshipTeam" class="championship-modal championship-team-panel" role="dialog" aria-modal="true" aria-labelledby="championship-team-modal-title-complete">
+        <section v-if="selectedChampionshipTeam" ref="championshipDialogRef" class="championship-modal championship-team-panel" role="dialog" aria-modal="true" aria-labelledby="championship-team-modal-title-complete" tabindex="-1">
           <div class="section-toolbar"><div><span class="eyebrow">Time no campeonato</span><h2 id="championship-team-modal-title-complete" class="section-title mb-0">{{ selectedChampionshipTeam.name }}</h2></div><button type="button" class="championship-detail-close" aria-label="Fechar detalhes do time" @click="closeChampionshipTeam"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div>
           <div class="championship-team-hero"><div class="team-crest team-crest--winner"><img v-if="selectedChampionshipTeam.crest_url" :src="selectedChampionshipTeam.crest_url" :alt="'Brasao do ' + selectedChampionshipTeam.name"><span v-else>{{ initials(selectedChampionshipTeam.name) }}</span></div><div><p class="championship-player-context">{{ selectedTeamStanding ? selectedTeamStanding.position + ' colocado' : 'Equipe inscrita' }} <span>•</span> {{ selectedChampionshipTeam.players?.length || 0 }} participantes</p><p class="championship-player-period">Dados exclusivamente deste campeonato</p></div></div>
           <div class="championship-team-metrics"><div><span>Pontos</span><strong>{{ selectedTeamStanding?.points ?? 0 }}</strong></div><div><span>Partidas</span><strong>{{ selectedTeamStanding?.played ?? 0 }}</strong></div><div><span>Vitorias</span><strong>{{ selectedTeamStanding?.wins ?? 0 }}</strong></div><div><span>Saldo</span><strong>{{ (selectedTeamStanding?.goal_difference ?? 0) > 0 ? '+' + selectedTeamStanding?.goal_difference : selectedTeamStanding?.goal_difference ?? 0 }}</strong></div></div>
@@ -150,14 +150,14 @@
           <div v-else-if="teamModalTab === 'matches'" class="championship-detail-list"><div class="section-toolbar"><div><span class="eyebrow">Calendario do time</span><h3 class="section-title mb-0">Partidas</h3></div><span class="text-muted small">Clique para abrir o jogo</span></div><div class="championship-team-match-list"><button v-for="match in selectedTeamMatches" :key="match.id" type="button" class="championship-team-match" @click="openChampionshipMatch(match)"><span><strong>{{ match.home_team.name }} <small>{{ score(match) }}</small> {{ match.away_team.name }}</strong><small>{{ phaseLabel(match.phase) }} · {{ match.status === 'finished' ? 'Finalizado' : 'Agendado' }}</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></button><div v-if="!selectedTeamMatches.length" class="empty-inline">Nenhuma partida encontrada para este time.</div></div></div>
           <div v-else class="championship-team-roster"><div class="section-toolbar"><div><span class="eyebrow">Elenco</span><h3 class="section-title mb-0">Jogadores do time</h3></div><span class="text-muted small">Clique para ver os numeros do campeonato</span></div><div class="championship-team-player-list"><button v-for="entry in selectedChampionshipTeam.players || []" :key="entry.id" type="button" class="championship-team-player" :disabled="!teamPlayerStatistics(entry)" @click="openChampionshipTeamPlayer(entry)"><span><strong>{{ championshipPlayerName(entry) }}</strong><small>{{ entry.player_type === 'goalkeeper' ? 'Goleiro' : 'Jogador de linha' }}</small></span><i class="bi bi-arrow-up-right" aria-hidden="true"></i></button><div v-if="!(selectedChampionshipTeam.players || []).length" class="empty-inline">Nenhum jogador inscrito neste time.</div></div></div>
         </section>
-        <section v-else-if="selectedChampionshipPlayer" class="championship-modal championship-player-panel" role="dialog" aria-modal="true" aria-labelledby="championship-player-modal-title-complete">
+        <section v-else-if="selectedChampionshipPlayer" ref="championshipDialogRef" class="championship-modal championship-player-panel" role="dialog" aria-modal="true" aria-labelledby="championship-player-modal-title-complete" tabindex="-1">
           <div class="section-toolbar"><div><span class="eyebrow">Perfil no campeonato</span><h2 id="championship-player-modal-title-complete" class="section-title mb-0">{{ selectedChampionshipPlayer.player.name }}</h2></div><button type="button" class="championship-detail-close" aria-label="Fechar detalhes do jogador" @click="closeChampionshipPlayer"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div>
           <div class="championship-player-hero"><div class="team-crest team-crest--winner">{{ initials(selectedChampionshipPlayer.player.name) }}</div><div><p class="championship-player-context">{{ selectedPlayerTeam?.name || 'Jogador inscrito no campeonato' }} <span>•</span> {{ selectedChampionshipPlayer.position === 'goalkeeper' ? 'Goleiro' : 'Jogador de linha' }}</p><p class="championship-player-period">Numeros da fase selecionada: {{ phaseFilter === 'all' ? 'campeonato completo' : phaseLabel(phaseFilter) }}</p></div></div>
           <div class="championship-detail-tabs" role="tablist" aria-label="Detalhes do jogador"><button v-for="tab in playerDetailTabs" :key="tab.id" type="button" :class="{ active: playerModalTab === tab.id }" role="tab" :aria-selected="playerModalTab === tab.id" @click="playerModalTab = tab.id">{{ tab.label }}</button></div>
           <div v-if="playerModalTab === 'overview'" class="championship-player-metrics"><div v-for="metric in selectedPlayerRankings" :key="metric.label" class="championship-player-metric"><span>{{ metric.label }}</span><strong>{{ metric.value }}</strong><small v-if="metric.position">{{ metric.position }} no ranking</small></div><div class="championship-player-metric"><span>Partidas</span><strong>{{ selectedChampionshipPlayer.played }}</strong><small>{{ selectedChampionshipPlayer.wins }} vitorias</small></div></div>
           <div v-else class="championship-detail-list"><div class="section-toolbar"><div><span class="eyebrow">Desempenho</span><h3 class="section-title mb-0">Partidas do campeonato</h3></div><span class="text-muted small">Somente dados do campeonato</span></div><p v-if="!playerMatchData.hasParticipationData && playerMatchData.matches.length" class="championship-data-note"><i class="bi bi-info-circle" aria-hidden="true"></i> A API publica nao informa a participacao individual por partida; os jogos abaixo sao os confrontos do time.</p><div class="championship-team-match-list"><button v-for="match in playerMatchData.matches" :key="match.id" type="button" class="championship-team-match" @click="openChampionshipMatch(match)"><span><strong>{{ match.home_team.name }} <small>{{ score(match) }}</small> {{ match.away_team.name }}</strong><small>{{ phaseLabel(match.phase) }} · {{ match.status === 'finished' ? 'Finalizado' : 'Agendado' }}</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></button><div v-if="!playerMatchData.matches.length" class="empty-inline">Nenhuma partida do time encontrada.</div></div></div>
         </section>
-        <section v-else-if="selectedChampionshipMatch" class="championship-modal championship-match-panel" role="dialog" aria-modal="true" aria-labelledby="championship-match-modal-title">
+        <section v-else-if="selectedChampionshipMatch" ref="championshipDialogRef" class="championship-modal championship-match-panel" role="dialog" aria-modal="true" aria-labelledby="championship-match-modal-title" tabindex="-1">
           <div class="section-toolbar"><div><span class="eyebrow">Partida do campeonato</span><h2 id="championship-match-modal-title" class="section-title mb-0">{{ selectedChampionshipMatch.home_team.name }} x {{ selectedChampionshipMatch.away_team.name }}</h2></div><button type="button" class="championship-detail-close" aria-label="Fechar detalhes da partida" @click="closeChampionshipMatch"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div>
           <div class="championship-match-hero"><button type="button" class="championship-match-team" @click="openChampionshipTeam(selectedChampionshipMatch.home_team)"><div class="team-crest team-crest--winner"><img v-if="selectedChampionshipMatch.home_team.crest_url" :src="selectedChampionshipMatch.home_team.crest_url" :alt="'Brasao do ' + selectedChampionshipMatch.home_team.name"><span v-else>{{ initials(selectedChampionshipMatch.home_team.name) }}</span></div><strong>{{ selectedChampionshipMatch.home_team.name }}</strong></button><div class="championship-match-score"><strong :class="{ pending: selectedChampionshipMatch.status !== 'finished' }">{{ score(selectedChampionshipMatch) }}</strong><span>{{ selectedChampionshipMatch.status === 'finished' ? 'Finalizado' : selectedChampionshipMatch.status === 'cancelled' ? 'Cancelado' : 'Agendado' }}</span><small>{{ phaseLabel(selectedChampionshipMatch.phase) }} · rodada {{ selectedChampionshipMatch.round || '—' }}</small></div><button type="button" class="championship-match-team" @click="openChampionshipTeam(selectedChampionshipMatch.away_team)"><div class="team-crest team-crest--winner"><img v-if="selectedChampionshipMatch.away_team.crest_url" :src="selectedChampionshipMatch.away_team.crest_url" :alt="'Brasao do ' + selectedChampionshipMatch.away_team.name"><span v-else>{{ initials(selectedChampionshipMatch.away_team.name) }}</span></div><strong>{{ selectedChampionshipMatch.away_team.name }}</strong></button></div>
           <div class="championship-detail-tabs" role="tablist" aria-label="Detalhes da partida"><button v-for="tab in matchDetailTabs" :key="tab.id" type="button" :class="{ active: matchModalTab === tab.id }" role="tab" :aria-selected="matchModalTab === tab.id" @click="matchModalTab = tab.id">{{ tab.label }}</button></div>
@@ -165,27 +165,17 @@
           <div v-else-if="matchModalTab === 'lineups'" class="championship-detail-list"><div class="section-toolbar"><div><span class="eyebrow">Escalacoes</span><h3 class="section-title mb-0">Jogadores relacionados</h3></div><span class="text-muted small">Numeros deste campeonato</span></div><div class="championship-lineups"><div><h3>{{ selectedChampionshipMatch.home_team.name }}</h3><button v-for="entry in selectedChampionshipMatch.home_team.players || []" :key="entry.id" type="button" class="championship-lineup-player" :disabled="!teamPlayerStatistics(entry)" @click="openChampionshipTeamPlayer(entry)"><span>{{ championshipPlayerName(entry) }}</span><small>{{ teamPlayerStatistics(entry)?.played ?? 0 }} jogos · {{ teamPlayerStatistics(entry)?.goals ?? 0 }} gols</small></button><p v-if="!(selectedChampionshipMatch.home_team.players || []).length" class="empty-inline">Escalacao nao publicada.</p></div><div><h3>{{ selectedChampionshipMatch.away_team.name }}</h3><button v-for="entry in selectedChampionshipMatch.away_team.players || []" :key="entry.id" type="button" class="championship-lineup-player" :disabled="!teamPlayerStatistics(entry)" @click="openChampionshipTeamPlayer(entry)"><span>{{ championshipPlayerName(entry) }}</span><small>{{ teamPlayerStatistics(entry)?.played ?? 0 }} jogos · {{ teamPlayerStatistics(entry)?.goals ?? 0 }} gols</small></button><p v-if="!(selectedChampionshipMatch.away_team.players || []).length" class="empty-inline">Escalacao nao publicada.</p></div></div></div>
           <div v-else class="championship-detail-list"><div class="section-toolbar"><div><span class="eyebrow">Historico</span><h3 class="section-title mb-0">Confrontos no campeonato</h3></div><span class="text-muted small">Ultimos jogos entre os times</span></div><div class="championship-team-match-list"><button v-for="match in selectedMatchHistory" :key="match.id" type="button" class="championship-team-match" @click="openChampionshipMatch(match)"><span><strong>{{ match.home_team.name }} <small>{{ score(match) }}</small> {{ match.away_team.name }}</strong><small>{{ phaseLabel(match.phase) }} · {{ match.status === 'finished' ? 'Finalizado' : 'Agendado' }}</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></button><div v-if="!selectedMatchHistory.length" class="empty-inline">Nao ha outro confronto entre os times neste campeonato.</div></div></div>
         </section>
-        <section v-if="false" class="championship-modal championship-team-panel" role="dialog" aria-modal="true" aria-labelledby="championship-team-modal-title">
-          <div class="section-toolbar"><div><span class="eyebrow">Time no campeonato</span><h2 id="championship-team-modal-title" class="section-title mb-0">{{ selectedChampionshipTeam.name }}</h2></div><button type="button" class="championship-detail-close" aria-label="Fechar detalhes do time" @click="closeChampionshipTeam"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div>
-          <div class="championship-team-hero"><div class="team-crest team-crest--winner"><img v-if="selectedChampionshipTeam.crest_url" :src="selectedChampionshipTeam.crest_url" :alt="'Brasão do ' + selectedChampionshipTeam.name"><span v-else>{{ initials(selectedChampionshipTeam.name) }}</span></div><div><p class="championship-player-context">{{ selectedTeamStanding ? selectedTeamStanding.position + 'º colocado' : 'Equipe inscrita' }} <span>•</span> {{ selectedChampionshipTeam.players?.length || 0 }} participantes</p><p class="championship-player-period">Campanha e jogadores deste campeonato</p></div></div>
-          <div class="championship-team-metrics"><div><span>Pontos</span><strong>{{ selectedTeamStanding?.points ?? 0 }}</strong></div><div><span>Partidas</span><strong>{{ selectedTeamStanding?.played ?? 0 }}</strong></div><div><span>Vitórias</span><strong>{{ selectedTeamStanding?.wins ?? 0 }}</strong></div><div><span>Saldo</span><strong>{{ (selectedTeamStanding?.goal_difference ?? 0) > 0 ? '+' + selectedTeamStanding?.goal_difference : selectedTeamStanding?.goal_difference ?? 0 }}</strong></div></div>
-          <div class="championship-team-roster"><div class="section-toolbar"><div><span class="eyebrow">Elenco</span><h3 class="section-title mb-0">Jogadores do time</h3></div><span class="text-muted small">Clique para ver os números do campeonato</span></div><div class="championship-team-player-list"><button v-for="entry in selectedChampionshipTeam.players || []" :key="entry.id" type="button" class="championship-team-player" :disabled="!teamPlayerStatistics(entry)" @click="openChampionshipTeamPlayer(entry)"><span><strong>{{ championshipPlayerName(entry) }}</strong><small>{{ entry.player_type === 'goalkeeper' ? 'Goleiro' : 'Jogador de linha' }}</small></span><i class="bi bi-arrow-up-right" aria-hidden="true"></i></button><div v-if="!(selectedChampionshipTeam.players || []).length" class="empty-inline">Nenhum jogador inscrito neste time.</div></div></div>
-        </section>
-        <section v-else-if="false" class="championship-modal championship-player-panel" role="dialog" aria-modal="true" aria-labelledby="championship-player-modal-title">
-          <div class="section-toolbar"><div><span class="eyebrow">Perfil no campeonato</span><h2 id="championship-player-modal-title" class="section-title mb-0">{{ selectedChampionshipPlayer.player.name }}</h2></div><button type="button" class="championship-detail-close" aria-label="Fechar detalhes do jogador" @click="closeChampionshipPlayer"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div>
-          <div class="championship-player-hero"><div class="team-crest team-crest--winner">{{ initials(selectedChampionshipPlayer.player.name) }}</div><div><p class="championship-player-context">{{ selectedPlayerTeam?.name || 'Jogador inscrito no campeonato' }} <span>•</span> {{ selectedChampionshipPlayer.position === 'goalkeeper' ? 'Goleiro' : 'Jogador de linha' }}</p><p class="championship-player-period">Números da fase selecionada: {{ phaseFilter === 'all' ? 'campeonato completo' : phaseLabel(phaseFilter) }}</p></div></div>
-          <div class="championship-player-metrics"><div v-for="metric in selectedPlayerRankings" :key="metric.label" class="championship-player-metric"><span>{{ metric.label }}</span><strong>{{ metric.value }}</strong><small v-if="metric.position">{{ metric.position }}º no ranking</small></div><div class="championship-player-metric"><span>Partidas</span><strong>{{ selectedChampionshipPlayer.played }}</strong><small>{{ selectedChampionshipPlayer.wins }} vitórias</small></div></div>
-        </section>
       </div>
     </Teleport>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, defineComponent, h, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, defineComponent, h, onMounted, ref } from 'vue'
 import { useToast } from 'vue-toastification'
 import ChampionshipVoterPanel from '../components/ChampionshipVoterPanel.vue'
 import { ChampionshipService, type ChampionshipMatch, type ChampionshipPlayer, type ChampionshipStatisticsRow, type ChampionshipTeam } from '../services/championshipService'
+import { useDialogFocus } from '../composables/useDialogFocus'
 
 type PublicTab = 'overview' | 'matches' | 'stats' | 'awards'
 type FormResult = 'win' | 'draw' | 'loss'
@@ -250,6 +240,8 @@ const statistics = ref<ChampionshipStatisticsRow[]>([])
 const selectedChampionshipTeam = ref<ChampionshipTeam | null>(null)
 const selectedChampionshipPlayer = ref<ChampionshipStatisticsRow | null>(null)
 const selectedChampionshipMatch = ref<ChampionshipMatch | null>(null)
+const championshipDialogRef = ref<HTMLElement | null>(null)
+const isChampionshipDialogOpen = computed(() => Boolean(selectedChampionshipTeam.value || selectedChampionshipPlayer.value || selectedChampionshipMatch.value))
 const awards = ref<Awaited<ReturnType<typeof ChampionshipService.awards>>>([])
 const phaseFilter = ref('all')
 const publicTab = ref<PublicTab>('overview')
@@ -373,9 +365,7 @@ const closeChampionshipOverlay = () => {
   selectedChampionshipPlayer.value = null
   selectedChampionshipMatch.value = null
 }
-const handleChampionshipKeydown = (event: KeyboardEvent) => {
-  if (event.key === 'Escape') closeChampionshipOverlay()
-}
+useDialogFocus(championshipDialogRef, isChampionshipDialogOpen, closeChampionshipOverlay)
 const resultLabel = (result: FormResult) => ({ win: 'Vitória', draw: 'Empate', loss: 'Derrota' })[result]
 const resultSymbol = (result: FormResult) => ({ win: 'V', draw: 'E', loss: 'D' })[result]
 const recentResults = (teamId: number): FormResult[] => {
@@ -408,7 +398,6 @@ const loadDetails = async () => {
   } finally { isLoading.value = false }
 }
 onMounted(async () => {
-  window.addEventListener('keydown', handleChampionshipKeydown)
   try {
     championships.value = await ChampionshipService.list()
     selectedId.value = championships.value[0]?.id
@@ -419,7 +408,6 @@ onMounted(async () => {
     isLoading.value = false
   }
 })
-onBeforeUnmount(() => window.removeEventListener('keydown', handleChampionshipKeydown))
 </script>
 
 <style scoped>
@@ -522,7 +510,8 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleChampionshipKe
 .match-row:last-child { border-bottom: 0; }
 .match-team { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
 .match-team--away { text-align: right; }
-.match-score-box { text-align: center; }
+.match-score-box { padding: .25rem; border: 0; border-radius: .55rem; background: transparent; color: inherit; font: inherit; text-align: center; cursor: pointer; transform: none; }
+.match-score-box:hover, .match-score-box:focus-visible { color: var(--red-devils-hover); }
 .match-score { display: block; color: var(--text-main); font-size: 1rem; }
 .match-score.pending { color: var(--red-devils-hover); }
 .match-score-box small { display: block; margin-top: .15rem; color: var(--text-muted); font-size: .66rem; white-space: nowrap; }
@@ -569,7 +558,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleChampionshipKe
 .standing-team-button:hover > i, .standing-team-button:focus-visible > i { opacity: 1; }
 .match-team-button { padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: inherit; cursor: pointer; }
 .match-team-button:hover, .match-team-button:focus-visible { color: var(--red-devils-hover); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: .2rem; }
-.match-row:hover, .match-row:focus-visible { background: rgba(255, 255, 255, .035); }
+.match-row:hover, .match-row:focus-within { background: rgba(255, 255, 255, .035); }
 .bracket-match { cursor: pointer; }
 .bracket-match:hover, .bracket-match:focus-visible { border-radius: .5rem; background: rgba(255, 255, 255, .045); }
 .championship-detail-tabs { display: flex; gap: .35rem; margin-top: 1rem; padding-bottom: .4rem; overflow-x: auto; border-bottom: 1px solid var(--line-soft); }
@@ -1329,6 +1318,11 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleChampionshipKe
     max-height: 260px;
   }
 
+  .standings-table-wrap,
+  .stats-table-wrap {
+    display: none;
+  }
+
   .standings-mobile-list,
   .stats-mobile-list {
     display: grid;
@@ -1673,7 +1667,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleChampionshipKe
 }
 
 .match-row:hover,
-.match-row:focus-visible {
+.match-row:focus-within {
   border-color: var(--red-devils);
   background: var(--red-devils);
 }
@@ -1683,11 +1677,11 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleChampionshipKe
 .match-row:hover .match-score-box small,
 .match-row:hover .odds-inline,
 .match-row:hover .odds-inline strong,
-.match-row:focus-visible .match-score,
-.match-row:focus-visible .match-team,
-.match-row:focus-visible .match-score-box small,
-.match-row:focus-visible .odds-inline,
-.match-row:focus-visible .odds-inline strong {
+.match-row:focus-within .match-score,
+.match-row:focus-within .match-team,
+.match-row:focus-within .match-score-box small,
+.match-row:focus-within .odds-inline,
+.match-row:focus-within .odds-inline strong {
   color: #fff;
 }
 

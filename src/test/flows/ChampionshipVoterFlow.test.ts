@@ -46,6 +46,7 @@ describe('fluxo público de votação por PIN', () => {
     const wrapper = mount(ChampionshipVoterPanel, {
       props: {
         championshipId: 7,
+        championshipFinished: true,
         awards: [{
           id: 31,
           name: 'Bola de Ouro',
@@ -82,7 +83,7 @@ describe('fluxo público de votação por PIN', () => {
 
   it('recupera um cadastro existente usando nome e PIN', async () => {
     const wrapper = mount(ChampionshipVoterPanel, {
-      props: { championshipId: 7, awards: [] },
+      props: { championshipId: 7, championshipFinished: false, awards: [] },
     })
     await flushPromises()
     await wrapper.get('.voter-mode-switch button:nth-child(2)').trigger('click')

@@ -26,7 +26,7 @@
 
           <div class="col-12 col-lg-4">
             <label class="form-label">Posicao</label>
-            <SearchableSelect v-model="form.position" :options="positionOptions" placeholder="Selecione" />
+            <SearchableSelect v-model="form.position" :options="positionOptions" placeholder="Selecione" aria-label="Posição do jogador" />
           </div>
 
           <div class="col-12 d-flex flex-wrap gap-2">
