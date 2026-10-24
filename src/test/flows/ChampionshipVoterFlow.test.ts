@@ -2,6 +2,9 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import AdminChampionshipVoters from '../../components/AdminChampionshipVoters.vue'
 import ChampionshipVoterPanel from '../../components/ChampionshipVoterPanel.vue'
+import { championshipAwardTone } from '../../utils/championshipAwardTone'
+import { championshipOddsAreStale } from '../../utils/championshipOddsFreshness'
+import type { ChampionshipMatch } from '../../services/championshipService'
 
 const dependencies = vi.hoisted(() => ({
   service: {
@@ -50,6 +53,7 @@ describe('fluxo público de votação por PIN', () => {
         awards: [{
           id: 31,
           name: 'Bola de Ouro',
+          description: 'Considere regularidade, impacto e contribuição para a equipe.',
           type: 'vote',
           published: false,
           voting_open: true,
@@ -70,6 +74,7 @@ describe('fluxo público de votação por PIN', () => {
     await flushPromises()
 
     expect(dependencies.service.registerVoter).toHaveBeenCalledWith(7, 11, '123456')
+    expect(wrapper.text()).toContain('Considere regularidade, impacto e contribuição para a equipe.')
     expect(sessionStorage.getItem('red-devils:championship-voter:7')).toBe('token-sessao')
     expect(dependencies.service.voterStatus).toHaveBeenCalledWith(7, 'token-sessao')
 
@@ -94,6 +99,35 @@ describe('fluxo público de votação por PIN', () => {
 
     expect(dependencies.service.loginVoter).toHaveBeenCalledWith(7, 11, '123456')
     expect(wrapper.text()).toContain('Ana Jogadora')
+  })
+})
+
+describe('apresentação de premiações e atualização das odds', () => {
+  it('classifica as categorias positivas, negativas e humorísticas', () => {
+    expect(championshipAwardTone('Bola de Ouro')).toBe('positive')
+    expect(championshipAwardTone('Bagre de Ouro')).toBe('humorous')
+    expect(championshipAwardTone('Prêmio Felipe Melo')).toBe('humorous')
+  })
+
+  it('detecta quando resultados ou escalações mudaram desde a estimativa', () => {
+    const match = {
+      id: 1,
+      phase: 'group',
+      round: 1,
+      status: 'scheduled',
+      home_score: null,
+      away_score: null,
+      home_team: { id: 10, name: 'Casa', players: [{ id: 5, player_type: 'field', stone_group: 1, stone_level: 1.2 }] },
+      away_team: { id: 20, name: 'Fora', players: [{ id: 6, player_type: 'goalkeeper', stone_group: 2 }] },
+      odds: { home_probability: 0.4, draw_probability: 0.3, away_probability: 0.3, home_odd: 2.5, draw_odd: 3.33, away_odd: 3.33, parameters: { results_signature: '', roster_signature: '10[5:field:1:1.2]|20[6:goalkeeper:2:-]' } },
+    } as ChampionshipMatch
+    expect(championshipOddsAreStale(match, [match])).toBe(false)
+
+    const finished = { ...match, id: 2, status: 'finished', home_score: 1, away_score: 0, odds: null } as ChampionshipMatch
+    expect(championshipOddsAreStale(match, [match, finished])).toBe(true)
+
+    const changedRoster = { ...match, home_team: { ...match.home_team, players: [{ id: 5, player_type: 'field', stone_group: 1, stone_level: 1.5 }] } } as ChampionshipMatch
+    expect(championshipOddsAreStale(changedRoster, [match])).toBe(true)
   })
 })
 

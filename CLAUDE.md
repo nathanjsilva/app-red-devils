@@ -17,10 +17,13 @@ Este repositório contém **apenas o frontend** (Vue 3 + TypeScript). O backend 
 | 1 | `.ai/ai-rules.md` | Regras gerais e ordem de prioridade |
 | 2 | `.ai/project-context.md` | Stack, modelos de dados, endpoints consumidos |
 | 3 | `.ai/feature-index.md` | Índice de funcionalidades e caminhos dos contexts |
-| 4 | `.ai/frontend/LEIA-ME.md` | Regras obrigatórias específicas do frontend |
-| 5 | `.ai/frontend/overview.md` | Estrutura, componentes, stores, roteamento |
-| 6 | `.ai/frontend/coding-standards.md` | Padrões de código Vue 3 / TypeScript / Bootstrap |
-| 7 | Context da funcionalidade em `.ai/frontend/contexts/` | Fluxos, regras de negócio, arquivos envolvidos |
+| 4 | `../api-red-devils/.ai/backend/README.md` | Visão técnica do sistema e roteiro de leitura |
+| 5 | `../api-red-devils/.ai/backend/fluxograma-aplicacao.md` | Fluxos entre frontend, API, módulos e dados |
+| 6 | `../api-red-devils/.ai/backend/matriz-dependencias.md` | Dependências e impactos entre operações |
+| 7 | `.ai/frontend/LEIA-ME.md` | Regras obrigatórias específicas do frontend |
+| 8 | `.ai/frontend/overview.md` | Estrutura, componentes, stores, roteamento |
+| 9 | `.ai/frontend/coding-standards.md` | Padrões de código Vue 3 / TypeScript / Bootstrap |
+| 10 | Context da funcionalidade em `.ai/frontend/contexts/` | Fluxos, regras de negócio, arquivos envolvidos |
 
 ---
 
@@ -31,6 +34,7 @@ Este repositório contém **apenas o frontend** (Vue 3 + TypeScript). O backend 
 3. **Nunca altere regra de negócio, apague, mova ou renomeie arquivos sem autorização explícita.**
 4. **Nunca altere o contrato com a API** (rotas, payloads, formato de resposta) sem confirmar — o backend é um repositório separado e mudanças aqui podem quebrar a integração silenciosamente.
 5. **Após qualquer alteração**, apresente resumo com: arquivos modificados, funcionalidades afetadas e próximos passos sugeridos.
+6. **Antes de qualquer alteração no frontend**, analise também o README técnico, o fluxograma e a matriz de dependências do backend listados acima, mesmo que a mudança pareça apenas visual. Use-os para mapear impactos e confira o contrato efetivo no código da API antes de editar integrações.
 
 ---
 

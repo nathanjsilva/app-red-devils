@@ -47,6 +47,8 @@
         <article v-for="award in votingAwards" :key="award.id" class="voter-category">
           <div>
             <strong>{{ award.name }}</strong>
+            <span class="pill-badge voter-award-tone" :class="`voter-award-tone--${awardTone(award.name)}`">{{ awardToneLabel(award.name) }}</span>
+            <p v-if="award.description" class="voter-award-description">{{ award.description }}</p>
             <small v-if="hasVoted(award.id)" class="voter-complete"><i class="bi bi-check-circle-fill" aria-hidden="true"></i> Voto realizado</small>
             <small v-else-if="!championshipFinished">Votação bloqueada até o encerramento do campeonato</small>
             <small v-else-if="!award.voting_open || award.published">Votação encerrada</small>
@@ -69,6 +71,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useToast } from 'vue-toastification'
+import { championshipAwardTone, championshipAwardToneLabel } from '../utils/championshipAwardTone'
 import {
   ChampionshipService,
   type ChampionshipAward,
@@ -95,6 +98,8 @@ const busy = ref(false)
 const loadingPlayers = ref(false)
 const storageKey = `red-devils:championship-voter:${props.championshipId}`
 const votingAwards = computed(() => props.awards.filter((award) => award.type === 'vote'))
+const awardTone = (name: string) => championshipAwardTone(name)
+const awardToneLabel = (name: string) => championshipAwardToneLabel(awardTone(name))
 
 const hasVoted = (awardId: number) => Boolean(session.value?.categories.find((category) => category.id === awardId)?.has_voted)
 const candidatesFor = (award: ChampionshipAward) => (award.candidates || []).filter((candidate) => candidate.id !== session.value?.voter.championship_player_id)
@@ -199,9 +204,14 @@ onMounted(async () => {
 .voter-session-heading strong { color: var(--text-main); }
 .voter-category-list { display: grid; gap: .5rem; }
 .voter-category { display: grid; grid-template-columns: minmax(0, 1fr) minmax(180px, .8fr) auto; gap: .6rem; align-items: center; padding: .65rem; border: 1px solid var(--line-soft); border-radius: .7rem; background: rgba(255,255,255,.02); }
-.voter-category > div { display: grid; gap: .15rem; min-width: 0; }
+.voter-category > div { display: grid; gap: .25rem; min-width: 0; }
 .voter-category > div strong { font-size: .8rem; }
 .voter-category small { color: var(--text-muted); font-size: .69rem; }
+.voter-award-tone { justify-self: start; padding: .15rem .4rem; font-size: .62rem; }
+.voter-award-tone--positive { background: rgba(34, 197, 94, .16); color: #4ade80; }
+.voter-award-tone--negative { background: rgba(220, 38, 38, .18); color: #f87171; }
+.voter-award-tone--humorous { background: rgba(250, 204, 21, .15); color: #facc15; }
+.voter-award-description { margin: 0; color: var(--text-muted); font-size: .7rem; line-height: 1.45; }
 .voter-category .voter-complete { color: #86efac; }
 @media (max-width: 680px) { .voter-form { grid-template-columns: 1fr; }.voter-category { grid-template-columns: 1fr; }.voter-category .btn { width: 100%; } }
 </style>

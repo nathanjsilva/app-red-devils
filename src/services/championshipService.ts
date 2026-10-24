@@ -23,13 +23,33 @@ export interface ChampionshipTeam {
 }
 
 export interface ChampionshipOdds {
+  calculation_version?: number
   home_probability: number
   draw_probability: number
   away_probability: number
   home_odd: number
   draw_odd: number
   away_odd: number
-  parameters?: { model?: string; [key: string]: unknown }
+  created_at?: string
+  parameters?: {
+    model?: string
+    preliminary?: boolean
+    sample_matches?: {
+      league?: number
+      home_team?: number
+      away_team?: number
+      head_to_head?: number
+      home_field_players?: number
+      away_field_players?: number
+      home_goalkeepers?: number
+      away_goalkeepers?: number
+    }
+    field_quality?: { home?: number; away?: number }
+    goalkeeper_quality?: { home?: number; away?: number }
+    lambda_home?: number
+    lambda_away?: number
+    [key: string]: unknown
+  }
 }
 
 export interface ChampionshipMatchParticipation {
@@ -360,6 +380,10 @@ export class ChampionshipService {
 
   static async calculateOdds(matchId: number): Promise<ChampionshipOdds> {
     return payload(await api.post(`/admin/championship-matches/${matchId}/odds`))
+  }
+
+  static async calculateUpcomingOdds(championshipId: number): Promise<{ calculated_matches: number }> {
+    return payload(await api.post(`/admin/championships/${championshipId}/odds`))
   }
 
   static async users(): Promise<Array<{ id: number; name: string; username: string; profile: string; player_id?: number | null }>> {
