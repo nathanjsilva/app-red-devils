@@ -225,6 +225,7 @@ export class ChampionshipService {
     player_type: ChampionshipPlayerType
     stone_group: number
     stone_level: number | null
+    sport_position?: string | null
     team_id?: number | null
   }): Promise<ChampionshipPlayer> {
     return payload(await api.post(`/admin/championships/${id}/players`, payloadData))

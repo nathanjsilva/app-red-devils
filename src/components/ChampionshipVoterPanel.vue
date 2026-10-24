@@ -102,7 +102,9 @@ const awardTone = (name: string) => championshipAwardTone(name)
 const awardToneLabel = (name: string) => championshipAwardToneLabel(awardTone(name))
 
 const hasVoted = (awardId: number) => Boolean(session.value?.categories.find((category) => category.id === awardId)?.has_voted)
-const candidatesFor = (award: ChampionshipAward) => (award.candidates || []).filter((candidate) => candidate.id !== session.value?.voter.championship_player_id)
+const candidatesFor = (award: ChampionshipAward) => (award.candidates || [])
+  .filter((candidate) => candidate.id !== session.value?.voter.championship_player_id)
+  .filter((candidate) => !award.name.toLocaleLowerCase().includes('xerif') || ['defensor', 'zagueiro', 'fixo', 'ala'].includes((candidate.sport_position || '').toLocaleLowerCase()))
 
 const loadStatus = async () => {
   if (!token.value) return

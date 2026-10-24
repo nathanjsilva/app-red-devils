@@ -55,6 +55,7 @@
               <label>Jogador<select v-model.number="registration.player_id"><option :value="0">Selecione um jogador</option><option v-for="player in registrationPlayers" :key="player.id" :value="player.id">{{ player.name }} · {{ player.position }}</option></select></label>
               <label>{{ registration.player_type === 'goalkeeper' ? 'Pedra do goleiro' : 'Pedra do jogador de linha' }}<input v-model.number="registration.stone_group" type="number" min="1" max="5"></label>
               <label v-if="registration.player_type === 'field'">Classificação<input v-model.number="registration.stone_level" type="number" min="1.1" max="5.5" step="0.1" placeholder="Ex.: 2.3"></label>
+              <label v-if="registration.player_type === 'field'">Posição esportiva<select v-model="registration.sport_position"><option value="">Sem posição definida</option><option value="defensor">Defensor</option><option value="zagueiro">Zagueiro</option><option value="fixo">Fixo</option><option value="ala">Ala</option><option value="lateral">Lateral</option><option value="meio-campo">Meio-campo</option><option value="atacante">Atacante</option></select></label>
               <label v-else>Equipe do goleiro<select v-model.number="registration.team_id"><option :value="0">Selecione uma equipe</option><option v-for="team in availableGoalkeeperTeams" :key="team.id" :value="team.id">{{ team.name }}</option></select></label>
               <p v-if="registration.player_type === 'goalkeeper'" class="helper-text">O goleiro será vinculado a uma única equipe no cadastro.</p>
               <button class="btn btn-red full" :disabled="busy || !registration.player_id || (registration.player_type === 'goalkeeper' && !registration.team_id)" @click="register">Inscrever jogador</button>
@@ -141,7 +142,7 @@ import type { Player } from '../types'
 import { useDialogFocus } from '../composables/useDialogFocus'
 import { championshipAwardTone, championshipAwardToneLabel } from '../utils/championshipAwardTone'
 
-interface RegistrationForm { player_id: number; player_type: 'field' | 'goalkeeper'; stone_group: number; stone_level: number | null; team_id: number }
+interface RegistrationForm { player_id: number; player_type: 'field' | 'goalkeeper'; stone_group: number; stone_level: number | null; sport_position: string; team_id: number }
 interface EventForm { scorer_id: number; assist_id: number; team_id: number; own_goal: boolean; minute: number | null }
 interface EventEditForm { own_goal: boolean; minute: number | null }
 
@@ -171,7 +172,7 @@ const matchEvents = reactive<Record<number, ChampionshipMatchEvent[]>>({})
 const selectedMatchId = ref<number | null>(null)
 const matchModalRef = ref<HTMLElement | null>(null)
 const tieBreakForm = reactive({ team_a_id: 0, team_b_id: 0, winner_id: 0 })
-const registration = reactive<RegistrationForm>({ player_id: 0, player_type: 'field', stone_group: 1, stone_level: 1.1, team_id: 0 })
+const registration = reactive<RegistrationForm>({ player_id: 0, player_type: 'field', stone_group: 1, stone_level: 1.1, sport_position: '', team_id: 0 })
 const tabs = [{ id: 'overview', label: 'Visão geral', meta: 'Resumo', icon: 'bi bi-grid-1x2' }, { id: 'players', label: 'Jogadores', meta: 'Inscrições e Pedras', icon: 'bi bi-people' }, { id: 'teams', label: 'Equipes', meta: 'Formação', icon: 'bi bi-diagram-3' }, { id: 'matches', label: 'Partidas', meta: 'Resultados', icon: 'bi bi-calendar2-week' }, { id: 'awards', label: 'Premiações', meta: 'Votação', icon: 'bi bi-award' }]
 
 const statusLabel = computed(() => statusLabelFor(details.value?.championship.status))
@@ -273,7 +274,7 @@ const refresh = async () => { championships.value = await ChampionshipService.li
 const loadInitialData = async () => { isLoading.value = true; loadError.value = ''; try { availablePlayers.value = await PlayerService.getAllPlayers(); users.value = await ChampionshipService.users(); await refresh() } catch (error) { console.error(error); loadError.value = 'Não foi possível carregar o painel de campeonatos.' } finally { isLoading.value = false } }
 
 const createChampionship = async () => { busy.value = true; try { const created = await ChampionshipService.create(newName.value); newName.value = ''; selectedId.value = created.id; await refresh(); toast.success('Campeonato criado') } finally { busy.value = false } }
-const register = async () => { busy.value = true; try { await ChampionshipService.registerPlayer(selectedId.value!, { player_id: registration.player_id, player_type: registration.player_type, stone_group: registration.stone_group, stone_level: registration.player_type === 'field' ? registration.stone_level : null, team_id: registration.player_type === 'goalkeeper' ? registration.team_id : null }); registration.player_id = 0; registration.team_id = 0; await loadDetails(); toast.success('Jogador inscrito') } finally { busy.value = false } }
+const register = async () => { busy.value = true; try { await ChampionshipService.registerPlayer(selectedId.value!, { player_id: registration.player_id, player_type: registration.player_type, stone_group: registration.stone_group, stone_level: registration.player_type === 'field' ? registration.stone_level : null, sport_position: registration.player_type === 'field' ? registration.sport_position || null : null, team_id: registration.player_type === 'goalkeeper' ? registration.team_id : null }); registration.player_id = 0; registration.team_id = 0; registration.sport_position = ''; await loadDetails(); toast.success('Jogador inscrito') } finally { busy.value = false } }
 const saveAssignments = async () => { const assignments = details.value!.championship.teams.map((team) => ({ team_id: team.id, championship_player_ids: [1, 2, 3, 4, 5].map((group) => assignment[team.id]?.[group]).filter(Boolean) })); if (assignments.some((item) => item.championship_player_ids.length !== 5)) return toast.error('Complete todas as vagas'); busy.value = true; try { await ChampionshipService.assignPlayers(selectedId.value!, assignments); await loadDetails(); toast.success('Formação salva') } finally { busy.value = false } }
 const saveTeamName = async (team: ChampionshipTeam) => { const name = teamNameDraft[team.id]?.trim(); if (!name || name === team.name) return; busy.value = true; try { const updated = await ChampionshipService.updateTeam(team.id, name); team.name = updated.name; teamNameDraft[team.id] = updated.name; toast.success('Nome da equipe atualizado') } finally { busy.value = false } }
 const uploadCrest = async (team: ChampionshipTeam, event: Event) => { const file = (event.target as HTMLInputElement).files?.[0]; if (!file) return; busy.value = true; try { const updated = await ChampionshipService.uploadCrest(team.id, file); Object.assign(team, updated); toast.success('Brasão atualizado') } finally { busy.value = false } }

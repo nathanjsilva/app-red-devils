@@ -16,8 +16,8 @@ O módulo de campeonato é independente das peladas existentes. Ele administra u
 
 ## Fluxo administrativo
 
-1. Criar o campeonato; a API cria as cinco equipes padrão e as quinze categorias de premiação.
-2. Inscrever 25 jogadores de linha e cinco goleiros vindos do cadastro global. Cada jogador só pode ser inscrito uma vez; cada goleiro é vinculado a uma única equipe no cadastro.
+1. Criar o campeonato; a API cria as cinco equipes padrão e as treze categorias ativas (onze por voto e duas estatísticas automáticas).
+2. Inscrever 25 jogadores de linha e cinco goleiros vindos do cadastro global. Cada jogador só pode ser inscrito uma vez; cada goleiro é vinculado a uma única equipe no cadastro. Jogadores de linha podem receber uma posição esportiva para habilitar a elegibilidade no Xerifão.
 3. Definir uma Pedra de cada grupo em cada equipe e editar nomes e brasões.
 4. Gerar os dez confrontos da primeira fase e validar/iniciar a competição.
 5. Marcar os participantes de cada partida, escolher o MVP, registrar gols, assistências e gols contra. O placar é recalculado pela API a partir dos eventos.
@@ -35,7 +35,7 @@ O módulo de campeonato é independente das peladas existentes. Ele administra u
 - Pênaltis não entram na artilharia. Gol contra altera o placar para o adversário e não conta para o autor como gol.
 - Assistências devem ser dadas por outro participante da mesma equipe do autor do gol. Apenas participantes da partida podem receber eventos ou MVP.
 - Estatísticas consideram somente partidas finalizadas e válidas.
-- Existem quinze premiações. Artilheiro e Garçom são automáticos; as outras categorias são votadas.
+- Existem treze categorias ativas. Artilheiro e Garçom são automáticos; as outras onze categorias são votadas. Duas categorias antigas permanecem inativas para preservar o histórico.
 - Votação fica disponível até o administrador encerrar todas as categorias. O participante pode usar o cadastro simples por PIN, limitado a um cadastro por jogador e a um voto por categoria. O backend valida a sessão, impede auto-voto e respeita a elegibilidade de goleiros/defensores. Resultados ficam ocultos até publicação.
 - PIN fica armazenado em hash; após cinco tentativas incorretas, a identificação bloqueia por 15 minutos. A sessão aleatória expira em 12 horas e o token bruto só fica no `sessionStorage` do navegador.
 - Administradores podem consultar cadastros/categorias votadas, corrigir o vínculo dentro do campeonato e redefinir PIN. Mudanças de vínculo entram na auditoria e invalidam a sessão; votos existentes permanecem no mesmo cadastro.
